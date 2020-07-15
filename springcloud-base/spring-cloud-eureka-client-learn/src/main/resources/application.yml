@@ -1,0 +1,66 @@
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    registry-fetch-interval-seconds: 5
+    serviceUrl:
+      # 多个注册中心用逗号分隔
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+#    status-page-url-path: ${server.servletPath}/info
+#    health-check-url-path: ${server.servletPath}/health
+
+spring:
+  application:
+    name: spring-cloud-eureka-client
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    cn.nihility.cloud.eureka: DEBUG
+#  pattern:
+#    level: "[%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
+server:
+  port: 52002
+  tomcat:
+    max-threads: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+# 修改 ribbon 负载的策略， 服务名 - ribbon - NFLoadBalancerRuleClassName : 全路径策略类
+spring-cloud-service-provider:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule
+    # 重试机制
+    ConnectTimeout: 250 # Ribbon 连接超时时间
+    ReadTimeout: 1000 # Ribbon 数据读取超时时间
+    OkToRetryOnAllOperations: true # 是否对所有操作进行重试
+    MaxAutoRetriesNextServer: 1 # 切换实例的重试次数
+    MaxAutoRetries: 1 # 对当前实例的重试次数
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+#          strategy: ExecutionIsolationStrategy.THREAD # 线程池隔离 SEMAPHORE 信号量隔离
+          thread:
+            timeoutInMilliseconds: 3000 # 默认连接超时时间 1 秒，若没有返回数据自动触发降级策略
+      circuitBreaker:
+        requestVolumeThreshold: 5 # 触发熔断的最小请求次数，默认 20个/10秒
+        sleepWindowInMilliseconds: 10000 # 熔断后尝试次数
+        errorThresholdPercentage: 50 # 触发熔断的失败请求百分比，默认 50%

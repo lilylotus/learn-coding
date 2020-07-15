@@ -1,0 +1,38 @@
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+#  server:
+#    关闭保护机制，以确保注册中心将不可用的实例正确剔除
+#    enable-self-preservation: false
+
+# 不让 Eureka Server 自己注册自己
+server:
+  port: ${PORT:8761}
+# Eureka Server 的默认端口
+
+# A different context path for admin server has been provided not conflicting with eureka
+# http://localhost:8761/admin
+spring:
+  boot:
+    admin:
+      context-path: '/admin'
+#  cloud:
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

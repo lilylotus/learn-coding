@@ -1,0 +1,86 @@
+
+/* 子模块项目名，jar 名 */
+archivesBaseName = 'common-project'
+
+idea {
+    module {
+        downloadJavadoc = true  // defaults to false
+        downloadSources = true
+    }
+}
+
+ext {
+    logbackVersion = '1.2.3'
+    log4j2Version = '2.12.1'
+    log4j2ToSlf4jVersion = '2.12.1'
+}
+
+dependencies {
+    /* logback */
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    /* log4j2 */
+    //implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    /* log4j2 to slf4j */
+    //implementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2ToSlf4jVersion"
+
+    /* 有序性测试 */
+    implementation 'org.openjdk.jcstress:jcstress-core:0.5'
+
+    // proxy
+    implementation 'cglib:cglib:3.3.0'
+
+    /* redis */
+    implementation 'redis.clients:jedis:3.1.0'
+
+    /* mybatis */
+    implementation 'org.mybatis:mybatis:3.4.5'
+    implementation 'mysql:mysql-connector-java:8.0.15'
+
+    /* openjdk */
+    implementation 'org.openjdk.jol:jol-cli:0.10'
+
+    /* rabbitmq */
+    implementation 'com.rabbitmq:amqp-client:5.7.3'
+
+    /* 其它工具 */
+    implementation 'org.joda:joda-primitives:1.0'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.6'
+    /* json */
+    implementation 'com.alibaba:fastjson:1.2.58'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
+
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation "org.projectlombok:lombok:1.18.8"
+
+    testImplementation "junit:junit:$junitVersion"
+    // junit5
+    testImplementation('org.junit.jupiter:junit-jupiter:5.6.1')
+}
+
+jar {
+    /* gradle jar -Pmainclass=cn.nihility.util.LogbackUtil */
+    def mainclass = project.hasProperty("mainclass") ? project.property("mainclass") : ""
+    // def gitversion = 'git rev-parse --short HEAD'.execute().text.trim()
+    manifestContentCharset 'UTF-8'
+    metadataCharset 'UTF-8'
+
+    manifest {
+        attributes 'Implementation-Title': 'Project Gradle Quickstart',
+                'Implementation-Version': "${version}",
+                'Main-Class': "$mainclass"
+    }
+
+    /* 这个不可以放到 allprojects 当中，不然会出现 class 重复，应该放到每个独立的 project 当中*/
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        /*configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }*/
+    }
+
+    exclude 'META-INF/NOTICE*', 'META-INF/DEPENDENCIES', 'META-INF/LICENSE*', '*.dtd', '*.xsd', '*.properties', '*.xml'
+    exclude('META-INF/maven/', 'META-INF/org/', 'META-INF/services/', 'META-INF/versions/')
+
+    /* 1. gradle jar -PallInOne  根据参数来决定是否将第三方依赖类打入自己的jar包
+     if (project.hasProperty("allInOne")) {from {configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }}}
+      2. 另一种把依赖放到 lib 里面
+     into('lib') { from configurations.runtime } */
+}

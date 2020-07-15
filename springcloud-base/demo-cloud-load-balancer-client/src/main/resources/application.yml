@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: cloud-load-balancer-client
+#  cloud:
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+
+server:
+  port: 51001
+  tomcat:
+    max-threads: 10
+
+eureka:
+  client:
+    serviceUrl:
+     defaultZone: http://localhost:8761/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    metadata-map:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000 # 默认连接超时时间 1 秒，若没有返回数据自动触发降级策略
+
+feign:
+  client:
+    config:
+      spring-cloud-service-provider: # 需要调用微服务的名称
+        loggerLevel: FULL
+  hystrix:
+    enabled: true
+
+#feign:
+#  client:
+#    config:
+#      feignName: # 定义 Feign 的名称
+#      connectTimeout: 5000 # 相当于 Request.Options
+#      readTimeout: 5000 # 相当于 Request.Options
+#      loggerLevel: full # 日志级别
+#      # Feign 错误解码器
+#      errorDecoder: cn.nihility.feign.SimpleErrorDecoder
+#      retryer: cn.nihility.feign.SimpleRetryer
+#      requestInterceptors:
+#        - cn.nihility.feign.FooRequestInterceptor
+#        - cn.nihility.feign.BarRequestInterceptor
+#      decode404: false

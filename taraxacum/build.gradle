@@ -1,0 +1,102 @@
+/*
+    buildscript 要放到 plugin 之前
+    buildscript 代码块中的声明是 gradle 脚本自身需要的资源。
+    可以声明的资源包括依赖项、第三方插件、maven 仓库地址等。
+    gradle 在执行脚本时，会优先执行 buildscript 代码块中的内容，然后才会执行剩余的 build 脚本。
+*/
+buildscript {
+    ext {
+        junitVersion = '4.12'
+    }
+    repositories {
+        mavenLocal()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+    dependencies {
+        /* 添加插件依赖路径（通过 jar 方式） */
+        //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" as Object)
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+group 'cn.nihility'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenLocal()
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "junit:junit:${junitVersion}"
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+/* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
+tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    ext {
+        junitVersion = "4.12"
+    }
+
+    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
+    tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    repositories {
+        mavenLocal()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+}
+
+subprojects {
+//    configurations {
+//        //移除spring boot 默认logger依赖
+//        all*.exclude module: 'spring-boot-starter-logging'
+//    }
+}
+
+//配置特殊的子 project
+//configure(allprojects.findAll { it.name.startsWith('sub') }) {
+//    subTask << {
+//        println 'this is a sub project'
+//    }
+//}
+
+//单独配置
+//project(':sub-project1') {
+//    task forProject1 << {
+//        println 'for project 1'
+//    }
+//}

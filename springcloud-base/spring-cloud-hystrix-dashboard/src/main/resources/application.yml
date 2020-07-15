@@ -1,0 +1,29 @@
+server:
+  port: 52102
+spring:
+  application:
+    name: spring-cloud-hystrix-dashboard
+#  cloud:
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 30
+    leaseExpirationDurationInSeconds: 90
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS

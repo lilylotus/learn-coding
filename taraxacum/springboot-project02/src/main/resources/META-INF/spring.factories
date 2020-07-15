@@ -1,0 +1,3 @@
+cn.nihility.boot2.suports.IAutoImportFactory= \
+  cn.nihility.boot2.suports.AutoImportFactoryImpl01, \
+  cn.nihility.boot2.suports.AutoImportFactoryImpl02

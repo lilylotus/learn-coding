@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: cloud-load-balancer
+
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+server:
+  port: 51000
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    metadataMap:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

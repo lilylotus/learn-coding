@@ -1,0 +1,3 @@
+cn.nihility.suports.IAutoImportFactory= \
+  cn.nihility.suports.AutoImportImpl01, \
+  cn.nihility.suports.AutoImportImpl02

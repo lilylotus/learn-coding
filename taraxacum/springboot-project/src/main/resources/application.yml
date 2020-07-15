@@ -1,0 +1,86 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: druid
+  redis:
+    host: 127.0.0.1
+    port: 50001
+    password: redis
+    database: 2
+    timeout: 10000
+    jedis:
+      pool:
+        max-wait: 10000
+        max-idle: 10
+        max-active: 10
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache/ehcache.xml
+
+logging:
+  level:
+    org.springframework.jdbc: debug
+
+# yaml 依赖注入练习
+inject:
+  name: 小红
+  age: 18
+  address:
+    - 重庆
+    - 上海
+    - 广州
+  address1: [上海, 重庆, 北京]
+  grades:
+    math: 99
+    english: 88
+    chinese: 89
+    chemistry: 70
+  grades1: {math: 99, english: 88, chinese: 77}
+  group: {dance: [小米, 小妹], guitar: ~, music: [威威, Steve]}
+
+# 数组用 ',' 逗号分隔
+my:
+  servers: dev.bar.com,foo.bar.com
+  #    - dev.example.com
+  #    - another.example.com
+  address: 192.168.1.100
+  pojoList:
+    - name: my name
+      description: my description
+    - name: another name
+      description: another description
+  firstName: It's first name.
+  last-name: It's last name.
+  full_name: It's full name.
+
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  config-location: classpath:mybatis/mybatis-config.xml
+  # 在没有注解的情况下，会使用 Bean 的首字母小写的非限定类名来作为它的别名 Author -> author, 若有注解，则别名为其注解值
+  type-aliases-package: cn.nihility.boot.mybatis.dto
+
+db:
+  host: 127.0.0.1
+  port: 50000
+  user: remote
+  password: mysql
+  driverClassName: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://${db.host}:${db.port}/test?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=GMT
+  dataSourceType: com.zaxxer.hikari.HikariDataSource
+
+---
+spring:
+  profiles: development
+my:
+  address: 127.0.0.1
+  pojo-list:
+    - name: my another name
+      description: my another description
+---
+spring:
+  profiles: production
+my:
+  address: 192.168.1.120

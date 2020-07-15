@@ -1,0 +1,4 @@
+rootProject.name = 'springcloud-base'
+
+include 'springcloud-configserver-learn'
+include 'springcloud-configclient-learn'

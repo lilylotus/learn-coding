@@ -1,0 +1,11 @@
+learn:
+  auto:
+    address: know address
+    age: 30
+    name: new best name
+
+spring:
+  application:
+    name: spring-boot-client
+server:
+  port: 8090

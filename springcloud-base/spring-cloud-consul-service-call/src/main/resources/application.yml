@@ -1,0 +1,26 @@
+server:
+  port: 53004
+
+spring:
+  application:
+    name: spring-cloud-consul-service-call
+  cloud:
+    consul:
+      host: 10.10.99.133
+      port: 30000
+      discovery:
+        register: true # 是否需要注册
+        #        instance-id: ${spring.application.name}
+        service-name: ${spring.application.name} # 服务名称
+        port: ${server.port} # 服务请求端口
+        prefer-ip-address: true
+        ip-address: ${spring.cloud.client.ip-address}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

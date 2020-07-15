@@ -1,0 +1,7 @@
+cn.nihility.boot.suports.IAutoImportFactory= \
+  cn.nihility.boot.suports.AutoImportFactoryImpl01, \
+  cn.nihility.boot.suports.AutoImportFactoryImpl02
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration= \
+  cn.nihility.boot.config.BeanImportSelectorConf, \
+  cn.nihility.boot.config.ImportBeanDefinitionRegistrarConfiguration

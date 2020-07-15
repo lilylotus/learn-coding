@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+out/
+build/
+#log/
+*.class
+*.log
+*.jar
+*.gz
+

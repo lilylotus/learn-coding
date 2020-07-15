@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: spring-cloud-sentinel-rest
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      datasource:
+        ds1:
+          file:
+            file: classpath:flowrule.json
+            datatype: json
+            rule-type: flow
+      eager: true
+
+server:
+  port: 52204
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    metadata-map:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000

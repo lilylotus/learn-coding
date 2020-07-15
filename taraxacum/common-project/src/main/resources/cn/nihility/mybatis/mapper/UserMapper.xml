@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.nihility.mybatis.mapper.UserMapper">
+
+    <select id="getAllUser" resultType="user">
+        SELECT id, name, age, address
+        FROM mybatis_user
+    </select>
+
+    <select id="getUserById" parameterType="int" resultType="user" databaseId="mysql">
+        SELECT id, name, age, address
+        FROM mybatis_user
+        WHERE id = #{param1}
+    </select>
+
+    <!--<select id="selectByAge" parameterType="int" resultType="user">
+        SELECT id, name, age, address
+        FROM mybatis_user
+        WHERE age = #{param1}
+    </select>-->
+    
+</mapper>

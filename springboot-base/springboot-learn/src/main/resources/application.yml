@@ -1,0 +1,15 @@
+learn:
+  auto:
+    name: auto import test name
+    age: 20
+    address: unknow address
+
+spring:
+  application:
+    name: springboot-learn
+
+  redis:
+    database: 1
+    host: localhost
+    password: redis
+    port: 50001

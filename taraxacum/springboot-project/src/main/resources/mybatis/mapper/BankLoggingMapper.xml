@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.nihility.boot.mybatis.dao.BankLoggingDao">
+
+    <select id="queryAll" resultType="bankLogging">
+        select id, operator, transfer_to, operation_time, money
+        from bank_logging
+    </select>
+
+    <select id="queryDetailsByOperator" resultType="bankLogging">
+        select id, operator, transfer_to, operation_time, money
+        from bank_logging
+        where operator = #{name}
+    </select>
+
+    <insert id="insertTransferLog" parameterType="bankLogging">
+        insert into bank_logging (operator, transfer_to, money)
+        values (#{operator}, #{transferTo}, #{money}) ;
+    </insert>
+
+</mapper>

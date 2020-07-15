@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file://${user.home}/dandelion/programming/git/self-springcloud-learn
+          search-paths: config
+#          uri: https://github.com/lilylotus/self-springcloud-learn.git
+logging:
+  level:
+    org.springframework.cloud: 'DEBUG'

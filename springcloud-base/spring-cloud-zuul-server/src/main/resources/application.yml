@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: spring-cloud-zuul-server
+
+server:
+  port: 52204
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    metadata-map:
+      instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000
+
+zuul:
+  routes:
+    service-product: /product-service/**
+#    spring-cloud-service-provider:
+#      path: /service-provider/** # 映射路径 localhost/service-provider/xx
+#      serviceId: spring-cloud-service-provider # 配置转发的微服务 id
+#      url: http://localhost:52200 # 转发的实际微服务地址 52200

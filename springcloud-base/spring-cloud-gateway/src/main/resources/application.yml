@@ -1,0 +1,63 @@
+server:
+  port: 52101
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 2
+
+spring:
+  application:
+    name: spring-cloud-api-gateway
+  cloud:
+    gateway:
+      routes:
+      - id: spring-cloud-service-provider
+        uri: lb://spring-cloud-service-provider # 依据微服务名称 (id) 负载均衡
+        predicates:
+          - Path=/service-provider/** # 会把 /employee/** 所有加入 http://spring-cloud-service-provider 之前
+        filters: # 路由过滤器
+          - RewritePath=/service-provider/(?<segment>.*),/$\{segment} # 路径重写过滤器
+          - name: CircuitBreaker
+            args:
+              name: fetchIngredients
+              fallbackUri: /gatewayFallback
+      discovery:
+        locator:
+          enabled: true # 开启根据微服务名称自动转发
+          lower-case-service-id: true # 使用微服务小写名称
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+
+#  sleuth:
+#    trace-id128: true
+#    sampler:
+#      probability: 1.0
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    cn.nihility.cloud.gateway: DEBUG
+#  pattern:
+#    level: "[%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
+# Adds trace and span IDs to logs (when a trace is in progress)
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: 'hystrix.stream'
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

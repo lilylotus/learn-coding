@@ -1,0 +1,26 @@
+plugins {
+    id 'war'
+}
+
+group 'cn.nihility.web'
+version '1.0-SNAPSHOT'
+
+ext {
+    springVersion = '5.1.12.RELEASE'
+    tomcatEmbedVersion = '8.5.43'
+}
+
+dependencies {
+    implementation "org.springframework:spring-webmvc:$springVersion"
+
+    compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
+    compileOnly 'javax.websocket:javax.websocket-api:1.1'
+
+    implementation "org.apache.tomcat.embed:tomcat-embed-jasper:$tomcatEmbedVersion"
+    implementation "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
+    implementation "org.apache.tomcat.embed:tomcat-embed-el:$tomcatEmbedVersion"
+
+    implementation 'com.alibaba:fastjson:1.2.62'
+
+    testImplementation 'junit:junit:4.12'
+}
