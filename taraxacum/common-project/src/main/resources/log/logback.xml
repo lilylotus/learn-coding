@@ -4,7 +4,7 @@
     <timestamp key="byHour" datePattern="yyyyMMddHH"/>
     <timestamp key="byDay" datePattern="yyyyMMdd"/>
     <property name="logDir" value="/home/dandelion/temporary/log/logback" />
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] %logger{36} - %msg%xEx%n" />
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] %logger{36} - %msg%xEx%n"/>
 
     <!-- 普通的日志窗口输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
