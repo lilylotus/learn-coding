@@ -21,7 +21,7 @@ public class MapperFactoryBean implements FactoryBean {
     private Class<?> mapperInstance;
 
     @Override
-    public Object getObject() throws Exception {
+    public Object getObject() {
         log.info("MapperFactoryBean getObject - mapper [{}]", mapperInstance.getName());
         return Proxy.newProxyInstance(mapperInstance.getClassLoader(),
                 new Class[] {mapperInstance}, ((proxy, method, args) -> {

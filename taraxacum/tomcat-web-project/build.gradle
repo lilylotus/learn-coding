@@ -2,8 +2,7 @@ plugins {
     id 'war'
 }
 
-group 'cn.nihility.web'
-version '1.0-SNAPSHOT'
+archivesBaseName = "tomcat-web-project"
 
 ext {
     springVersion = '5.1.12.RELEASE'
@@ -22,5 +21,9 @@ dependencies {
 
     implementation 'com.alibaba:fastjson:1.2.62'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junitVersion"
+}
+
+test {
+    useJUnitPlatform()
 }

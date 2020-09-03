@@ -5,14 +5,13 @@
     gradle 在执行脚本时，会优先执行 buildscript 代码块中的内容，然后才会执行剩余的 build 脚本。
 */
 buildscript {
-    ext {
-        junitVersion = '4.12'
+    /*ext {
+        junitVersion = '4.13'
     }
     repositories {
-        mavenLocal()
         maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         mavenCentral()
-    }
+    }*/
     dependencies {
         /* 添加插件依赖路径（通过 jar 方式） */
         //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" as Object)
@@ -27,30 +26,6 @@ plugins {
 group 'cn.nihility'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
-
-repositories {
-    mavenLocal()
-    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation "junit:junit:${junitVersion}"
-}
-
-idea {
-    module {
-        downloadJavadoc = true
-        downloadSources = true
-    }
-}
-
-/* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
-tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
-[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-
 allprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
@@ -59,24 +34,45 @@ allprojects {
     targetCompatibility = 1.8
 
     ext {
-        junitVersion = "4.12"
+        branchName = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+        branchCommitId = "git rev-parse HEAD".execute().text.trim()
+        currentUser = System.getenv("USER")
+        currentOsName = System.getProperty("os.name")
+        currentJdkVersion = System.getProperty("java.version")
     }
-
-    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
-    tasks.withType(JavaCompile) { options.encoding = "UTF-8" }
-    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-
-    repositories {
-        mavenLocal()
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        mavenCentral()
-    }
-
+    
     idea {
         module {
             downloadJavadoc = true
             downloadSources = true
         }
+    }
+
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+
+    /*dependencies {
+        testImplementation "junit:junit:${junitVersion}"
+    }*/
+
+    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'utf-8'
+    [compileJava, compileTestJava]*.sourceCompatibility = "1.8"
+    [compileJava, compileTestJava]*.targetCompatibility = "1.8"
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+
+    task clearJar(type: Delete) {
+        println(project.name + " : clear Jar : $buildDir")
+        delete "$buildDir\\libs"
+    }
+
+    task copyJar(type: Copy, dependsOn: 'clearJar') {
+        println(project.name + " : copy Jar : $buildDir")
+        from configurations.runtimeClasspath
+        into "$buildDir\\libs\\lib"
     }
 }
 
@@ -85,6 +81,14 @@ subprojects {
 //        //移除spring boot 默认logger依赖
 //        all*.exclude module: 'spring-boot-starter-logging'
 //    }
+
+    ext {
+        junitVersion = "4.13"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
 }
 
 //配置特殊的子 project

@@ -68,7 +68,7 @@ db:
   user: remote
   password: mysql
   driverClassName: com.mysql.cj.jdbc.Driver
-  url: jdbc:mysql://${db.host}:${db.port}/test?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=GMT
+  url: jdbc:mysql://${db.host}:${db.port}/test?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
   dataSourceType: com.zaxxer.hikari.HikariDataSource
 
 ---

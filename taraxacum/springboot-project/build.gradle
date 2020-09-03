@@ -54,7 +54,7 @@ dependencies {
     /* json */
     implementation 'com.alibaba:fastjson:1.2.54'
     /* 这个会合默认的 springboot 自带版本冲突 */
-    /*implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.2'*/
+    /*implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'*/
     // implementation 'com.google.code.gson:gson:2.8.5'
     // implementation 'org.json:json:20180813'
 
@@ -79,4 +79,44 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    excludes = ["*.jar"]
+    dependsOn clearJar
+    dependsOn copyJar
+
+    manifestContentCharset 'UTF-8'
+    metadataCharset 'UTF-8'
+
+    manifest {
+        attributes("Main-Class": "cn.nihility.boot.SpringbootProjectApplication")
+        attributes("branchName": "$branchName")
+        attributes("commitId": "$branchCommitId")
+        attributes('Implementation-Title': 'Project Gradle Quickstart')
+    }
+
+    /* 这个不可以放到 allprojects 当中，不然会出现 class 重复，应该放到每个独立的 project 当中 */
+    /* 可执行 jar 包，所有依赖的 jar 包单独放到 lib 目录下 */
+    if (!configurations.runtimeClasspath.isEmpty()) {
+        manifest.attributes('Class-Path': '. ' + configurations.runtimeClasspath.files.collect { /*println it.name;*/ "lib/$it.name" }.join(' '))
+    }
+
+}
+
+
+bootJar {
+    excludes = ["*.jar"]
+    dependsOn clearJar
+    dependsOn copyJar
+
+    manifest {
+        attributes ("branchName": "$branchName")
+        attributes ("commitId": "$branchCommitId")
+        attributes("Main-Class": "org.springframework.boot.loader.PropertiesLauncher")
+    }
+
+    if (!configurations.runtimeClasspath.isEmpty()) {
+        manifest.attributes('Class-Path': '. ' + configurations.runtimeClasspath.files.collect { /*println it.name;*/ "lib/$it.name" }.join(' '))
+    }
 }

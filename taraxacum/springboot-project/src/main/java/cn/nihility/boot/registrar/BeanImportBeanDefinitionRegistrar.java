@@ -44,7 +44,7 @@ public class BeanImportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
         if (null != attributes) {
             String[] packages = attributes.getStringArray("basePackage");
-            if (packages != null && packages.length > 0) {
+            if (packages.length > 0) {
                 log.info("scan package [{}]", String.join(":", packages));
                 List<Class<?>> clazzList = ResourceUtil.scanPackageClass(packages[0], 1);
                 String clazzString = clazzList.stream().map(Class::getName).collect(Collectors.joining(":"));
