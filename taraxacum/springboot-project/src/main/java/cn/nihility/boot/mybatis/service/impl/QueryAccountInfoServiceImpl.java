@@ -19,8 +19,11 @@ public class QueryAccountInfoServiceImpl implements QueryAccountInfoService {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryAccountInfoServiceImpl.class);
 
-    @Autowired
-    private BankDao bankDao;
+    private final BankDao bankDao;
+
+    public QueryAccountInfoServiceImpl(BankDao bankDao) {
+        this.bankDao = bankDao;
+    }
 
     @Override
     public Bank queryDetailInfo(String operator) {

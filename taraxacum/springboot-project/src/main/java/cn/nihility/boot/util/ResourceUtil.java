@@ -29,10 +29,10 @@ public class ResourceUtil {
         if (null != basePackage && !"".equals(basePackage.trim())) {
             String locationPattern = "classpath:" + basePackage.replace(".", "/") + "/*/*.class";
             log.info("location resolver pattern [{}]", locationPattern);
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(ResourceUtil.class.getClassLoader());
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(CLASS_LOADER);
             try {
                 Resource[] resources = resolver.getResources(locationPattern);
-                final CachingMetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(ResourceUtil.class.getClassLoader());
+                final CachingMetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(CLASS_LOADER);
                 Stream.of(resources).forEach(r -> {
                     try {
                         MetadataReader metadata = readerFactory.getMetadataReader(r);
@@ -54,7 +54,7 @@ public class ResourceUtil {
     }
 
     public static List<Class<?>> scanPackageClass(String basePackage) {
-        return scanPackageClass(basePackage, 0);
+        return scanPackageClass(basePackage, 2);
     }
 
     public static List<Class<?>> scanPackageClass(String basePackage, int depth) {
@@ -63,10 +63,13 @@ public class ResourceUtil {
         if (null != basePackage && !"".equals(basePackage.trim())) {
             String locationPattern;
             if (1 == depth) {
+                /* 当前 package 路径下的所有 *.class */
                 locationPattern = "classpath:" + basePackage.replace(".", "/") + "/*.class";
             } else if (2 == depth) {
+                /* 当前 package 路径及其所有子目录的所有 *.class */
                 locationPattern = "classpath:" + basePackage.replace(".", "/") + "/**/*.class";
             } else {
+                /* 当前 package 路径的子 一级 目录下的所有 *.class, (不包含当前目录) */
                 locationPattern = "classpath:" + basePackage.replace(".", "/") + "/*/*.class";
             }
 

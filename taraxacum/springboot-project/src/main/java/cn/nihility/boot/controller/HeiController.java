@@ -1,13 +1,17 @@
 package cn.nihility.boot.controller;
 
 import cn.nihility.boot.annotation.LoginToken;
+import cn.nihility.boot.controller.ret.ResponseResultBody;
+import cn.nihility.boot.controller.ret.ResultResponse;
 import cn.nihility.boot.controller.vo.ResultVo;
+import cn.nihility.boot.mybatis.dao.TestDao;
 import cn.nihility.boot.util.ResultVoUtil;
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +25,25 @@ import java.util.Map;
 public class HeiController {
 
     private final static Logger log = LoggerFactory.getLogger(HeiController.class);
+    private static final Map<String, Object> RESULT_DATA;
+
+    private final TestDao testDao;
+
+    static {
+        RESULT_DATA = new HashMap<>();
+        RESULT_DATA.put("status", 200);
+        RESULT_DATA.put("message", "自定义 Hei 信息");
+        RESULT_DATA.put("name", "anonymous");
+        try {
+            RESULT_DATA.put("remote", Inet4Address.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public HeiController(TestDao testDao) {
+        this.testDao = testDao;
+    }
 
     @RequestMapping("/hello")
     public ResultVo hello() {
@@ -84,4 +107,31 @@ public class HeiController {
         }
     }
 
+    /* ========== 统一返回格式 ========== */
+
+    @RequestMapping("/data")
+    public Map<String, Object> data() {
+        return RESULT_DATA;
+    }
+
+    @RequestMapping("/result")
+    @ResponseBody
+    public ResultResponse<Map<String, Object>> result() {
+        return ResultResponse.success(RESULT_DATA);
+    }
+
+    @RequestMapping("/resultBody")
+    @ResponseResultBody
+    public Map<String, Object> resultBody() {
+        return RESULT_DATA;
+    }
+
+    /* ========== mybatis ========== */
+
+    @RequestMapping("/dao")
+    public Map<String, Object> selector() {
+        Map<String, Object> ret = new HashMap<>(4);
+        ret.put("dto", testDao.selectAll());
+        return ret;
+    }
 }

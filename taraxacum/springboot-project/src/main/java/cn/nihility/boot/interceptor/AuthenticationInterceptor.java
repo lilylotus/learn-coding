@@ -5,6 +5,7 @@ import cn.nihility.boot.annotation.PassToken;
 import cn.nihility.boot.exception.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,7 +19,7 @@ import java.lang.reflect.Method;
  * @author dandelion
  * @date 2020:06:27 10:51
  */
-public class AuthenticationInterceptor implements HandlerInterceptor {
+public class AuthenticationInterceptor implements HandlerInterceptor, Ordered {
 
     private final static Logger log = LoggerFactory.getLogger(AuthenticationInterceptor.class);
 
@@ -68,4 +69,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         log.info("AuthenticationInterceptor -> afterCompletion");
     }
 
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE + 10;
+    }
 }

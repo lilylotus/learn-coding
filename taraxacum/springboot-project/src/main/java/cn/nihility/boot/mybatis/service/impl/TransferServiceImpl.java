@@ -21,10 +21,13 @@ public class TransferServiceImpl implements TransferService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransferServiceImpl.class);
 
-    @Autowired
-    private BankDao bankDao;
-    @Autowired
-    private TransferLogService transferLogService;
+    private final BankDao bankDao;
+    private final TransferLogService transferLogService;
+
+    public TransferServiceImpl(BankDao bankDao, TransferLogService transferLogService) {
+        this.bankDao = bankDao;
+        this.transferLogService = transferLogService;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

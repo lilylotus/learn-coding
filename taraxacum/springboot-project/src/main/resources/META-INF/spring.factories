@@ -4,4 +4,5 @@ cn.nihility.boot.suports.IAutoImportFactory= \
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration= \
   cn.nihility.boot.config.BeanImportSelectorConf, \
-  cn.nihility.boot.config.ImportBeanDefinitionRegistrarConfiguration
+  cn.nihility.boot.config.ImportBeanDefinitionRegistrarConfiguration, \
+  cn.nihility.boot.config.ApplicationAwareConfiguration

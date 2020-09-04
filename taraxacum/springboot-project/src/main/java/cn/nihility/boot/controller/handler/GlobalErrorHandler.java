@@ -1,4 +1,4 @@
-package cn.nihility.boot.controller;
+package cn.nihility.boot.controller.handler;
 
 import cn.nihility.boot.exception.ErrorInfoBuilder;
 import org.springframework.beans.factory.annotation.Autowired;

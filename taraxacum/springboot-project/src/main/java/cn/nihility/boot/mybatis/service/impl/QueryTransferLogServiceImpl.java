@@ -21,14 +21,15 @@ public class QueryTransferLogServiceImpl implements QueryTransferLogService {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryTransferLogServiceImpl.class);
 
-    @Autowired
-    private BankLoggingDao bankLoggingDao;
+    private final BankLoggingDao bankLoggingDao;
+
+    public QueryTransferLogServiceImpl(BankLoggingDao bankLoggingDao) {
+        this.bankLoggingDao = bankLoggingDao;
+    }
 
     @Override
     public List<BankLogging> query(String operator) {
-
         logger.info("query transfer info, operator [{}]", operator);
-
         return bankLoggingDao.queryDetailsByOperator(operator);
     }
 }

@@ -1,14 +1,14 @@
 server:
-  port: 8080
+  port: 9091
 
 spring:
   profiles:
-    active: druid
+    active: hikari
   redis:
     host: 127.0.0.1
-    port: 50001
+    port: 6379
     password: redis
-    database: 2
+    database: 11
     timeout: 10000
     jedis:
       pool:
@@ -19,10 +19,6 @@ spring:
     type: ehcache
     ehcache:
       config: classpath:ehcache/ehcache.xml
-
-logging:
-  level:
-    org.springframework.jdbc: debug
 
 # yaml 依赖注入练习
 inject:
@@ -64,8 +60,8 @@ mybatis:
 
 db:
   host: 127.0.0.1
-  port: 50000
-  user: remote
+  port: 3306
+  user: root
   password: mysql
   driverClassName: com.mysql.cj.jdbc.Driver
   url: jdbc:mysql://${db.host}:${db.port}/test?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai

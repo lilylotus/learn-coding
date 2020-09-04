@@ -23,8 +23,11 @@ public class TransferLogServiceImpl implements TransferLogService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransferLogServiceImpl.class);
 
-    @Autowired
-    private BankLoggingDao bankLoggingDao;
+    private final BankLoggingDao bankLoggingDao;
+
+    public TransferLogServiceImpl(BankLoggingDao bankLoggingDao) {
+        this.bankLoggingDao = bankLoggingDao;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -39,10 +42,9 @@ public class TransferLogServiceImpl implements TransferLogService {
         int result = bankLoggingDao.insertTransferLog(log);
 
 //        System.out.println("print error " + (1 / 0));
-
 //        if (true) { throw new IOException("transfer error"); }
 
         logger.info("Transfer recording over, log result [{}]", result);
-        return result > 0 ? true : false;
+        return result > 0;
     }
 }

@@ -59,7 +59,6 @@ test {
 
 jar {
     excludes = ["*.jar"]
-    dependsOn clearJar
     dependsOn copyJar
 
     /* gradle jar -PmainClass=cn.nihility.start.Starter */
@@ -70,9 +69,9 @@ jar {
 
     manifest {
         attributes("Main-Class": "${mainClass}")
-        attributes("branchName": "$branchName")
-        attributes("commitId": "$branchCommitId")
-        attributes ("author": "$currentUser")
+        attributes("Branch-Name": "$branchName")
+        attributes("Commit-Id": "$branchCommitId")
+        attributes ("Author": "$currentUser")
         attributes ("JDK-Version": "$currentJdkVersion")
         attributes ("Operation-System": "${currentOsName}")
         attributes('Implementation-Title': 'Project Gradle Quickstart')

@@ -19,8 +19,11 @@ public class CreateBankAccountServiceImpl implements CreateBankAccountService {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateBankAccountServiceImpl.class);
 
-    @Autowired
-    private BankDao bankDao;
+    private final BankDao bankDao;
+
+    public CreateBankAccountServiceImpl(BankDao bankDao) {
+        this.bankDao = bankDao;
+    }
 
     @Override
     public boolean createNewBankAccount(Bank account) {
@@ -30,6 +33,6 @@ public class CreateBankAccountServiceImpl implements CreateBankAccountService {
         int result = bankDao.insertNewBankAccount(account);
         logger.info("create new bank account result [{}]", result);
 
-        return result > 0 ? true : false;
+        return result > 0;
     }
 }

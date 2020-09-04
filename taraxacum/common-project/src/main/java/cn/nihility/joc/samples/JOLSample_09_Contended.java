@@ -58,7 +58,7 @@ public class JOLSample_09_Contended {
     public static class A {
                              int a;
                              int b;
-        @sun.misc.Contended  int c;
+        /*@sun.misc.Contended*/  int c;
                              int d;
     }
 

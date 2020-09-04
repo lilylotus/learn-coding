@@ -32,4 +32,12 @@ public class Zoom {
     public void setCat2(Cat cat2) {
         this.cat2 = cat2;
     }
+
+    @Override
+    public String toString() {
+        return "Zoom{" +
+                "cat1=" + cat1.hashCode() +
+                ", cat2=" + cat2.hashCode() +
+                '}';
+    }
 }

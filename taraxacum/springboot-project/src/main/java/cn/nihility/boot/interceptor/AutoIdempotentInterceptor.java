@@ -5,6 +5,7 @@ import cn.nihility.boot.exception.AuthenticationException;
 import cn.nihility.boot.service.TokenServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,7 +22,7 @@ import java.lang.reflect.Method;
  * @author dandelion
  * @date 2020:06:27 20:00
  */
-public class AutoIdempotentInterceptor implements HandlerInterceptor {
+public class AutoIdempotentInterceptor implements HandlerInterceptor, Ordered {
 
     private final static Logger log = LoggerFactory.getLogger(AutoIdempotentInterceptor.class);
 
@@ -79,5 +80,10 @@ public class AutoIdempotentInterceptor implements HandlerInterceptor {
         } catch (IOException e) {
             log.error("write response json message error, message [{}]", jsonMsg, e);
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
     }
 }

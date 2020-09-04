@@ -1,4 +1,4 @@
-package cn.nihility.boot.controller;
+package cn.nihility.boot.controller.handler;
 
 import cn.nihility.boot.controller.vo.ResultVo;
 import cn.nihility.boot.exception.AuthenticationException;

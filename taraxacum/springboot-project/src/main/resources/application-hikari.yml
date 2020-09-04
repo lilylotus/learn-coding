@@ -1,0 +1,16 @@
+# JDBC hikari 基本配置
+spring:
+  datasource:
+    type: ${db.dataSourceType}
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 32
+      auto-commit: true
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: 'SELECT 1'
+      driver-class-name: ${db.driverClassName}
+      jdbc-url: ${db.url}
+      username: ${db.user}
+      password: ${db.password}
