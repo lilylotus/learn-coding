@@ -3,7 +3,7 @@
 <!-- 日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
 <!-- Configuration 后面的 status，设置 log4j2 自身内部的信息输出，可以不设置，trace 时会看到 log4j2 内部各种详细输出 -->
 <!-- monitorInterval: Log4j 能够自动检测修改配置 文件和重新配置本身，设置间隔秒数 -->
-<configuration status="DEBUG" monitorInterval="30">
+<configuration status="INFO" monitorInterval="60">
 
     <!--变量配置-->
     <Properties>
@@ -13,8 +13,9 @@
         <!-- System.setProperty("appName", "urm"); -->
         <Property name="APP_PROFILE" value="${sys:profileName:-default}"/>
         <Property name="APP_NAME" value="${sys:appName:-default}"/>
+        <Property name="LOG4j2_BASE_DIR" value="${env:USER:-logger}"/>
         <!-- 定义日志存储的路径 /${ctx:spring.application.name} -->
-        <property name="BASE_DIR" value="D:/logger/${APP_NAME}/${APP_PROFILE}" />
+        <property name="BASE_DIR" value="./${LOG4j2_BASE_DIR}/${APP_NAME}/${APP_PROFILE}" />
     </Properties>
 
     <!--先定义所有的appender-->

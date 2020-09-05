@@ -14,7 +14,7 @@ import java.util.List;
  * @date 2020:06:26 20:26
  */
 @SpringBootTest
-public class JdbcTest {
+public class JdbcNormalTest {
 
     @Autowired
     private DataSource dataSource;
@@ -42,12 +42,15 @@ public class JdbcTest {
     @Test
     public void testJdbcCaching() {
         List<JdbcCaching.SpringBean> springBeans = jdbcDemonstrate.querySpringBeanList();
-        System.out.println(springBeans);
-        System.out.println(springBeans.hashCode());
+        Assertions.assertNotNull(springBeans);
+        int hashCode = springBeans.hashCode();
+        System.out.println(hashCode);
 
         List<JdbcCaching.SpringBean> springBeans1 = jdbcDemonstrate.querySpringBeanList();
-        System.out.println(springBeans1);
-        System.out.println(springBeans1.hashCode());
+        Assertions.assertNotNull(springBeans1);
+        int hashCode1 = springBeans1.hashCode();
+        System.out.println(hashCode1);
+        Assertions.assertEquals(hashCode, hashCode1);
     }
 
 }

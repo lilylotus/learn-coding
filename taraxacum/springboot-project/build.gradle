@@ -5,6 +5,8 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 }
 
+apply plugin: 'io.spring.dependency-management'
+
 configurations {
     developmentOnly
     runtimeClasspath {
@@ -90,6 +92,9 @@ test {
 }
 
 jar {
+    /* spring boot 推荐开启 */
+    enabled = true
+
     excludes = ["*.jar"]
     dependsOn copyJar
 
@@ -141,12 +146,16 @@ bootJar {
     excludes = ["*.jar"]
     dependsOn copyJar
 
+    /* 文件名称后缀 */
+    classifier('boot')
+
     manifest {
         attributes("Branch-Name": "$branchName")
         attributes("Commit-Id": "$branchCommitId")
         attributes ("Author": "$currentUser")
         attributes ("JDK-Version": "$currentJdkVersion")
         attributes ("Operation-System": "${currentOsName}")
+        /* 使用 PropertiesLauncher */
         attributes("Main-Class": "org.springframework.boot.loader.PropertiesLauncher")
     }
 

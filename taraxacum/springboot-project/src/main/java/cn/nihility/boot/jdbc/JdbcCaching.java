@@ -18,9 +18,13 @@ import java.util.Objects;
 public class JdbcCaching implements Serializable {
     private static final long serialVersionUID = 7426984968194232865L;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
+    public JdbcCaching(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    /* 这里的名称要和 encache.xml 配置的 cache name 一致 */
     @Cacheable("ehcache")
     public List<SpringBean> querySpringBeanList() {
         Objects.requireNonNull(jdbcTemplate);
