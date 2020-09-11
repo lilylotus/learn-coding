@@ -9,15 +9,23 @@ ext {
     slf4jVersion = '1.7.26'
 }
 
+configurations {
+    all*.exclude module: 'logback-classic'
+    all*.exclude module: 'log4j-over-slf4j'
+    all*.exclude module: 'slf4j-log4j12'
+}
+
 dependencies {
     /* logback */
-    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    /*implementation "ch.qos.logback:logback-classic:$logbackVersion"*/
 
     /* log4j2 binding slf4j/web project/bing to sl4fj/slf4j api */
-    /*implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
     implementation "org.apache.logging.log4j:log4j-web:$log4j2Version"
     implementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"*/
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    /* log4j2 异步日志所需 */
+    implementation "com.lmax:disruptor:3.4.2"
 
     /* 有序性测试 */
     implementation 'org.openjdk.jcstress:jcstress-core:0.5'

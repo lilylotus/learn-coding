@@ -21,7 +21,7 @@ public class Log {
         String msg = "Logger test, msg [{}]";
         Object[] params = new Object[] {"logger param"};
 
-        int loop = 10000;
+        int loop = 10;
         for (int i = 0; i < loop; i++) {
             log(LoggerLevel.TRACE, msg, params);
             log(LoggerLevel.DEBUG, msg, params);
