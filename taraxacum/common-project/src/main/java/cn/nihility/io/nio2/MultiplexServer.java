@@ -14,20 +14,18 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Set;
 
 public class MultiplexServer implements Runnable {
 
-    private final static Logger log = LoggerFactory.getLogger(MultiplexServer.class);
+    // 多路复用器，事件轮询器
     private Selector selector;
 
     private volatile boolean run = true;
 
     public static void main(String[] args) {
-        int port = 40000;
-        new Thread(new MultiplexServer(port)).start();
+        new Thread(new MultiplexServer(40000), "server").start();
     }
 
     public MultiplexServer(int port) {
@@ -35,15 +33,14 @@ public class MultiplexServer implements Runnable {
             ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
             // 设置非阻塞
             serverSocketChannel.configureBlocking(false);
-
+            // 绑定地址和端口
             final ServerSocket serverSocket = serverSocketChannel.socket();
             serverSocket.bind(new InetSocketAddress(port));
-
             /* 多路复用器 */
             selector = Selector.open();
             // 注册 serverSocketChannel 到 多路复用器
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            log.info("Initialization Nio Server Success.");
+            System.out.println("Initialization Nio Server Success.");
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -51,38 +48,42 @@ public class MultiplexServer implements Runnable {
     }
 
     private void listen() {
-        int selectCnt;
         while (run) {
-            selectCnt = 0;
             try {
-                selectCnt = selector.select(1000L);
-            } catch (IOException e) {
-                e.printStackTrace();
+                // 阻塞
+                int selectCnt = selector.select(500L);
+                if (selectCnt == 0) {
+                    System.out.print(".");
+                    continue;
+                }
+                System.out.println("\r\nselect count [" + selectCnt + "]");
+            } catch (IOException ex) {
+                System.out.println("Selector->select() error" + ex.getMessage());
+                continue;
             }
-            if (selectCnt > 0) {
-                log.info("Selector count [{}]", selectCnt);
-                final Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                final Iterator<SelectionKey> iterator = selectionKeys.iterator();
 
-                while (iterator.hasNext()) {
-                    final SelectionKey key = iterator.next();
-                    // 移除事件，避免重复处理
-                    iterator.remove();
-                    try {
-                        handleKey(key);
-                    } catch (Exception ex) {
-                        if (null != key) {
-                            key.cancel();
-                            if (key.channel() != null) {
-                                try {
-                                    key.channel().close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+            // 事件集合
+            final Set<SelectionKey> selectionKeys = selector.selectedKeys();
+            final Iterator<SelectionKey> iterator = selectionKeys.iterator();
+            while (iterator.hasNext()) {
+                final SelectionKey key = iterator.next();
+                // 移除事件，避免重复处理
+                iterator.remove();
+
+                try {
+                    handleKey(key);
+                } catch (Exception ex) {
+                    System.out.println("handle key " + ex.getMessage());
+                    if (null != key) {
+                        key.cancel();
+                        if (key.channel() != null) {
+                            try {
+                                key.channel().close();
+                            } catch (IOException e) {
+                                System.out.println("key channel close ex " + e.getMessage());
                             }
                         }
                     }
-
                 }
             }
         }
@@ -91,66 +92,82 @@ public class MultiplexServer implements Runnable {
     private void handleKey(SelectionKey selectionKey) throws IOException {
         // 可连接
         if (selectionKey.isValid() && selectionKey.isAcceptable()) {
-            log.info("Acceptable SelectionKey");
-            final ServerSocketChannel ssc = (ServerSocketChannel) selectionKey.channel();
-            // 三次握手
-            final SocketChannel sc = ssc.accept();
-            sc.configureBlocking(false);
-
-            // 返回信息
-            if (sc.isConnected()) {
-                sc.write(StandardCharsets.UTF_8.encode("Welcome To Nio Server."));
-                log.info("Echo Connected Client Info.");
-            }
-
-            sc.register(selector, SelectionKey.OP_READ);
+            handleConnection(selectionKey);
         }
 
         if (selectionKey.isValid() && selectionKey.isReadable()) {
-            log.info("Readable SelectionKey");
-            // 获取对应可读的 Chanel
-            final SocketChannel sc = (SocketChannel) selectionKey.channel();
-            // 创建一个 Buffer 用户加载数据
-            final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
-
-            while (sc.read(readBuffer) > 0) {
-                // 切换到读取模式 position limit capacity
-                readBuffer.flip();
-                byte[] buffer = new byte[readBuffer.remaining()];
-                readBuffer.get(buffer);
-                bao.write(buffer);
-                readBuffer.clear();
-            }
-
-            if (bao.size() > 0) {
-                String content = new String(bao.toByteArray(), StandardCharsets.UTF_8);
-                log.info("Receive Client Content ({})", content);
-
-                responseReceiveMessage(sc, content);
-                /*sc.register(selector, SelectionKey.OP_READ);*/
-            } else {
-                // 小于 0 说明有问题，关闭 SelectionKey 和 channel
-                log.info("Close The Connection In Question.");
-                selectionKey.channel();
-                sc.close();
-            }
+            handleRead(selectionKey);
         }
     }
 
-    private void responseReceiveMessage(SocketChannel socketChannel, String content) throws IOException {
+    private void handleConnection(SelectionKey selectionKey) throws IOException {
+        System.out.println("handle connection");
+        ServerSocketChannel ssc = (ServerSocketChannel) selectionKey.channel();
+        // 三次握手
+        SocketChannel sc = ssc.accept();
+        sc.configureBlocking(false);
+
+        // 返回信息
+        if (sc.isConnected()) {
+            responseMessage(sc, "Connect Server Success.");
+            System.out.println("Client connect success.");
+        }
+
+        sc.register(selector, SelectionKey.OP_READ);
+    }
+
+    private void handleRead(SelectionKey selectionKey) throws IOException {
+        System.out.println("handle read");
+        // 获取对应可读的 Chanel
+        SocketChannel sc = (SocketChannel) selectionKey.channel();
+        sc.configureBlocking(false);
+        // 创建一个 Buffer 用户加载数据
+        ByteBuffer readBuffer = ByteBuffer.allocate(256);
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+
+        while (sc.read(readBuffer) > 0) {
+            // 切换到读取模式 position limit capacity
+            readBuffer.flip();
+            bao.write(readBuffer.array(), 0, readBuffer.remaining());
+            readBuffer.clear();
+        }
+
+        if (bao.size() > 0) {
+            String content = new String(bao.toByteArray(), StandardCharsets.UTF_8);
+            bao.close();
+            System.out.println("Read Client [" + content + "]");
+
+            responseMessage(sc, content);
+
+            if ("quit".equals(content)) {
+                System.out.println("Client require close socket.");
+                sc.close();
+            } else {
+                // 现在服务端就是持续读，没有 write 操作
+                sc.register(selector, SelectionKey.OP_READ);
+            }
+        } else {
+            // 小于 0 说明有问题，关闭 SelectionKey 和 channel
+            System.out.println("Close The Connection In Question.");
+            selectionKey.cancel();
+            sc.close();
+        }
+    }
+
+    private void responseMessage(SocketChannel socketChannel, String content) throws IOException {
         if (StringUtils.isNoneBlank(content)) {
-            String res = Thread.currentThread().getName() + ":" + content;
-            log.info("to client [{}]", res);
-            final byte[] writeBytes = res.getBytes(StandardCharsets.UTF_8);
-            final ByteBuffer writeBuffer = ByteBuffer.allocate(writeBytes.length);
+            String echo = "Success rec [" + content + "]";
+            System.out.println("To client [" + echo + "]");
+            byte[] writeBytes = echo.getBytes(StandardCharsets.UTF_8);
+            ByteBuffer writeBuffer = ByteBuffer.allocate(writeBytes.length);
             writeBuffer.put(writeBytes);
             // 切换到写模式
             writeBuffer.flip();
             socketChannel.write(writeBuffer);
+            System.out.println("response end.");
+            /*socketChannel.write(ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8)));*/
         }
     }
-
 
     private void stop() {
         run = false;

@@ -1,8 +1,6 @@
 package cn.nihility.io.nio2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,38 +10,36 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
 public class MultiplexClient implements Runnable {
 
-    private final static Logger log = LoggerFactory.getLogger(MultiplexClient.class);
-
     private SocketChannel socketChannel;
+    // 多路复用器，事件轮询器
     private Selector selector;
-    private String host;
-    private int port;
     private volatile boolean run = true;
 
     public static void main(String[] args) {
-        int port = 40000;
-        String host = "localhost";
-
-        new Thread(new MultiplexClient(host, port)).start();
+        new Thread(new MultiplexClient(40000), "client012").start();
     }
 
-    public MultiplexClient(String host, int port) {
-        this.host = host;
-        this.port = port;
-
+    public MultiplexClient(int port) {
         try {
+            /*InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
+            socketChannel = SocketChannel.open(inetSocketAddress);*/
+
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
             selector = Selector.open();
 
-            log.info("Initialization Multiplex Client Success.");
+            // 注册 selector 到 Channel, 监听 Connect 事件
+            socketChannel.register(selector, SelectionKey.OP_CONNECT);
+            // 发起连接
+            socketChannel.connect(new InetSocketAddress(port));
+
+            System.out.println("Initialization Multiplex Client Success.");
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -52,45 +48,38 @@ public class MultiplexClient implements Runnable {
 
     @Override
     public void run() {
-        try {
-            //尝试连接
-            doConnect();
-        }catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        int selectCnt;
         while (run) {
-            selectCnt = 0;
             try {
-                selectCnt = selector.select(1000L);
-            } catch (IOException e) {
-                e.printStackTrace();
+                int selectCnt = selector.select(500L);
+                if (selectCnt == 0) {
+                    continue;
+                }
+                System.out.println("\r\nselect count [" + selectCnt + "]");
+            } catch (IOException ex) {
+                System.out.println("Selector->select() error " + ex.getMessage());
+                continue;
             }
 
-            if (selectCnt > 0) {
-                final Set<SelectionKey> selectionKeys = selector.selectedKeys();
-                final Iterator<SelectionKey> iterator = selectionKeys.iterator();
-                if (iterator.hasNext()) {
-                    final SelectionKey key = iterator.next();
-                    iterator.remove();
+            // 事件集合
+            Set<SelectionKey> selectionKeys = selector.selectedKeys();
+            Iterator<SelectionKey> iterator = selectionKeys.iterator();
+            if (iterator.hasNext()) {
+                SelectionKey key = iterator.next();
+                iterator.remove();
 
-                    try {
-                        handleKey(key);
-                    } catch (Exception ex) {
-                        if (null != key) {
-                            key.cancel();
-                            if (key.channel() != null) {
-                                try {
-                                    key.channel().close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                try {
+                    handleKey(key);
+                } catch (Exception ex) {
+                    if (null != key) {
+                        key.cancel();
+                        if (key.channel() != null) {
+                            try {
+                                key.channel().close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
-
                 }
             }
         }
@@ -112,96 +101,110 @@ public class MultiplexClient implements Runnable {
     }
 
     private void handleKey(SelectionKey selectionKey) throws IOException {
-
         if (selectionKey.isValid() && selectionKey.isConnectable()) {
-            log.info("Connection To Multiplex Server.");
-
-            SocketChannel sc = (SocketChannel) selectionKey.channel();
-
-            if (sc.isConnectionPending()) {
-                log.info("Connection is Pending");
-                if (sc.finishConnect()) {
-                    log.info("Finished Connection.");
-                    sc.register(selector, SelectionKey.OP_READ);
-
-                    doWrite(sc, "Connect To Multiplex Server.");
-                } else {
-                    log.error("Connection To Multiplex Server Error.");
-                    System.exit(1);
-                }
-            }
+            handleConnection(selectionKey);
         }
 
         if (selectionKey.isValid() && selectionKey.isReadable()) {
-            // 获取对应可读的 Chanel
-            final SocketChannel sc = (SocketChannel) selectionKey.channel();
-            // 创建一个 Buffer 用户加载数据
-            final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-            final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+           handleRead(selectionKey);
+        }
 
-            while (sc.read(readBuffer) > 0) {
-                // 切换到读取模式 position limit capacity
-                readBuffer.flip();
-                byte[] buffer = new byte[readBuffer.remaining()];
-                readBuffer.get(buffer);
-                bao.write(buffer);
-                readBuffer.clear();
-            }
+        if (selectionKey.isValid() && selectionKey.isWritable()) {
+           handleWrite(selectionKey);
+        }
+    }
 
-            if (bao.size() > 0) {
-                String content = new String(bao.toByteArray(), StandardCharsets.UTF_8);
-                log.info("Receive Server Content [{}]", content);
+    private void handleConnection(SelectionKey selectionKey) throws IOException {
+        System.out.println("handle connection");
+        SocketChannel sc = (SocketChannel) selectionKey.channel();
+        sc.configureBlocking(false);
 
-                /*sc.register(selector, SelectionKey.OP_WRITE);*/
+        // 完成连接
+        if (sc.isConnectionPending()) {
+            System.out.println("Connection is Pending");
+            if (sc.finishConnect()) {
+                System.out.println("Finished Connection.");
+                /*doResponseContent(sc, "Connect To Multiplex Server.");*/
                 sc.register(selector, SelectionKey.OP_READ);
             } else {
-                // 小于 0 说明有问题，关闭 SelectionKey 和 channel
-                log.info("Close The Connection In Question.");
-                selectionKey.channel();
-                sc.close();
+                System.out.println("Connection To Multiplex Server Error.");
+                System.exit(1);
             }
         }
-
-       /* if (selectionKey.isValid() && selectionKey.isWritable()) {
-            SocketChannel sc = (SocketChannel) selectionKey.channel();
-            Scanner scanner = new Scanner(System.in);
-
-            String content = scanner.nextLine();
-            final ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(content);
-            sc.write(byteBuffer);
-
-            sc.register(selector, SelectionKey.OP_READ);
-
-            if ("quit".equals(content)) {
-                log.info("Exit Client Application.");
-                stop();
-            }
-        }*/
-
     }
 
-    private void doConnect() throws IOException {
+    private void handleRead(SelectionKey selectionKey) throws IOException {
+        System.out.println("handle read");
+        // 获取对应可读的 Chanel
+        final SocketChannel sc = (SocketChannel) selectionKey.channel();
+        sc.configureBlocking(false);
+
+        // 创建一个 Buffer 用户加载数据
+        final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+        final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        int readByteLen;
+        while ((readByteLen = sc.read(readBuffer)) > 0) {
+            // 切换到读取模式 position limit capacity
+            readBuffer.flip();
+            bao.write(readBuffer.array(), 0, readByteLen);
+            readBuffer.clear();
+        }
+        if (bao.size() > 0) {
+            String content = new String(bao.toByteArray(), StandardCharsets.UTF_8);
+            bao.close();
+            System.out.println("Read Server [" + content + "]");
+        }
+
+        if (readByteLen < 0) {
+            // 小于 0 说明有问题，关闭 SelectionKey 和 channel
+            System.out.println("Close The Connection In Question.");
+            selectionKey.cancel();
+            sc.close();
+        } else {
+            sc.register(selector, SelectionKey.OP_WRITE);
+        }
+    }
+
+    private void handleWrite(SelectionKey selectionKey) throws IOException {
+        System.out.println("handle write");
+        SocketChannel sc = (SocketChannel) selectionKey.channel();
+
+        Scanner scanner = new Scanner(System.in);
+        String content = scanner.nextLine();
+        System.out.println("input [" + content + "]");
+        doResponseContent(sc, content);
+
+        if ("quit".equals(content)) {
+            System.out.println("Exit Client Application.");
+            stop();
+        }
+
+        sc.register(selector, SelectionKey.OP_READ);
+    }
+
+    /*private void doConnect() throws IOException {
         // 如果连接成功，就将 SocketChannel 挂上 Selector，并且写入数据；如果失败，就说注册连接成功
         if (socketChannel.connect(new InetSocketAddress(host, port))) {
-            log.info("do connection.");
+            System.out.println("try connection.");
             socketChannel.register(selector, SelectionKey.OP_READ);
-            doWrite(socketChannel, "Hello Server.");
+            doResponseContent(socketChannel, "Hello Server.");
         } else {
-            log.info("has connected.");
+            System.out.println("have connected.");
             socketChannel.register(selector, SelectionKey.OP_CONNECT);
         }
-    }
+    }*/
 
-    private void doWrite(SocketChannel socketChannel, String content) throws IOException {
+    private void doResponseContent(SocketChannel socketChannel, String content) throws IOException {
         if (StringUtils.isNoneBlank(content)) {
-            String res = Thread.currentThread().getName() + ":" + content;
-            log.info("to server [{}]", res);
-            final byte[] writeBytes = res.getBytes(StandardCharsets.UTF_8);
+            String echo = Thread.currentThread().getName() + " : " + content;
+            System.out.println("to server [" + echo + "]");
+            /*final byte[] writeBytes = res.getBytes(StandardCharsets.UTF_8);
             final ByteBuffer writeBuffer = ByteBuffer.allocate(writeBytes.length);
             writeBuffer.put(writeBytes);
             // 切换到写模式
             writeBuffer.flip();
-            socketChannel.write(writeBuffer);
+            socketChannel.write(writeBuffer);*/
+            socketChannel.write(ByteBuffer.wrap(echo.getBytes(StandardCharsets.UTF_8)));
         }
     }
 

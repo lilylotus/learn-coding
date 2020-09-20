@@ -3,7 +3,7 @@ rootProject.name = 'taraxacum'
 /* 引入子模块 */
 include 'common-project','springboot-project'
 include('tomcat-web-project')
-include('springboot-project02')
+include('springboot-undertow')
 
 //project(':sub-project3').projectDir = file("$rootDir/../sub-project3")
 //$rootDir 指的是 root-project 项目所在的目录，

@@ -1,24 +1,18 @@
 server:
-  port: 9091
+  port: 30000
 
 spring:
   profiles:
-    active: hikari
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password: redis
-    database: 11
-    timeout: 10000
-    jedis:
-      pool:
-        max-wait: 10000
-        max-idle: 10
-        max-active: 10
+    active: hikari,redis
   cache:
     type: ehcache
     ehcache:
       config: classpath:ehcache/ehcache.xml
+
+logging:
+  level:
+    root: debug
+    org.springframework: info
 
 # yaml 依赖注入练习
 inject:

@@ -1,0 +1,7 @@
+server:
+  port: 30000
+
+logging:
+  level:
+    root: debug
+    org.springframework: info

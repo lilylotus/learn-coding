@@ -16,10 +16,10 @@ configurations {
         extendsFrom annotationProcessor
     }
 
-    all*.exclude module: 'spring-boot-starter-logging'
+    /*all*.exclude module: 'spring-boot-starter-logging'
     all*.exclude module: 'logback-classic'
     all*.exclude module: 'log4j-over-slf4j'
-    all*.exclude module: 'slf4j-log4j12'
+    all*.exclude module: 'slf4j-log4j12'*/
 }
 
 dependencies {
@@ -29,15 +29,21 @@ dependencies {
     /*implementation 'org.springframework.boot:spring-boot-starter-security'*/
     /* spring boot 2.x 采用的是 Hikari 数据库连接池 */
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     /* spring boot caching 支持 */
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     /* 添加 Thymeleaf 依赖 */
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     /* spring boot log4j2 */
-    implementation "org.springframework.boot:spring-boot-starter-log4j2"
+    /*implementation "org.springframework.boot:spring-boot-starter-log4j2"*/
     /*  ali druid database source */
     /*implementation 'com.alibaba:druid-spring-boot-starter:1.1.16'*/
+
+    /* spring boot redis 操作 */
+    implementation "org.springframework.boot:spring-boot-starter-data-redis"
+    /* spring-boot-starter-data-redis 依赖 commons-pool2 连接池 */
+    implementation 'org.apache.commons:commons-pool2:2.8.1'
+    /* redis 分布式锁 */
+    implementation 'org.redisson:redisson:3.13.4'
 
     /* 在设置 compiler 中勾选 Make Project automatically,
     在 Shift+Ctrl+Alt+/ 选择 Registry - compiler.automake.allow.when.app.running */

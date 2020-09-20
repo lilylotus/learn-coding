@@ -17,108 +17,111 @@ public class JWTUtil {
 
     private final static String SECRET_KEY = "SECRET_KEY";
     private final static int EXPIRE_MILLIS_SECONDS = 60 * 60 * 1000;
-    private final static Algorithm HMAC256 = Algorithm.HMAC256(SECRET_KEY);
 
-    public static String createJwtHMAC256(Map<String, String> params) {
+    private final static Algorithm HMAC256 = Algorithm.HMAC256(SECRET_KEY);
+    private final static Algorithm RSA256 = generateRS256();
+
+    /* ==================== generate jwt token ==================== */
+
+    /**
+     * default algorithm HMAC256
+     */
+    public static String createJwt(Map<String, String> params) {
         return createJwt(params, HMAC256);
     }
 
-    public static String createJwt(Map<String, String> params, Algorithm algorithm) {
+    public static String createJwtRSA256(Map<String, String> params) {
+        return createJwt(params, RSA256);
+    }
 
+    public static String createJwt(Map<String, String> params, Algorithm algorithm) {
         String[] audience  = {"app","web"};
+
         JWTCreator.Builder builder = JWT.create();
-        builder.withIssuer("auth0");  // 发布者
+        builder.withIssuer("auth");  // 发布者
         builder.withAudience(audience); // 接收者
         builder.withNotBefore(new Date()); // 生效时间
         builder.withIssuedAt(new Date()); // 生成签名的时间
         builder.withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_MILLIS_SECONDS)); // token 有效时间
         builder.withJWTId(UUID.randomUUID().toString());
-        params.forEach(builder::withClaim);
+        if (params != null && params.size() > 0) {
+            params.forEach(builder::withClaim);
+        }
 
         return builder.sign(algorithm);
     }
 
-    public static String createJwtRS256(Map<String, String> params) {
-        return createJwt(params, generateRS256());
+    private static Algorithm generateRS256() {
+        SecretKeyUtils.RSAKeyPair keyPair = SecretKeyUtils.getRSA256KeyPair();
+        return Algorithm.RSA256(keyPair.getRsaPublicKey(), keyPair.getRsaPrivateKey());
     }
 
-    public static void verifierTokenHMAC256(String token) {
-        verifierToken(token, null, HMAC256);
+    /* ==================== verify ==================== */
+
+    /**
+     * default algorithm HMAC256
+     */
+    public static boolean verifierToken(String token) {
+        return verifierToken(token, HMAC256);
     }
 
-    public static void verifierTokenHMAC256(String token, Map<String, String> params) {
-        verifierToken(token, params, HMAC256);
+    public static boolean verifierToken(String token, Map<String, String> params) {
+        return verifierToken(token, HMAC256, params);
     }
 
-    public static Algorithm generateRS256() {
-        try {
-            RSA256Key rsa256Key = SecretKeyUtils.getRSA256Key();
-            return Algorithm.RSA256(rsa256Key.getPublicKey(), rsa256Key.getPrivateKey());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static boolean verifierTokenRSA256(String token) {
+        return verifierToken(token, RSA256);
     }
 
-    public static void verifierTokenRS256(String token) {
-        verifierToken(token, null, generateRS256());
+    public static boolean verifierTokenRSA256(String token, Map<String, String> params) {
+        return verifierToken(token, RSA256, params);
     }
 
-    public static void verifierTokenRS256(String token, Map<String, String> params) {
-        verifierToken(token, params, generateRS256());
+    public static boolean verifierToken(String token, Algorithm algorithm) {
+        return verifierToken(token, algorithm, null);
     }
 
-    public static void verifierToken(String token, Map<String, String> params, Algorithm algorithm) {
-        Verification verification = JWT.require(algorithm)
-                .withIssuer("auth0")
-                .withAudience("app", "web");
-
-        if (null != params) {
+    public static boolean verifierToken(String token, Algorithm algorithm, Map<String, String> params) {
+        Verification verification = JWT.require(algorithm).withIssuer("auth");
+        if (null != params && params.size() > 0) {
             params.forEach(verification::withClaim);
         }
-
         JWTVerifier verifier = verification.build();
-
+        boolean ok = true;
         try {
             DecodedJWT verify = verifier.verify(token);
-            System.out.println(verify);
 
-            String header = verify.getHeader();
-            String payload = verify.getPayload();
-            String signature = verify.getSignature();
-
-            System.out.println("Header: " + header);
-            System.out.println("payLoad: " + payload);
-            System.out.println("signature: " + signature);
-
+            System.out.println("verify: " + verify);
+            System.out.println("Header: " + verify.getHeader());
+            System.out.println("payLoad: " + verify.getPayload());
+            System.out.println("signature: " + verify.getSignature());
             System.out.println("Expire : " + verify.getExpiresAt());
 
             verify.getClaims().forEach((k, v) -> System.out.println(k + ":" + v.asString()));
         } catch (JWTVerificationException e) {
-            System.out.println("inValid token");
-            System.out.println(e.getMessage());
+            System.out.println("inValid token error : " + e.getMessage());
+            ok = false;
         }
-
+        return ok;
     }
 
     public static void main(String[] args) {
         Map<String, String> param = new HashMap<>();
-        param.put("one", "one");
-        param.put("two", "TWO");
+        param.put("name", "小明");
+        param.put("age", "20");
 
-        String jwt = createJwtHMAC256(param);
-        System.out.println(jwt);
-
-        String tokenOk = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvbmUiOiJvbmUiLCJpc3MiOiJhdXRoMCIsImV4cCI6MTU5MjU0MjUxNywiaWF0IjoxNTkyNTM4OTE3LCJ0d28iOiJUV08ifQ.7Pp8DWHMtYmClGzTqn-w3LMt3vY9cAC5bIX6k-wZXAI";
-        String tokenExpire = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvbmUiOiJvbmUiLCJpc3MiOiJhdXRoMCIsImV4cCI6MTU5MjUzNTI4MiwiaWF0IjoxNTkyNTM4ODgyLCJ0d28iOiJUV08ifQ.s-LjCFhPYNij52cG5Zaa5jUTPOFse97nCwM9uPRj4eI";
-        verifierTokenHMAC256(jwt, param);
-
+        String jwt = createJwt(param, HMAC256);
+        System.out.println("jwt " + jwt);
+        verifierToken(jwt, HMAC256, param);
 
         System.out.println("============================");
-        String jwtRS256 = createJwtRS256(param);
-        System.out.println(jwtRS256);
+        jwt = createJwt(param, RSA256);
+        //String jwtRS256 = createJwtRS256(param);
+        //System.out.println(jwtRS256);
+        System.out.println("rsa256 jwt : " + jwt);
 
-        verifierTokenRS256(jwtRS256, param);
+        param.put("age", "22");
+        verifierToken(jwt, RSA256, param);
     }
 
 }

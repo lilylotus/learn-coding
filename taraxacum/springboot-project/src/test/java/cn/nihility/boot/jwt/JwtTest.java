@@ -26,24 +26,24 @@ public class JwtTest {
         params.put("user", jwtString);
         params.put("password", "Jwt Password");
 
-        String jwtHMAC256 = JWTUtil.createJwtHMAC256(params);
-        String jwtRS256 = JWTUtil.createJwtRS256(params);
+        String jwtHMAC256 = JWTUtil.createJwt(params);
+        String jwtRS256 = JWTUtil.createJwtRSA256(params);
 
         System.out.println(jwtHMAC256);
         System.out.println(jwtRS256);
 
         System.out.println("==================================");
-        JWTUtil.verifierTokenHMAC256(jwtHMAC256, params);
+        JWTUtil.verifierToken(jwtHMAC256, params);
         System.out.println("==================================");
-        JWTUtil.verifierTokenRS256(jwtRS256, params);
+        JWTUtil.verifierTokenRSA256(jwtRS256, params);
     }
 
     @Test
     public void testJwtGenerate() {
         try {
-            RSA256Key rsa256Key = SecretKeyUtils.getRSA256Key();
-            RSAPublicKey publicKey = rsa256Key.getPublicKey();
-            RSAPrivateKey privateKey = rsa256Key.getPrivateKey();
+            SecretKeyUtils.RSAKeyPair rsa256Key = SecretKeyUtils.getRSA256KeyPair();
+            RSAPublicKey publicKey = rsa256Key.getRsaPublicKey();
+            RSAPrivateKey privateKey = rsa256Key.getRsaPrivateKey();
 
             System.out.println(publicKey);
             System.out.println(privateKey);
@@ -57,10 +57,10 @@ public class JwtTest {
     public void testGenerateRSAKey() {
         try {
 
-            Map<String, Object> keyMap = SecretKeyUtils.initKey(4096);
+            SecretKeyUtils.RSAKeyPair keyPair = SecretKeyUtils.initRSAKeyPair(4096);
 
-            RSAPublicKey publicKey = (RSAPublicKey) keyMap.get(SecretKeyUtils.PUBLIC_KEY);
-            RSAPrivateKey privateKey = (RSAPrivateKey) keyMap.get(SecretKeyUtils.PRIVATE_KEY);
+            RSAPublicKey publicKey = keyPair.getRsaPublicKey();
+            RSAPrivateKey privateKey = keyPair.getRsaPrivateKey();
 
             String algorithm = publicKey.getAlgorithm();
             String format = publicKey.getFormat();
@@ -68,8 +68,8 @@ public class JwtTest {
             BigInteger modulus = publicKey.getModulus();
             byte[] publicKeyEncoded = publicKey.getEncoded();
             System.out.println("publicKey algorithm [" + algorithm + "], format [" + format + "], exponent [" + exponent + "], modulus [" + modulus + "]");
-            String publicEncoded = SecretKeyUtils.encryptBASE64(publicKeyEncoded);
-            System.out.println(publicEncoded);
+            String publicEncode = Base64Coded.encode(publicKeyEncoded);
+            System.out.println(publicEncode);
 
             algorithm = privateKey.getAlgorithm();
             format = privateKey.getFormat();
@@ -77,7 +77,7 @@ public class JwtTest {
             modulus = privateKey.getModulus();
             byte[] privateKeyEncoded = privateKey.getEncoded();
             System.out.println("privateKey algorithm [" + algorithm + "], format [" + format + "], exponent [" + exponent + "], modulus [" + modulus + "]");
-            String privateEncoded = SecretKeyUtils.encryptBASE64(privateKeyEncoded);
+            String privateEncoded = Base64Coded.encode(privateKeyEncoded);
             System.out.println(privateEncoded);
 
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class JwtTest {
         }
     }
 
-    class TestJwt implements Serializable {
+    static class TestJwt implements Serializable {
         private static final long serialVersionUID = 8606546306516594159L;
 
         String name;
