@@ -4,25 +4,38 @@ server:
 spring:
   application:
     name: cloud-eureka-client
+  # Spring Cloud Ribbon 处于维护阶段
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
 
 eureka:
   instance:
     hostname: localhost
-    prefer-ip-address: true
+    prefer-ip-address: false
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
   client:
+    healthcheck:
+      enabled: true
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      # 多个注册中心用逗号分隔
+      defaultZone: http://localhost:8761/eureka
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        # "*" 表示包含所有
+        include: ["health","info"]
   endpoint:
     health:
       show-details: ALWAYS
 
+logging:
+  level:
+    root: info
+    com.netflix.discovery: debug

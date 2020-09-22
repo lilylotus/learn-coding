@@ -1,21 +1,44 @@
 server:
   port: 8761
+
+spring:
+  # Spring Cloud Ribbon 处于维护阶段
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+
 eureka:
   instance:
     hostname: localhost
-    prefer-ip-address: true
+    # 是否优先使用 ip 来作为主机名
+    prefer-ip-address: false
+    # client 多少秒发送心跳去注册中心续约
     lease-renewal-interval-in-seconds: 30
+    # server 等待 client 多少秒不去续约认为服务失效
     lease-expiration-duration-in-seconds: 90
   client:
-    fetch-registry: false
+    # 注册成功后是否定期检查服务健康状况
+    healthcheck:
+      enabled: true
+    # 是否从 eureka server 获取注册的服务列表
+    fetch-registry: true
+    # eureka 是否自己注册到 server 端，server 可以不用注册
     register-with-eureka: true
     service-url:
-      defaultZone: http://${eureka.instance.hostname:localhost}:${server.port:8761}/eureka/
+      defaultZone: http://localhost:8761/eureka
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        # "*" 表示包含所有
+        include: ["health","info"]
   endpoint:
     health:
       show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    com.netflix.discovery: debug
