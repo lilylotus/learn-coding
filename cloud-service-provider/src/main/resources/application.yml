@@ -1,0 +1,41 @@
+server:
+  port: 41100
+  tag: provider01
+
+spring:
+  application:
+    name: cloud-service-provider
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+eureka:
+  instance:
+    hostname: localhost
+    preferIpAddress: false
+    leaseRenewalIntervalInSeconds: 30
+    leaseExpirationDurationInSeconds: 90
+  client:
+    healthcheck:
+      enabled: true
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      # 多个注册中心用逗号分隔
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    com.netflix.discovery: debug

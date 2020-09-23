@@ -1,0 +1,36 @@
+server:
+  port: 41102
+
+spring:
+  application:
+    name: cloud-openfeign
+
+eureka:
+  instance:
+    hostname: localhost
+    preferIpAddress: false
+    leaseRenewalIntervalInSeconds: 30
+    leaseExpirationDurationInSeconds: 90
+  client:
+    healthcheck:
+      enabled: true
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      # \u591A\u4E2A\u6CE8\u518C\u4E2D\u5FC3\u7528\u9017\u53F7\u5206\u9694
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" \u8868\u793A\u5305\u542B\u6240\u6709 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    com.netflix.discovery: debug

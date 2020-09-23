@@ -1,14 +1,14 @@
 server:
-  port: 30100
+  port: 41101
 
 spring:
   application:
     name: cloud-eureka-client
-  # Spring Cloud Ribbon 处于维护阶段
+  # Spring Cloud Ribbon 处于维护阶段，可以配置为 false
   cloud:
     loadbalancer:
       ribbon:
-        enabled: false
+        enabled: true
 
 eureka:
   instance:
@@ -29,11 +29,18 @@ management:
   endpoints:
     web:
       exposure:
-        # "*" 表示包含所有
-        include: ["health","info"]
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
+        include: "*"
   endpoint:
+    info:
+      enabled: true
     health:
       show-details: ALWAYS
+
+# actuator 自定义 info 信息
+info.app.name=cloud-eureka-client
+info.app.description=Eureka Client Application
+info.app.version=1.0.0
 
 logging:
   level:
