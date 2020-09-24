@@ -12,7 +12,9 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    /*all*.exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'*/
+
+    all*.exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-netflix-ribbon'
+    /*all*.exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'*/
 }
 
 repositories {
@@ -32,9 +34,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation ('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client') {
-        exclude(group: "org.springframework.cloud", module: "spring-cloud-starter-netflix-ribbon")
-    }
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    /* 服务熔断降级 */
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

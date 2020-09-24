@@ -3,12 +3,10 @@ package cn.nihility.cloud.controller;
 import cn.nihility.cloud.domain.Employee;
 import cn.nihility.cloud.domain.ResultResponse;
 import cn.nihility.cloud.service.EmployeeService;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,12 +34,13 @@ public class EmployeeController {
         log.info("getEmployeeById [{}]", id);
 
         /* 测试高并发，模拟数据请求 */
-        /*try {
-            Thread.sleep(2000);
+        try {
+            int delay = RandomUtils.nextInt(10) + 1;
+            log.info("delay time [{}]", delay);
+            Thread.sleep(delay * 1000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
-
+        }
         return ResultResponse.success(employeeService.queryEmployeeById(id));
     }
 
@@ -55,6 +54,12 @@ public class EmployeeController {
     public ResultResponse<Employee> deleteEmployeeById(@PathVariable("id") Integer id) {
         log.info("deleteEmployeeById [{}]", id);
         return ResultResponse.success(employeeService.deleteEmployeeById(id));
+    }
+
+    @RequestMapping(path = {"/add"}, method = RequestMethod.POST)
+    public ResultResponse<Employee> addEmployee(@RequestBody Employee employee) {
+        log.info("addEmployee [{}]", employee);
+        return ResultResponse.success(employeeService.addEmployee(employee));
     }
 
 

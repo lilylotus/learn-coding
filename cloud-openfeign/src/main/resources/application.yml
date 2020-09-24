@@ -1,9 +1,16 @@
 server:
   port: 41102
+  tag: cloud-openfeign-tag
+  employeeId: 1
 
 spring:
   application:
     name: cloud-openfeign
+  # Ribbon （现在处于维护阶段），Spring Cloud LoadBalancer （推荐）
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
 
 eureka:
   instance:
@@ -17,14 +24,86 @@ eureka:
     fetchRegistry: true
     registerWithEureka: true
     serviceUrl:
-      # \u591A\u4E2A\u6CE8\u518C\u4E2D\u5FC3\u7528\u9017\u53F7\u5206\u9694
-      defaultZone: http://localhost:8761/eureka
+      # 多个注册中心用逗号分隔，默认就是 http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000
+  # 使用 httpclient
+  http:
+    client:
+      enabled: true
+
+# hystrix configuration
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          # strategy: ExecutionIsolationStrategy.THREAD 线程池隔离 SEMAPHORE 信号量隔离
+          thread:
+            # 默认连接超时时间 1 秒，若没有返回数据自动触发降级策略
+            timeoutInMilliseconds: 3000
+      circuitBreaker:
+        # 触发熔断的最小请求次数，默认 20个/10秒
+        requestVolumeThreshold: 5
+        # 熔断后尝试次数
+        sleepWindowInMilliseconds: 10000
+        # 触发熔断的失败请求百分比，默认 50%
+        errorThresholdPercentage: 50
+  dashboard:
+    # 配置允许访问的列表
+    proxy-stream-allow-list: "*"
+
+# openfeign
+feign:
+  # Hystrix 熔断支持
+  hystrix:
+    enabled: true
+  # feign 启用 httpclient
+  httpclient:
+    enabled: true
+  client:
+    config:
+      # 会应用到所有的 OpenClients
+      default:
+        # 指定 Feign 客户端连接提供者的超时时限，取决于网络环境
+        connectTimeout: 5000
+        # 指定 Feign 客户端从请求到获取到提供者给出的响应的超时时限，取决于业务逻辑运算时间
+        readTimeout: 5000
+        loggerLevel: full
+      # 指定 OpenClients 需要调用微服务的名称 FeignClientConfiguration
+      cloud-service-provider:
+        request:
+          # 开启对请求的压缩
+          enabled: true
+          mime-types: text/xml,application/xml,application/json
+          # 指定启用压缩的最小文件大小
+          min-request-size: 2048
+        response:
+          # 开启对响应的压缩
+          enabled: true
+#        # feign.codec.ErrorDecoder
+#        errorDecoder: feign.codec.ErrorDecoder.Default
+#        # feign.Retryer
+#        retryer: feign.Retryer.Default
+#        # feign.RequestInterceptor
+#        requestInterceptors:
+#          - feign.auth.BasicAuthRequestInterceptor
+#        decode404: false
+#        # feign.codec.Encoder default: SpringEncoder
+#        encoder: org.springframework.cloud.openfeign.support.SpringEncoder
+#        # feign.codec.Decoder default: ResponseEntityDecoder
+#        decoder: org.springframework.cloud.openfeign.support.ResponseEntityDecoder
+#        # feign.Contract default: SpringMvcContract
+#        contract: org.springframework.cloud.openfeign.support.SpringMvcContract
 
 management:
   endpoints:
     web:
       exposure:
-        # "*" \u8868\u793A\u5305\u542B\u6240\u6709 ["health","info","metrics","prometheus"]
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
         include: "*"
   endpoint:
     health:
@@ -33,4 +112,6 @@ management:
 logging:
   level:
     root: info
-    com.netflix.discovery: debug
+    com.netflix: debug
+    cn.nihility: debug
+

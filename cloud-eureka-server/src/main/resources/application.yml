@@ -7,6 +7,10 @@ spring:
     loadbalancer:
       ribbon:
         enabled: false
+  security:
+    user:
+      name: 'admin'
+      password: 'admin'
 
 eureka:
   instance:
@@ -17,6 +21,10 @@ eureka:
     leaseRenewalIntervalInSeconds: 30
     # server 等待 client 多少秒不去续约认为服务失效
     leaseExpirationDurationInSeconds: 90
+    # 使用 security 安全
+#    metadata-map:
+#      user.name: ${spring.security.user.name}
+#      user.password: ${spring.security.user.password}
   client:
     # 注册成功后是否定期检查服务健康状况
     healthcheck:
@@ -26,7 +34,7 @@ eureka:
     # eureka 是否自己注册到 server 端，单体 server 可以不用注册
     registerWithEureka: false
     serviceUrl:
-      # 默认的 url : http://localhost:8761/eureka/InetUtils
+      # 默认的 url : http://localhost:8761/eureka/，配置了安全时 http://user:password@127.0.0.1:8761/eureka/
       defaultZone: http://localhost:8761/eureka/
 
 management:

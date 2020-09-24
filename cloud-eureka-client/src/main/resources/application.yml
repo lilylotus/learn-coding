@@ -1,5 +1,6 @@
 server:
   port: 41101
+  tag: cloud-eureka-client-tag
 
 spring:
   application:
@@ -22,8 +23,8 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      # 多个注册中心用逗号分隔
-      defaultZone: http://localhost:8761/eureka
+      # 多个注册中心用逗号分隔，server 使用了安全时 http://user:password@localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 management:
   endpoints:
@@ -38,9 +39,11 @@ management:
       show-details: ALWAYS
 
 # actuator 自定义 info 信息
-info.app.name=cloud-eureka-client
-info.app.description=Eureka Client Application
-info.app.version=1.0.0
+info:
+  app:
+    name: cloud-eureka-client
+    description: Eureka Client Application
+    version: 1.0.0
 
 logging:
   level:

@@ -1,0 +1,78 @@
+server:
+  port: 41103
+  tag: cloud-ribbon-tag
+
+spring:
+  application:
+    name: cloud-ribbon
+  # Spring Cloud Ribbon \u5904\u4E8E\u7EF4\u62A4\u9636\u6BB5\uFF0C\u53EF\u4EE5\u914D\u7F6E\u4E3A false
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: true
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+  client:
+    healthcheck:
+      enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      # \u591A\u4E2A\u6CE8\u518C\u4E2D\u5FC3\u7528\u9017\u53F7\u5206\u9694\uFF0C \u9ED8\u8BA4\u5C31\u662F http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
+# ribbon \u5168\u5C40\u901A\u7528\u914D\u7F6E
+ribbon:
+  ReadTimeout: 3000
+  ConnectTimeout: 3000
+  # \u914D\u7F6E ribbon \u4F7F\u7528\u7684\u8BF7\u6C42\u5DE5\u5177\uFF0Capache httpclient, okhttpclient
+  http:
+    client:
+      enabled: true
+
+# \u9488\u5BF9\u8981\u8BBF\u95EE\u7684 eureka \u6CE8\u518C\u670D\u52A1\u540D\u79F0\u7684 ribbon \u914D\u7F6E
+cloud-service-provider:
+  ribbon:
+    # \u91CD\u8BD5\u673A\u5236
+    # Ribbon \u8FDE\u63A5\u8D85\u65F6\u65F6\u95F4
+    ConnectTimeout: 250
+    # Ribbon \u6570\u636E\u8BFB\u53D6\u8D85\u65F6\u65F6\u95F4
+    ReadTimeout: 1000
+    # \u662F\u5426\u5BF9\u6240\u6709\u64CD\u4F5C\u8FDB\u884C\u91CD\u8BD5
+    OkToRetryOnAllOperations: true
+    # \u5207\u6362\u5B9E\u4F8B\u7684\u91CD\u8BD5\u6B21\u6570
+    MaxAutoRetriesNextServer: 1
+    # \u5BF9\u5F53\u524D\u5B9E\u4F8B\u7684\u91CD\u8BD5\u6B21\u6570
+    MaxAutoRetries: 1
+#    # Implement ILoadBalancer default: com.netflix.loadbalancer.ZoneAwareLoadBalancer
+    NFLoadBalancerClassName: com.netflix.loadbalancer.RoundRobinRule
+#    # IRule
+#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.ZoneAvoidanceRule
+#    # IPing
+#    NFLoadBalancerPingClassName: com.netflix.loadbalancer.DummyPing
+#    # ServerList
+#    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
+#    # ServerListFilter
+#    NIWSServerListFilterClassName: org.springframework.cloud.netflix.ribbon.ZonePreferenceServerListFilter
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" \u8868\u793A\u5305\u542B\u6240\u6709 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    info:
+      enabled: true
+    health:
+      show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    com.netflix.discovery: debug

@@ -3,8 +3,11 @@ package cn.nihility.cloud.eureka.controller;
 import cn.nihility.cloud.eureka.domain.ResultResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,9 +17,10 @@ import java.util.function.BiFunction;
 
 /**
  * RestTemplate 带服务注册发现方式访问服务实现
+ * 采用 客户端负载均衡 Ribbon 实现
  */
 @RestController
-@RequestMapping("/rest2")
+@RequestMapping("/ribbon")
 public class RestTemplateDiscoveryController {
 
     private static final Logger log = LoggerFactory.getLogger(RestTemplateDiscoveryController.class);
@@ -29,10 +33,30 @@ public class RestTemplateDiscoveryController {
     /* 使用 Ribbon 的 LoadBalancerClient，做服务发现 */
     private final LoadBalancerClient loadBalancerClient;
 
-    public RestTemplateDiscoveryController(LoadBalancerClient loadBalancerClient) {
+    private final String serviceTag;
+    private final Integer localPort;
+
+    public RestTemplateDiscoveryController(LoadBalancerClient loadBalancerClient,
+                                           @Value("${server.tag}") String serviceTag,
+                                           @Value("${server.port}") Integer localPort) {
         this.loadBalancerClient = loadBalancerClient;
+        this.serviceTag = serviceTag;
+        this.localPort = localPort;
     }
 
+    @RequestMapping(value = "/id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> id() {
+        String threadName = Thread.currentThread().getName();
+        log.info("service tag [{}], current thread [{}]", serviceTag, threadName);
+        Map<String, Object> ret = new HashMap<>(4);
+        ret.put("tag", serviceTag + ":" + localPort);
+        ret.put("thread", threadName);
+        return ret;
+    }
+
+    /**
+     * 使用 spring cloud loadbalancer 的方式，手动获取服务地址配置
+     */
     private String loadBalanceClientHost() {
         ServiceInstance instance = loadBalancerClient.choose(EUREKA_REGISTRY_SERVICE);
         String schema = instance.getScheme();
