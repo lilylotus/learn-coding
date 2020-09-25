@@ -24,6 +24,8 @@ public class RestTemplateController {
 
     /* 若要使用自动服务发现转发，就要在 RestTemplate Bean 生成时加上 @LoadBalanced 注解
     * 就可以不用在指定请求服务的具体 IP 地址，默认使用的时 eureka 携带的 ribbon，但它还处于维护阶段
+    * 默认使用 ribbon， 没有 ribbon 使用 cloud loadbalancer
+    * spring.cloud.loadbalancer.ribbon.enabled=false 禁用 ribbon
     *  */
     private final RestTemplate restTemplate;
 

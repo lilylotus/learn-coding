@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
  * 采用 客户端负载均衡 Ribbon 实现
  */
 @RestController
-@RequestMapping("/ribbon")
+@RequestMapping("/manual")
 public class RestTemplateDiscoveryController {
 
     private static final Logger log = LoggerFactory.getLogger(RestTemplateDiscoveryController.class);
