@@ -1,0 +1,11 @@
+/* 父模块名称 */
+rootProject.name = 'cloud-learn'
+/* 引入子模块 */
+include 'cloud-eureka-client','cloud-eureka-server'
+include('cloud-openfeign')
+include('cloud-ribbon')
+include('cloud-service-provider')
+
+//project(':sub-project3').projectDir = file("$rootDir/../sub-project3")
+//$rootDir 指的是 root-project 项目所在的目录，
+//.. 从 rootDir 开始找，一层层找，一直到找到 sub-project3 为止

@@ -1,0 +1,125 @@
+/*
+    buildscript 要放到 plugin 之前
+    buildscript 代码块中的声明是 gradle 脚本自身需要的资源。
+    可以声明的资源包括依赖项、第三方插件、maven 仓库地址等。
+    gradle 在执行脚本时，会优先执行 buildscript 代码块中的内容，然后才会执行剩余的 build 脚本。
+*/
+buildscript {
+    ext {
+        set('springCloudVersion', "Hoxton.SR8")
+        set("springBootDocsVersion", "2.3.4.RELEASE")
+        set("springBootVersion", "2.3.4.RELEASE")
+    }
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        mavenCentral()
+    }
+    dependencies {
+        /* 添加插件依赖路径（通过 jar 方式） */
+        //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" as Object)
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootDocsVersion}")
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+    id 'idea'
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    group = 'cn.nihility.cloud'
+    version = '0.0.1-SNAPSHOT'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    ext {
+        branchName = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+        branchCommitId = "git rev-parse HEAD".execute().text.trim()
+        currentUser = System.getProperty("user.name")
+        currentOsName = System.getProperty("os.name")
+        currentJdkVersion = System.getProperty("java.version")
+        
+        set('springCloudVersion', "Hoxton.SR8")
+        set("springBootDocsVersion", "2.3.4.RELEASE")
+    }
+    ext['springBootVersion'] = '2.3.4.RELEASE'
+
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        mavenCentral()
+    }
+
+    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'utf-8'
+    [compileJava, compileTestJava]*.sourceCompatibility = "1.8"
+    [compileJava, compileTestJava]*.targetCompatibility = "1.8"
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+    
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
+    }
+
+    /* 这里一定得要。在多模块下，不然编译失败，因为不会把信赖模块给打包。*/
+    /*jar { enabled = true }*/
+
+    dependencyManagement {
+        dependencies {
+            imports {
+                mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+            }
+        }
+    }
+}
+
+subprojects {
+
+    dependencies { }
+
+    task clearJar(type: Delete) {
+        println(project.name + " : clear Jar : $buildDir")
+        delete "$buildDir\\libs"
+    }
+
+    task copyJar(type: Copy, dependsOn: 'clearJar') {
+        println(project.name + " : copy Jar : $buildDir")
+        from project.sourceSets.main.runtimeClasspath
+        into "$buildDir\\libs\\lib"
+    }
+
+    /*configurations {
+        //移除spring boot 默认logger依赖
+        all*.exclude module: 'spring-boot-starter-logging'
+    }*/
+}
+
+//配置特殊的子 project
+//configure(allprojects.findAll { it.name.startsWith('sub') }) {
+//    subTask << {
+//        println 'this is a sub project'
+//    }
+//}
+
+//单独配置
+//project(':sub-project1') {
+//    task forProject1 << {
+//        println 'for project 1'
+//    }
+//}
