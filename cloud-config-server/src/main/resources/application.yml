@@ -1,0 +1,37 @@
+server:
+  port: 41120
+spring:
+  application:
+    name: cloud-config-server
+  # spring cloud config server configuration
+  cloud:
+    config:
+      server:
+        git:
+          #uri: file:///home/daffodil/temporary/git/cloud-config
+          uri: https://github.com/lilylotus/test
+          # 查找文件目录
+          search-paths: config
+          # 分支名称
+          default-label: config
+          #force-pull: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    info:
+      enabled: true
+    health:
+      show-details: ALWAYS
+
+config:
+  name: inner-application
+
+logging:
+  level:
+    root: info
+    org.springframework.cloud: debug

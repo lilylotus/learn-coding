@@ -1,0 +1,109 @@
+server:
+  port: 41110
+
+spring:
+  application:
+    name: cloud-gateway
+  # Spring Cloud Ribbon 处于维护阶段，可以配置为 false
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+    # spring cloud api gateway configuration
+    gateway:
+      discovery:
+        locator:
+          # 开启根据微服务名称自动转发
+          enabled: true
+          # 使用微服务小写名称
+          lower-case-service-id: true
+      routes:
+        - id: service-provider-gateway
+          uri: lb://cloud-service-provider
+          # 断言
+          predicates:
+            # 会匹配 /serviceapi/** 的所有请求
+            - Path=/serviceapi/**
+          # 路由过滤器
+          filters:
+            # request uri /serviceapi/common/id -> http://cloud-service-provider/common/id
+            # 会截取前几段 uri, - PrefixPath=/prefix 会在访问的 uri 前面加上指定的 uri
+            - StripPrefix=1
+            # 服务降级配置
+            - name: CircuitBreaker
+              args:
+                name: fetchIngredients
+                fallbackUri: forward:/gatewayFallback
+        - id: route02
+          uri: lb://cloud-service-provider
+          # 断言
+          predicates:
+            # 会匹配 /serviceapi/** 的所有请求
+            - Path=/serviceapi02/**
+          # 路由过滤器
+          filters:
+            # request uri /serviceapi/common/id -> http://cloud-service-provider/common/id
+            - StripPrefix=1
+            # 服务降级配置
+            - name: Hystrix
+              args:
+                name: fallbackcmd
+                fallbackUri: forward:/gatewayFallback
+        - id: route03
+          uri: lb://cloud-service-provider
+          # 断言
+          predicates:
+            # 会匹配 /serviceapi/** 的所有请求
+            - Path=/serviceapi03/**
+          # 路由过滤器
+          filters:
+            # request uri /serviceapi/common/id -> http://cloud-service-provider/common/id
+            - StripPrefix=1
+            # 服务重试配置
+            - name: Retry
+              args:
+                # 重试次数，实际请求次数要加一
+                retries: 3
+                # org.springframework.http.HttpStatus
+                statuses: OK
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+  client:
+    healthcheck:
+      enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      # 多个注册中心用逗号分隔，server 使用了安全时 http://user:password@localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            # 默认连接超时时间 1 秒，若没有返回数据自动触发降级策略
+            timeoutInMilliseconds: 3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    cn.nihility: debug
+    org.springframework.web: DEBUG
+

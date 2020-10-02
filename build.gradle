@@ -51,8 +51,8 @@ allprojects {
         
         set('springCloudVersion', "Hoxton.SR8")
         set("springBootDocsVersion", "2.3.4.RELEASE")
+        set("springBootVersion", "2.3.4.RELEASE")
     }
-    ext['springBootVersion'] = '2.3.4.RELEASE'
 
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public' }
