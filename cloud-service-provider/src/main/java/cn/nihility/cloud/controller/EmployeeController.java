@@ -15,7 +15,6 @@ import java.util.List;
 public class EmployeeController {
 
     private static final Logger log = LoggerFactory.getLogger(EmployeeController.class);
-
     private final EmployeeService employeeService;
 
     public EmployeeController(EmployeeService employeeService) {
@@ -35,7 +34,7 @@ public class EmployeeController {
 
         /* 测试高并发，模拟数据请求 */
         try {
-            int delay = RandomUtils.nextInt(10) + 1;
+            int delay = RandomUtils.nextInt(10) % 2 == 0 ? 1 : 4;
             log.info("delay time [{}]", delay);
             Thread.sleep(delay * 1000L);
         } catch (InterruptedException e) {

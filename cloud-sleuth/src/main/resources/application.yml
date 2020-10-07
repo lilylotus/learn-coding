@@ -1,0 +1,96 @@
+server:
+  port: 41200
+spring:
+  application:
+    name: cloud-sleuth
+  # Ribbon （现在处于维护阶段），Spring Cloud LoadBalancer （推荐）
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+  zipkin:
+    base-url: http://127.0.0.1:9411/
+    sleuth:
+      sampler:
+        probability: 1
+
+eureka:
+  instance:
+    hostname: localhost
+    preferIpAddress: false
+    leaseRenewalIntervalInSeconds: 30
+    leaseExpirationDurationInSeconds: 90
+  client:
+    healthcheck:
+      enabled: true
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      # 多个注册中心用逗号分隔，默认就是 http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
+# openfeign
+feign:
+  # Hystrix 熔断支持
+  hystrix:
+    enabled: true
+  # feign 启用 httpclient
+  httpclient:
+    enabled: true
+  client:
+    config:
+      # 会应用到所有的 OpenClients
+      default:
+        # 指定 Feign 客户端连接提供者的超时时限，取决于网络环境
+        connectTimeout: 5000
+        # 指定 Feign 客户端从请求到获取到提供者给出的响应的超时时限，取决于业务逻辑运算时间
+        readTimeout: 5000
+        loggerLevel: full
+      # 指定 OpenClients 需要调用微服务的名称 FeignClientConfiguration
+      cloud-ribbon:
+        request:
+          # 开启对请求的压缩
+          enabled: true
+          mime-types: text/xml,application/xml,application/json
+          # 指定启用压缩的最小文件大小
+          min-request-size: 2048
+        response:
+          # 开启对响应的压缩
+          enabled: true
+
+# hystrix configuration
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          # strategy: ExecutionIsolationStrategy.THREAD 线程池隔离 SEMAPHORE 信号量隔离
+          thread:
+            # 默认连接超时时间 1 秒，若没有返回数据自动触发降级策略
+            timeoutInMilliseconds: 3000
+      circuitBreaker:
+        # 触发熔断的最小请求次数，默认 20个/10秒
+        requestVolumeThreshold: 5
+        # 熔断后尝试次数
+        sleepWindowInMilliseconds: 10000
+        # 触发熔断的失败请求百分比，默认 50%
+        errorThresholdPercentage: 50
+  dashboard:
+    # 配置允许访问的列表
+    proxy-stream-allow-list: "*"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # "*" 表示包含所有 ["health","info","metrics","prometheus"]
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+logging:
+  level:
+    root: info
+    cn.nihility: debug
+    com.netflix: debug

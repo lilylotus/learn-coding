@@ -6,6 +6,7 @@ include('cloud-openfeign')
 include('cloud-ribbon')
 include('cloud-service-provider')
 include('cloud-gateway')
+include('cloud-config-client', 'cloud-config-server')
 
 //project(':sub-project3').projectDir = file("$rootDir/../sub-project3")
 //$rootDir 指的是 root-project 项目所在的目录，

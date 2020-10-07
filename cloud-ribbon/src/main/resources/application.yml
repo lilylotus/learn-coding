@@ -10,6 +10,11 @@ spring:
     loadbalancer:
       ribbon:
         enabled: true
+  zipkin:
+    base-url: http://127.0.0.1:9411/
+    sleuth:
+      sampler:
+        probability: 1
 
 eureka:
   instance:
@@ -40,9 +45,9 @@ cloud-service-provider:
   ribbon:
     # 重试机制
     # Ribbon 连接超时时间
-    ConnectTimeout: 250
+    ConnectTimeout: 3000
     # Ribbon 数据读取超时时间
-    ReadTimeout: 1000
+    ReadTimeout: 3000
     # 是否对所有操作进行重试
     OkToRetryOnAllOperations: true
     # 切换实例的重试次数
@@ -50,7 +55,7 @@ cloud-service-provider:
     # 对当前实例的重试次数
     MaxAutoRetries: 1
 #    # Implement ILoadBalancer default: com.netflix.loadbalancer.ZoneAwareLoadBalancer
-    NFLoadBalancerClassName: com.netflix.loadbalancer.RoundRobinRule
+#    NFLoadBalancerClassName: com.netflix.loadbalancer.RoundRobinRule
 #    # IRule
 #    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.ZoneAvoidanceRule
 #    # IPing
