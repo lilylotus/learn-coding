@@ -17,14 +17,26 @@ eureka:
     hostname: localhost
     # 是否优先使用 ip 来作为主机名, 负责发现获取的 host 就为 IP 地址，不是 host (注册的名称)
     preferIpAddress: false
-    # client 多少秒发送心跳去注册中心续约
-    leaseRenewalIntervalInSeconds: 30
-    # server 等待 client 多少秒不去续约认为服务失效
-    leaseExpirationDurationInSeconds: 90
+    # 默认 90s. 服务过期时间配置,超过这个时间没有接收到心跳 EurekaServer 就会将这个实例剔除.
+    # 注意，EurekaServer 一定要设置 eureka.server.eviction-interval-timer-in-ms 否则这个配置无效，这个配置一般为服务刷新时间配置的三倍
+    lease-expiration-duration-in-seconds: 15
+    # 默认 30s. 服务刷新时间配置，每隔这个时间会主动心跳一次
+    lease-renewal-interval-in-seconds: 5
     # 使用 security 安全
-#    metadata-map:
-#      user.name: ${spring.security.user.name}
-#      user.password: ${spring.security.user.password}
+    #metadata-map:
+    #  user.name: ${spring.security.user.name}
+    #  user.password: ${spring.security.user.password}
+  server:
+    # 关闭自我保护模式。自我保护模式是指，出现网络分区、eureka 在短时间内丢失过多客户端时，会进入自我保护模式。
+    # 自我保护：一个服务长时间没有发送心跳包，eureka 也不会将其删除，默认为 true。
+    enable-self-preservation: false
+    # 在Eureka服务器获取不到集群里对等服务器上的实例时，需要等待的时间，单位为毫秒，默认为1000 * 60 * 5
+    wait-time-in-ms-when-sync-empty: 0
+    # 默认30s. eureka server 刷新 readCacheMap 的时间，注意 client 读取的是 readCacheMap
+    # 这个时间决定了多久会把 readWriteCacheMap 的缓存更新到 readCacheMap 上
+    response-cache-update-interval-ms: 3000
+    # 默认 60s. 启用主动失效，并且每次主动失效检测间隔为 5s.
+    eviction-interval-timer-in-ms: 5000
   client:
     # 注册成功后是否定期检查服务健康状况
     healthcheck:
