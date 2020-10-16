@@ -12,15 +12,24 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
+    /*all*.exclude module: 'spring-boot-starter-logging'*/
 }
 
 repositories {
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/spring' }
+    maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
     mavenCentral()
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
