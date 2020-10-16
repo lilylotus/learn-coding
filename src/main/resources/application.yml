@@ -1,0 +1,7 @@
+unify:
+  exception:
+    # 发生异常时是否推送错误堆栈信息
+    debug: true
+
+server:
+  port: 49000
