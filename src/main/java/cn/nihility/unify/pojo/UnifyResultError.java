@@ -1,5 +1,7 @@
 package cn.nihility.unify.pojo;
 
+import org.springframework.http.HttpStatus;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,9 +23,7 @@ public class UnifyResultError implements Serializable {
     private Integer error_code;
     private String error;
     private List<StackTraceElement> debug;
-
-    public UnifyResultError() {
-    }
+    private HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
     public UnifyResultError(String tipMessage) {
         this.message = tipMessage;
@@ -32,14 +32,14 @@ public class UnifyResultError implements Serializable {
     }
 
     public UnifyResultError(UnifyResultCode resultCode) {
-        this.error = resultCode.getMessage();
-        this.error_code = resultCode.getCode();
+        this(resultCode, null);
     }
 
     public UnifyResultError(UnifyResultCode resultCode, String tipMessage) {
         this.message = tipMessage;
         this.error_code = resultCode.getCode();
         this.error = resultCode.getMessage();
+        this.httpStatus = resultCode.getHttpStatus();
     }
 
     public UnifyResultError(String tipMessage, Integer error_code, String error) {
@@ -53,34 +53,27 @@ public class UnifyResultError implements Serializable {
         this.error_code = resultCode.getCode();
         this.error = resultCode.getMessage();
         this.debug = debug;
+        this.httpStatus = resultCode.getHttpStatus();
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public Integer getError_code() {
         return error_code;
-    }
-
-    public void setError_code(Integer error_code) {
-        this.error_code = error_code;
     }
 
     public String getError() {
         return error;
     }
 
-    public void setError(String error) {
-        this.error = error;
-    }
-
     public List<StackTraceElement> getDebug() {
         return debug;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 
     public void setDebug(List<StackTraceElement> debug) {

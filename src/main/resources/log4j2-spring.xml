@@ -9,7 +9,7 @@
     <Properties>
         <!-- [%date]日期，[%thread] 线程名，[%-5level] 级别从左显示5个字符宽度，%msg 日志消息，-->
         <!-- %n 换行符，%logger{36} 表示 Logger 名字最长36个字符 -->
-        <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] %logger{36} - %msg%xEx%n" />
+        <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] [%X{traceId}] - %logger{36} - %msg%xEx%n" />
         <!-- System.setProperty("appName", "urm"); -->
         <Property name="APP_PROFILE" value="${sys:profileName:-default}"/>
         <Property name="APP_NAME" value="${sys:appName:-default}"/>

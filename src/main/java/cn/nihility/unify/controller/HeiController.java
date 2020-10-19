@@ -6,13 +6,13 @@ import cn.nihility.unify.pojo.UnifyResult;
 import cn.nihility.unify.pojo.UnifyResultCode;
 import cn.nihility.unify.pojo.UnifyResultError;
 import cn.nihility.unify.pojo.UnifyResultUtil;
+import cn.nihility.unify.util.HttpClientUtil;
+import cn.nihility.unify.util.RestTemplateUtil;
 import cn.nihility.unify.vo.TestEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,6 +31,11 @@ public class HeiController {
     @RequestMapping("/success")
     public UnifyResult success() {
         return UnifyResultUtil.success();
+    }
+
+    @RequestMapping("/response_code")
+    public UnifyResult responseCode() {
+        return UnifyResultUtil.success(UnifyResultCode.ACCEPTED, "测试状态");
     }
 
     @RequestMapping("/map")
@@ -78,6 +83,18 @@ public class HeiController {
     public TestEntity entityStr(@RequestBody TestEntity entity) {
         log.info("Body Entity [{}]", entity);
         return entity;
+    }
+
+    @GetMapping("/web_util")
+    public void webUtilRequest() {
+        try {
+            String response = RestTemplateUtil.doGet("http://127.0.0.1:49000/v1/hei/success", UnifyResult.class);
+            log.info("Rest Template Util Response [{}]", response);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        String result = HttpClientUtil.doGet("http://127.0.0.1:49000/v1/hei/success");
+        log.info("HttpClient DoGet Result [{}]", result);
     }
 
 }

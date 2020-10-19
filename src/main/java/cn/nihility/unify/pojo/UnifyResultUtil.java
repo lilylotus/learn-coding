@@ -6,11 +6,27 @@ public class UnifyResultUtil {
      * 成功
      */
     public static UnifyResult success() {
-        return new UnifyResult(UnifyResultCode.SUCCESS);
+        return success(UnifyResultCode.SUCCESS);
+    }
+
+    public static UnifyResult success(UnifyResultCode resultCode, String tipMessage) {
+        return success(resultCode, tipMessage, null);
+    }
+
+    public static UnifyResult success(UnifyResultCode resultCode) {
+        return success(resultCode, null);
     }
 
     public static UnifyResult success(Object data) {
-        return new UnifyResult(UnifyResultCode.SUCCESS, data);
+        return success(UnifyResultCode.SUCCESS, data);
+    }
+
+    public static UnifyResult success(UnifyResultCode resultCode, Object data) {
+        return new UnifyResult(resultCode, data);
+    }
+
+    public static UnifyResult success(UnifyResultCode resultCode, String tipMessage, Object data) {
+        return new UnifyResult(resultCode, tipMessage, data);
     }
 
     /**

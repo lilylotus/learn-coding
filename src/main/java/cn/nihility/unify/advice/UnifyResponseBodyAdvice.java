@@ -34,7 +34,13 @@ public class UnifyResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request, ServerHttpResponse response) {
 
-        if (body instanceof UnifyResult || body instanceof UnifyResultError) {
+        if (body instanceof UnifyResult) {
+            /*UnifyResult result = (UnifyResult) body;
+            //ServletServerHttpResponse
+            response.setStatusCode(result.getHttpStatus());*/
+            return body;
+        }
+        if (body instanceof UnifyResultError) {
             return body;
         }
         /*

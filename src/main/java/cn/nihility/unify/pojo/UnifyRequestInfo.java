@@ -1,11 +1,13 @@
 package cn.nihility.unify.pojo;
 
+import java.util.Map;
+
 public class UnifyRequestInfo {
     private String ip;
     private String url;
     private String httpMethod;
     private String classMethod;
-    private Object requestParams;
+    private Map<String, Object> requestParams;
     private Object result;
     private Long timeCost;
 
@@ -41,11 +43,11 @@ public class UnifyRequestInfo {
         this.classMethod = classMethod;
     }
 
-    public Object getRequestParams() {
+    public Map<String, Object> getRequestParams() {
         return requestParams;
     }
 
-    public void setRequestParams(Object requestParams) {
+    public void setRequestParams(Map<String, Object> requestParams) {
         this.requestParams = requestParams;
     }
 
