@@ -79,11 +79,11 @@ public class JWTUtil {
      * default algorithm HMAC256
      */
     public static boolean verifierToken(String token) {
-        return verifierToken(token, HMAC256);
+        return verifierToken(token, RSA256);
     }
 
     public static boolean verifierToken(String token, Map<String, String> params) {
-        return verifierToken(token, HMAC256, params);
+        return verifierToken(token, RSA256, params);
     }
 
     public static boolean verifierTokenRSA256(String token) {

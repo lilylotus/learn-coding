@@ -21,6 +21,10 @@ public class UnifyResultUtil {
         return success(UnifyResultCode.SUCCESS, data);
     }
 
+    public static UnifyResult success(Object data, String tipMessage) {
+        return success(UnifyResultCode.SUCCESS, tipMessage, data);
+    }
+
     public static UnifyResult success(UnifyResultCode resultCode, Object data) {
         return new UnifyResult(resultCode, data);
     }

@@ -1,6 +1,8 @@
 package cn.nihility.unify.controller;
 
+import cn.nihility.unify.annotaion.SkipAuthentication;
 import cn.nihility.unify.annotaion.UnifyResponse;
+import cn.nihility.unify.annotaion.VerifyAuthentication;
 import cn.nihility.unify.exception.UnifyException;
 import cn.nihility.unify.pojo.UnifyResult;
 import cn.nihility.unify.pojo.UnifyResultCode;
@@ -80,12 +82,14 @@ public class HeiController {
     }
 
     @PostMapping("/entity")
+    @SkipAuthentication
     public TestEntity entityStr(@RequestBody TestEntity entity) {
         log.info("Body Entity [{}]", entity);
         return entity;
     }
 
     @GetMapping("/web_util")
+    @VerifyAuthentication
     public void webUtilRequest() {
         try {
             String response = RestTemplateUtil.doGet("http://127.0.0.1:49000/v1/hei/success", UnifyResult.class);
