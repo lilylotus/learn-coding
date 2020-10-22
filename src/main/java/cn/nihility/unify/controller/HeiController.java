@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@VerifyAuthentication
 @RequestMapping("/v1/hei")
 public class HeiController {
 

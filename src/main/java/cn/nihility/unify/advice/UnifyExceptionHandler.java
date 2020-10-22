@@ -74,6 +74,7 @@ public class UnifyExceptionHandler {
         if (Boolean.TRUE.equals(exceptionDebug)) {
             body.setDebug(formatStackTrace(ex.getStackTrace()));
         }
+        log.error("Unify Handler Exception", ex);
         return new ResponseEntity<>(body, headers, status);
     }
 

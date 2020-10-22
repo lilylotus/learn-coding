@@ -238,7 +238,7 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
-        <Root level="ALL">
+        <Root level="DEBUG">
             <appender-ref ref="Console"/>
             <!--<AppenderRef ref="FileLog"/>-->
             <AppenderRef ref="RollingFileAll"/>

@@ -35,43 +35,43 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         Class<?> clazzType = handlerMethod.getBeanType();
         Method execMethod = handlerMethod.getMethod();
-        boolean skip;
-        // 跳过认证注解
+        /* skip -> true: 跳过认证，false: 需要认证 */
+        boolean skip = false;
+        // 类级别跳过认证注解
         if (clazzType.isAnnotationPresent(SkipAuthentication.class)) {
             skip = clazzType.getAnnotation(SkipAuthentication.class).skip();
             if (log.isDebugEnabled()) {
                 log.debug("Class Skip Authentication Annotation [{}]", skip);
             }
-            if (skip) {
-                return true;
-            }
         }
+        // 方法级别跳过认证注解
         if (execMethod.isAnnotationPresent(SkipAuthentication.class)) {
             skip = execMethod.getAnnotation(SkipAuthentication.class).skip();
             if (log.isDebugEnabled()) {
                 log.debug("Method Skip Authentication Annotation [{}]", skip);
             }
-            if (skip) {
-                return true;
-            }
         }
 
-        // 需要认证注解
+        /* verify -> true : 认证，false : 取消认证
+        * 按理应该是所有的方法都应该默认需要登陆认证，此处为了测试，仅有需要认证注解的类或方法需要认证
+        * */
         boolean verify = false;
+        // 类级别需要认证注解
         if (clazzType.isAnnotationPresent(VerifyAuthentication.class)) {
             verify = clazzType.getAnnotation(VerifyAuthentication.class).verify();
             if (log.isDebugEnabled()) {
                 log.debug("Class Verify Authentication Annotation [{}]", verify);
             }
         }
-        if (verify && execMethod.isAnnotationPresent(SkipAuthentication.class)) {
-            verify = execMethod.getAnnotation(SkipAuthentication.class).skip();
+        // 方法需要认证注解
+        if (execMethod.isAnnotationPresent(VerifyAuthentication.class)) {
+            verify = execMethod.getAnnotation(VerifyAuthentication.class).verify();
             if (log.isDebugEnabled()) {
                 log.debug("Method Verify Authentication Annotation [{}]", verify);
             }
         }
 
-        if (verify) {
+        if (verify && !skip) {
             // 认证校验，登录 token 校验
             String authToken = request.getHeader("Authorization");
             if (log.isDebugEnabled()) {
@@ -80,7 +80,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             if (StringUtils.isBlank(authToken)) {
                 throw new UnifyException("认证 token 为空", UnifyResultCode.UNAUTHORIZED);
             }
-            if (JWTUtil.verifierToken(authToken)) {
+            // 去掉 [Bearer ] 前缀
+            if (!JWTUtil.verifyJwtToken(authToken.replace("Bearer ", ""))) {
                 throw new UnifyException("认证 token 过期", UnifyResultCode.UNAUTHORIZED);
             }
         }

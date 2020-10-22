@@ -11,6 +11,9 @@ public class UnifyRequestInfo {
     private Object result;
     private Long timeCost;
 
+    public UnifyRequestInfo() {
+    }
+
     public String getIp() {
         return ip;
     }

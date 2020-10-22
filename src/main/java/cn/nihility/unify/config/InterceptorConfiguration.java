@@ -19,7 +19,8 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new LogTraceIdInterceptor()).addPathPatterns("/**");
 
         /* 拦截所有身份校验 */
-        registry.addInterceptor(new AuthenticationInterceptor()).addPathPatterns("/**");
+        registry.addInterceptor(new AuthenticationInterceptor())
+                .addPathPatterns("/**").excludePathPatterns("/**/login");
 
     }
 

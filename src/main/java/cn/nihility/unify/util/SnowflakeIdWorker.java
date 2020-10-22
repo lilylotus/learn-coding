@@ -1,13 +1,9 @@
 package cn.nihility.unify.util;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -178,20 +174,15 @@ public class SnowflakeIdWorker {
     }
 
     private static Long getWorkId() {
-        try {
-            String hostAddress = Inet4Address.getLocalHost().getHostAddress();
-            if (log.isDebugEnabled()) {
-                log.debug("host address [{}]", hostAddress);
-            }
-            return intArrayToRandomInt(StringUtils.toCodePoints(hostAddress));
-        } catch (UnknownHostException e) {
-            // 如果获取失败，则使用随机数备用
-            return RandomUtils.nextLong(0, 31);
+        String hostAddress = NetworkUtil.getFirstHostAddress();
+        if (log.isDebugEnabled()) {
+            log.debug("host address [{}]", hostAddress);
         }
+        return intArrayToRandomInt(StringUtils.toCodePoints(hostAddress));
     }
 
     private static Long getDataCenterId() {
-        final String hostName = SystemUtils.getHostName();
+        final String hostName = NetworkUtil.getLocalHostName();
         if (log.isDebugEnabled()) {
             log.debug("host name [{}]", hostName);
         }

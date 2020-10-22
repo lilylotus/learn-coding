@@ -3,10 +3,7 @@ package cn.nihility.unify.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -24,7 +21,7 @@ public class NetworkUtil {
      * @param interfaceName 接口名称
      * @return 网卡接口地址集合
      */
-    private static List<String> getIPAddress(String interfaceName) throws SocketException {
+    public static List<String> getIPAddress(String interfaceName) throws SocketException {
         final List<String> ipList = new ArrayList<>(6);
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
@@ -52,6 +49,34 @@ public class NetworkUtil {
             }
         }
         return ipList;
+    }
+
+    /**
+     * 获取得到的第一个本地的 IP 地址，当获取地址抛出错误，返回回环地址。
+     */
+    public static String getFirstHostAddress() {
+        try {
+            return getIPAddress(null).get(0);
+        } catch (SocketException e) {
+            log.error("Get Local IP Address Error", e);
+        }
+        return "127.0.0.1";
+    }
+
+    /**
+     * 获取本地的 host 名称
+     */
+    public static String getLocalHostName() {
+        String hostName;
+        if ((hostName = System.getenv("COMPUTERNAME")) == null) {
+            try {
+                hostName = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                log.error("Get LocalHost Name Error", e);
+                hostName = "default";
+            }
+        }
+        return hostName;
     }
 
 }

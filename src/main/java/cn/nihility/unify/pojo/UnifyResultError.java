@@ -25,6 +25,9 @@ public class UnifyResultError implements Serializable {
     private List<StackTraceElement> debug;
     private HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
+    public UnifyResultError() {
+    }
+
     public UnifyResultError(String tipMessage) {
         this.message = tipMessage;
         this.error_code = UnifyResultCode.INTERNAL_SERVER_ERROR.getCode();

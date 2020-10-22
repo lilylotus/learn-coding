@@ -10,6 +10,9 @@ public class UnifyRequestErrorInfo {
     private Map<String, Object> requestParams;
     private RuntimeException exception;
 
+    public UnifyRequestErrorInfo() {
+    }
+
     public String getIp() {
         return ip;
     }

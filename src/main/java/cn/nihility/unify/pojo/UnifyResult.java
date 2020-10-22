@@ -18,6 +18,9 @@ public class UnifyResult implements Serializable {
     private Object data;
     private HttpStatus httpStatus = HttpStatus.OK;
 
+    public UnifyResult() {
+    }
+
     public UnifyResult(UnifyResultCode resultCode) {
         this(resultCode, null);
     }
