@@ -5,20 +5,28 @@
     gradle 在执行脚本时，会优先执行 buildscript 代码块中的内容，然后才会执行剩余的 build 脚本。
 */
 buildscript {
-    /*ext {
-        junitVersion = '4.13'
+    ext {
+        set("springBootDocsVersion", "2.2.9.RELEASE")
+        set("springBootVersion", "2.2.9.RELEASE")
     }
     repositories {
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
         mavenCentral()
-    }*/
+    }
     dependencies {
         /* 添加插件依赖路径（通过 jar 方式） */
         //classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" as Object)
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootDocsVersion}")
     }
 }
 
 plugins {
+    id 'org.springframework.boot' version '2.2.9.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
     id 'idea'
 }
@@ -27,7 +35,7 @@ allprojects {
     apply plugin: 'idea'
     apply plugin: 'java'
 
-    group 'cn.nihility'
+    group 'cn.nihility.boot'
     version '1.0-SNAPSHOT'
 
     sourceCompatibility = 1.8
@@ -39,8 +47,26 @@ allprojects {
         currentUser = System.getProperty("user.name")
         currentOsName = System.getProperty("os.name")
         currentJdkVersion = System.getProperty("java.version")
-        junitVersion = "4.13"
+
+        set("springBootDocsVersion", "2.2.9.RELEASE")
+        set("springBootVersion", "2.2.9.RELEASE")
     }
+
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        mavenCentral()
+    }
+
+    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'utf-8'
+    [compileJava, compileTestJava]*.sourceCompatibility = "1.8"
+    [compileJava, compileTestJava]*.targetCompatibility = "1.8"
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
     
     idea {
         module {
@@ -51,19 +77,6 @@ allprojects {
 }
 
 subprojects {
-
-    repositories {
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        mavenCentral()
-    }
-
-    /* Gradle 指定编码,Java 编译的时候缺省状态下会因为中文字符而失败 */
-    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'utf-8'
-    [compileJava, compileTestJava]*.sourceCompatibility = "1.8"
-    [compileJava, compileTestJava]*.targetCompatibility = "1.8"
-    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
-
     dependencies {
         /*testImplementation "junit:junit:${junitVersion}"*/
         /* common util */
@@ -80,7 +93,7 @@ subprojects {
 
     task copyJar(type: Copy, dependsOn: 'clearJar') {
         println(project.name + " : copy Jar : $buildDir")
-        from configurations.runtimeClasspath
+        from project.sourceSets.main.runtimeClasspath
         into "$buildDir\\libs\\lib"
     }
 

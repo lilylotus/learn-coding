@@ -7,6 +7,8 @@ archivesBaseName = "tomcat-web-project"
 ext {
     springVersion = '5.1.12.RELEASE'
     tomcatEmbedVersion = '8.5.43'
+
+    set('junitVersion', '4.13')
 }
 
 dependencies {
