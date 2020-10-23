@@ -11,10 +11,13 @@ public class UnifyException extends RuntimeException {
     private String tipMessage;
 
     public UnifyException(UnifyResultCode resultCode) {
+        super(resultCode.getMessage());
         this.resultCode = resultCode;
+        this.tipMessage = resultCode.getMessage();
     }
 
     public UnifyException(String tipMessage, UnifyResultCode resultCode) {
+        super(resultCode.getMessage());
         this.tipMessage = tipMessage;
         this.resultCode = resultCode;
     }
@@ -33,4 +36,10 @@ public class UnifyException extends RuntimeException {
         return StringUtils.isBlank(this.tipMessage) ? super.getMessage() : this.tipMessage;
     }
 
+    @Override
+    public String toString() {
+        return "UnifyException{" +
+                "tipMessage='" + tipMessage + '\'' +
+                '}';
+    }
 }

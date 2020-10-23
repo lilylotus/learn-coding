@@ -78,11 +78,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 log.debug("Authentication Token [{}]", authToken);
             }
             if (StringUtils.isBlank(authToken)) {
-                throw new UnifyException("认证 token 为空", UnifyResultCode.UNAUTHORIZED);
+                throw new UnifyException("认证 token 为空", UnifyResultCode.PARAM_IS_BLANK);
             }
             // 去掉 [Bearer ] 前缀
             if (!JWTUtil.verifyJwtToken(authToken.replace("Bearer ", ""))) {
-                throw new UnifyException("认证 token 过期", UnifyResultCode.UNAUTHORIZED);
+                throw new UnifyException("认证 token 过期", UnifyResultCode.PARAM_VALUE_EXPIRE_OR_NOT_EXIST);
             }
         }
 

@@ -1,6 +1,10 @@
 package cn.nihility.unify.config;
 
+import cn.nihility.unify.idempotent.IdempotentService;
+import cn.nihility.unify.idempotent.impl.IdempotentServiceImpl;
+import cn.nihility.unify.idempotent.impl.IdempotentTokenSuperviseImpl;
 import cn.nihility.unify.interceptor.AuthenticationInterceptor;
+import cn.nihility.unify.interceptor.IdempotentInterceptor;
 import cn.nihility.unify.interceptor.LogTraceIdInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -11,7 +15,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class InterceptorConfiguration implements WebMvcConfigurer {
-    
+
+    private final IdempotentService idempotentService;
+
+    public InterceptorConfiguration(IdempotentService idempotentService) {
+        this.idempotentService = idempotentService;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 实现拦截器 要拦截的路径以及不拦截的路径
@@ -21,6 +31,10 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
         /* 拦截所有身份校验 */
         registry.addInterceptor(new AuthenticationInterceptor())
                 .addPathPatterns("/**").excludePathPatterns("/**/login");
+
+        /* 拦截幂等性校验 token key */
+        registry.addInterceptor(new IdempotentInterceptor(idempotentService))
+                .addPathPatterns("/**").excludePathPatterns("/**/idempotent/token");
 
     }
 

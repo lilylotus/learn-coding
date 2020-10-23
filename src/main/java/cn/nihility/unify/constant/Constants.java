@@ -9,6 +9,6 @@ public class Constants {
     public final static String TRACE_ID = "TraceId";
 
     /** 幂等性 token 键值 */
-    private final static String IDEMPOTENT_TOKEN_KEY = "IdempotentTokenKey";
+    public final static String IDEMPOTENT_TOKEN_KEY = "IdempotentTokenKey";
 
 }
