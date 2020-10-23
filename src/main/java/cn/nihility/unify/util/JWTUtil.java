@@ -7,6 +7,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.Verification;
@@ -15,17 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JWTUtil {
 
     private final static Logger log = LoggerFactory.getLogger(JWTUtil.class);
     private final static String SECRET_KEY = "SECRET_KEY";
-    private final static int EXPIRE_MILLIS_SECONDS = 60 * 60 * 1000;
+    /* 过期时间 30 分钟 */
+    private final static int EXPIRE_MILLIS_SECONDS = 30 * 60 * 1000;
 
     private final static Algorithm HMAC256 = Algorithm.HMAC256(SECRET_KEY);
     private final static Algorithm RSA256 = generateRS256();
+    private final static Algorithm CURRENT_USE_ALGORITHM = HMAC256;
 
     /* ==================== generate jwt token ==================== */
 
@@ -70,20 +71,20 @@ public class JWTUtil {
         return Algorithm.RSA256(keyPair.getRsaPublicKey(), keyPair.getRsaPrivateKey());
     }
 
-    /*==================== generate RSA256 token and verify token ====================*/
+    /*==================== generate RSA256/HMAC256 token and verify token ====================*/
     public static String generateJwtToken(Map<String, String> params) {
-        return createJwt(params, RSA256);
+        return createJwt(params, CURRENT_USE_ALGORITHM);
     }
 
     public static boolean verifyJwtToken(String token) {
         return verifyJwtToken(token, null);
     }
 
-    public static boolean verifyJwtToken(String token, Map<String, String> params) {
+    public static boolean verifyJwtToken(String token, Map<String, String> params) throws UnifyException {
         if (StringUtils.isBlank(token)) {
-            return false;
+            throw new UnifyException("TOKEN IS NULL", UnifyResultCode.UNAUTHORIZED);
         }
-        return verifierToken(token, RSA256, params);
+        return verifierToken(token, CURRENT_USE_ALGORITHM, params);
     }
 
     public static Map<String, String> verifyJwtTokenAndClaims(String token) throws UnifyException {
@@ -125,10 +126,8 @@ public class JWTUtil {
             params.forEach(verification::withClaim);
         }
         JWTVerifier verifier = verification.build();
-        boolean ok = true;
         try {
             DecodedJWT verify = verifier.verify(token);
-
             if (log.isDebugEnabled()) {
                 log.debug("verify: [{}], Header: [{}] , payLoad: [{}], signature: [{}], Expire: [{}], Issuer [{}], Audience [{}]",
                         verify, verify.getHeader(), verify.getPayload(), verify.getSignature(), verify.getExpiresAt(),
@@ -136,16 +135,16 @@ public class JWTUtil {
 
                 verify.getClaims().forEach((k, v) -> log.debug("[{}] : [{}]", k, v.asString()));
             }
+        } catch (TokenExpiredException ex) {
+            throw new UnifyException("Verify Token Expire", ex, UnifyResultCode.UNAUTHORIZED);
         } catch (JWTVerificationException e) {
-            log.error("Invalid Token", e);
-            ok = false;
+            throw new UnifyException("Verify Token Error", e, UnifyResultCode.UNAUTHORIZED);
         }
-        return ok;
+        return true;
     }
 
     public static boolean verifyJwtTokenAndClaims(String token, Algorithm algorithm, final Map<String, String> claims) {
         JWTVerifier verifier = JWT.require(algorithm).build();
-        boolean ok = true;
         try {
             DecodedJWT verify = verifier.verify(token);
             Map<String, Claim> claimMap = verify.getClaims();
@@ -168,11 +167,12 @@ public class JWTUtil {
 
                 claimMap.forEach((k, v) -> log.debug("[{}] : [{}]", k, v.asString()));
             }
+        } catch (TokenExpiredException ex) {
+            throw new UnifyException("Verify Token Expire", UnifyResultCode.UNAUTHORIZED);
         } catch (JWTVerificationException e) {
-            log.error("inValid token", e);
-            ok = false;
+            throw new UnifyException("Verify Token Error", UnifyResultCode.UNAUTHORIZED);
         }
-        return ok;
+        return true;
     }
 
     public static void main(String[] args) {

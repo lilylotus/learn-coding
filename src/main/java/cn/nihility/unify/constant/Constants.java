@@ -5,6 +5,10 @@ package cn.nihility.unify.constant;
  */
 public class Constants {
 
-    public static String TRACE_ID = "traceId";
+    /** 日志 Trace ID */
+    public final static String TRACE_ID = "TraceId";
+
+    /** 幂等性 token 键值 */
+    private final static String IDEMPOTENT_TOKEN_KEY = "IdempotentTokenKey";
 
 }

@@ -46,7 +46,7 @@ public class UnifyExceptionHandler {
      * 对ResultException类返回返回结果的处理
      */
     protected ResponseEntity<UnifyResultError> handleUnifyResultException(UnifyException ex, HttpHeaders headers, WebRequest request) {
-        return this.handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getResultCode(), ex.getMessage()),
+        return this.handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getResultCode(), ex.getTipMessage()),
                 headers, ex.getResultCode().getHttpStatus(), request);
     }
 

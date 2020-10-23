@@ -32,6 +32,7 @@ public class HeiController {
     private static final Logger log = LoggerFactory.getLogger(HeiController.class);
 
     @RequestMapping("/success")
+    @SkipAuthentication
     public UnifyResult success() {
         return UnifyResultUtil.success();
     }
@@ -92,13 +93,14 @@ public class HeiController {
     @GetMapping("/web_util")
     @VerifyAuthentication
     public void webUtilRequest() {
+        String url = "http://127.0.0.1:49000/v1/hei/success";
         try {
-            String response = RestTemplateUtil.doGet("http://127.0.0.1:49000/v1/hei/success", UnifyResult.class);
+            String response = RestTemplateUtil.doGet(url, UnifyResult.class);
             log.info("Rest Template Util Response [{}]", response);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Request URL [{}] Error", url, e);
         }
-        String result = HttpClientUtil.doGet("http://127.0.0.1:49000/v1/hei/success");
+        String result = HttpClientUtil.doGet(url);
         log.info("HttpClient DoGet Result [{}]", result);
     }
 

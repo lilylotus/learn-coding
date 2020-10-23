@@ -25,6 +25,7 @@ public class RestTemplateUtil {
      */
     public static String doGet(String url, Class<?> clazz) throws JsonProcessingException {
         REST_TEMPLATE.setInterceptors(Collections.singletonList(new RestTemplateTraceIdInterceptor()));
+
         ObjectMapper objectMapper = new JacksonConfiguration().getObjectMapper();
         Object resultObject = REST_TEMPLATE.getForObject(url, clazz);
         log.info("Rest Template Do Get URI [{}], Response [{}]", url, resultObject);
