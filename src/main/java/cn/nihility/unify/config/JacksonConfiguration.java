@@ -22,8 +22,13 @@ public class JacksonConfiguration {
      */
     @Bean
     public ObjectMapper getObjectMapper() {
+        return parseJdk8DateTimeFormatObjectMapper();
+    }
+
+    public static ObjectMapper parseJdk8DateTimeFormatObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
+
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
 

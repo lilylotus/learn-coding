@@ -24,7 +24,7 @@
             <!--输出日志的格式-->
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <!-- 只输出 level 及其以上级别的信息（onMatch），其它直接拒绝（onMismatch）-->
-            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </console>
 
         <!-- 文件会打印出所有信息，这个 log 每次运行程序会自动清空，由 append 属性决定，适合临时测试用 -->
@@ -228,10 +228,10 @@
         <!-- 若是 additivity 设为 false，则子 Logger 只会在自己的 appender 里输出，而不会在父 Logger 的 appender 里输出 -->
         <!-- 过滤掉 spring 和 hibernate 的一些无用的 DEBUG 信息 -->
         <!-- org.springframework | org.mybatis -->
-        <Logger name="org.springframework" level="DEBUG" additivity="false">
+        <!--<Logger name="org.springframework" level="DEBUG" additivity="false">
             <AppenderRef ref="Async"/>
             <AppenderRef ref="RollingFileDebug"/>
-        </Logger>
+        </Logger>-->
 
         <Root level="DEBUG">
             <appender-ref ref="Console"/>

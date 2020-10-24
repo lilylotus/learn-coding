@@ -1,12 +1,15 @@
 package cn.nihility.unify.vo;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-public class TestEntity {
+public class TestEntity implements Serializable {
+    private static final long serialVersionUID = 1585203892768191758L;
+
     private Instant instant;
     private LocalTime localTime;
     private LocalDateTime localDateTime;

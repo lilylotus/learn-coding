@@ -27,6 +27,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    /* redis 分布式锁 */
+    /*implementation 'org.redisson:redisson-spring-boot-starter:3.13.6'*/
+    /* redis 布隆过滤器 */
+    implementation 'com.redislabs:jrebloom:2.0.0'
 
     /* jwt */
     implementation 'com.auth0:java-jwt:3.10.3'
