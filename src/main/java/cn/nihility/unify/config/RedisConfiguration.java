@@ -1,14 +1,20 @@
 package cn.nihility.unify.config;
 
+import cn.nihility.unify.distribute.DistributedLock;
+import cn.nihility.unify.distribute.SimpleDistributedLock;
+import cn.nihility.unify.distribute.impl.DistributedLockRedisImpl;
+import cn.nihility.unify.distribute.impl.SimpleDistributedLockRedisImpl;
+import cn.nihility.unify.util.RedissonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -26,7 +32,8 @@ public class RedisConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(name = "redisTemplate")
-    public RedisTemplate<Object, Object> redisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
+    /* LettuceConnectionFactory */
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory lettuceConnectionFactory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory);
 
@@ -50,11 +57,46 @@ public class RedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(StringRedisTemplate.class)
-    public StringRedisTemplate stringredisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
+    /* LettuceConnectionFactory */
+    public StringRedisTemplate stringredisTemplate(RedisConnectionFactory lettuceConnectionFactory) {
         StringRedisTemplate stringredisTemplate = new StringRedisTemplate();
         stringredisTemplate.setConnectionFactory(lettuceConnectionFactory);
         log.info("Initialize Redis StringRedisTemplate");
         return stringredisTemplate;
+    }
+
+    /**
+     * 单机模式自动装配
+     * org.redisson.spring.starter.RedissonAutoConfiguration#redisson() 有实现
+     */
+    /*@Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClientSingle() {
+        Config config = new Config();
+        SingleServerConfig serverConfig = config.useSingleServer()
+                .setAddress(redissonProperties.getAddress())
+                .setTimeout(redissonProperties.getTimeout())
+                .setDatabase(redissonProperties.getDatabase())
+
+                .setConnectionPoolSize(redissonProperties.getConnectionPoolSize())
+                .setConnectionMinimumIdleSize(redissonProperties.getConnectionMinimumIdleSize());
+        if(StringUtils.isNotBlank(redissonProperties.getPassword())) {
+            serverConfig.setPassword(redissonProperties.getPassword());
+        }
+        return Redisson.create(config);
+    }*/
+
+    @Bean
+    public SimpleDistributedLock distributedLocker(RedissonClient redissonClient) {
+        log.info("Init SimpleDistributedLock Redis Impl");
+        return new SimpleDistributedLockRedisImpl(redissonClient);
+    }
+
+    @Bean
+    public DistributedLock distributedLock(RedissonClient redissonClient) {
+        DistributedLockRedisImpl lockRedis = new DistributedLockRedisImpl(redissonClient, null);
+        RedissonUtil.setDistributedLock(lockRedis);
+        log.info("Init DistributedLock Redis Impl And Add RedissonUtil Locker");
+        return lockRedis;
     }
 
 }

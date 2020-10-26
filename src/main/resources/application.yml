@@ -14,6 +14,7 @@ spring:
     database: 12
     password: redis
     timeout: 3000
+    ssl: false
     lettuce:
       pool:
         # Lettuce
@@ -27,3 +28,6 @@ spring:
         max-wait: 1000
       # 关闭超时时间
       shutdown-timeout: 100
+    # redisson config
+#    redisson:
+#      file: redisson.yml

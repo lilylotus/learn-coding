@@ -6,15 +6,15 @@ public class UnifyResultUtil {
      * 成功
      */
     public static UnifyResult success() {
-        return success(UnifyResultCode.SUCCESS);
-    }
-
-    public static UnifyResult success(UnifyResultCode resultCode, String tipMessage) {
-        return success(resultCode, tipMessage, null);
+        return success(UnifyResultCode.SUCCESS, "success");
     }
 
     public static UnifyResult success(UnifyResultCode resultCode) {
         return success(resultCode, null);
+    }
+
+    public static UnifyResult success(UnifyResultCode resultCode, String tipMessage) {
+        return success(resultCode, tipMessage, null);
     }
 
     public static UnifyResult success(Object data) {
