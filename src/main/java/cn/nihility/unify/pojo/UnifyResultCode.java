@@ -38,13 +38,16 @@ public enum  UnifyResultCode {
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, 503000, "Service Unavailable"),
 
     /* ============ 6xx : 其它，自定义的状态码 */
+    /* 60000 - 61000 : params/value exception */
     PARAM_IS_INVALID(HttpStatus.BAD_REQUEST, 60001, "参数无效"),
     PARAM_IS_BLANK(HttpStatus.BAD_REQUEST, 60002, "参数为空"),
     PARAM_TYPE_BIND_ERROR(HttpStatus.BAD_REQUEST, 6003, "参数类型错误"),
     PARAM_NOT_COMPLETE(HttpStatus.BAD_REQUEST, 60004, "参数缺失"),
-    TEST_UNIFY_EXCEPTION(HttpStatus.SERVICE_UNAVAILABLE, 60005, "测试统一异常处理"),
-    REPETITIVE_OPERATION(HttpStatus.BAD_REQUEST, 60006, "重复操作"),
-    PARAM_VALUE_EXPIRE_OR_NOT_EXIST(HttpStatus.BAD_REQUEST, 60006, "值过期或不存在")
+    PARAM_VALUE_EXPIRE_OR_NOT_EXIST(HttpStatus.BAD_REQUEST, 60005, "值过期或不存在")
+
+    /* 61001 - 62000 : operation exception */,
+    TEST_UNIFY_EXCEPTION(HttpStatus.SERVICE_UNAVAILABLE, 61001, "测试统一异常处理"),
+    REPETITIVE_OPERATION(HttpStatus.BAD_REQUEST, 61002, "重复操作")
     ;
 
     private HttpStatus httpStatus;

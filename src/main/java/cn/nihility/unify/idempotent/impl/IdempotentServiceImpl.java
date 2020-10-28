@@ -38,15 +38,17 @@ public class IdempotentServiceImpl implements IdempotentService {
             throw new IdempotentException("Idempotent verify token key cannot be blank", UnifyResultCode.PARAM_IS_BLANK);
         }
         /* 校验该 token 是否存在，可能被消费掉了或过期了 */
-        if (!idempotentTokenSupervise.exists(tokenKey)) {
+        if (idempotentTokenSupervise.exists(tokenKey)) {
+            /* 删除该 token */
+            boolean del = idempotentTokenSupervise.deleteToken(tokenKey);
+            if (!del) {
+                /* 删除失败，表示在此期间被别的服务消费掉了 */
+                throw new IdempotentException(UnifyResultCode.REPETITIVE_OPERATION);
+            }
+        } else {
             throw new IdempotentException("Idempotent token expire or consumed", UnifyResultCode.PARAM_IS_INVALID);
         }
-        /* 删除该 token */
-        boolean del = idempotentTokenSupervise.deleteToken(tokenKey);
-        if (!del) {
-            /* 删除失败，表示在此期间被别的服务消费掉了 */
-            throw new IdempotentException(UnifyResultCode.REPETITIVE_OPERATION);
-        }
+
         return true;
     }
 
