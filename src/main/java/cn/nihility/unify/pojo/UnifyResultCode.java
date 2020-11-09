@@ -50,8 +50,11 @@ public enum  UnifyResultCode {
     REPETITIVE_OPERATION(HttpStatus.BAD_REQUEST, 61002, "重复操作")
     ;
 
+    /* HTTP 对应的标准状态码 */
     private HttpStatus httpStatus;
+    /* 自定义的状态码 */
     private Integer code;
+    /* 提示信息 */
     private String message;
 
     UnifyResultCode(HttpStatus httpStatus, Integer code, String message) {

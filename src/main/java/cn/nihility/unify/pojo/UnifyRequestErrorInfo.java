@@ -2,6 +2,9 @@ package cn.nihility.unify.pojo;
 
 import java.util.Map;
 
+/**
+ * 记录 HTTP REQUEST 异常/错误 请求的详细信息
+ */
 public class UnifyRequestErrorInfo {
     private String ip;
     private String url;
