@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class FilterConfiguration {
 
     @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
+    public FilterRegistrationBean<LogFilter> filterRegistrationBean() {
         LoggerUtil.log(getClass(), LogLevel.INFO, "Registry Filter LogFilter");
 
         FilterRegistrationBean<LogFilter> bean = new FilterRegistrationBean<>();
