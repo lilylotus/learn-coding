@@ -2,6 +2,8 @@ package cn.nihility.boot.jwt;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.nio.charset.StandardCharsets;
+
 public class Base64Coded {
 
     /**
@@ -10,7 +12,7 @@ public class Base64Coded {
      * @return 解码后的字节数组字符串
      */
     public static String decode(byte[] bytes) {
-        return new String(Base64.decodeBase64(bytes));
+        return new String(Base64.decodeBase64(bytes), StandardCharsets.UTF_8);
     }
 
     /**
@@ -19,7 +21,7 @@ public class Base64Coded {
      * @return 编码后的字节数组字符串
      */
     public static String encode(byte[] bytes) {
-        return new String(Base64.encodeBase64(bytes));
+        return new String(Base64.encodeBase64(bytes), StandardCharsets.UTF_8);
     }
 
     /**

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * @author dandelion
  * @date 2020:06:27 18:30
  */
-public class MapperFactoryBean implements FactoryBean {
+public class MapperFactoryBean implements FactoryBean<Object> {
 
     private final static Logger log = LoggerFactory.getLogger(MapperFactoryBean.class);
     private Class<?> mapperInstance;

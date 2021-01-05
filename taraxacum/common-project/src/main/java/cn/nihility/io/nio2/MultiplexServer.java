@@ -1,8 +1,6 @@
 package cn.nihility.io.nio2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +19,7 @@ public class MultiplexServer implements Runnable {
 
     // 多路复用器，事件轮询器
     private Selector selector;
+    private static ServerSocketChannel serverSocketChannel;
 
     private volatile boolean run = true;
 
@@ -30,7 +29,7 @@ public class MultiplexServer implements Runnable {
 
     public MultiplexServer(int port) {
         try {
-            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel = ServerSocketChannel.open();
             // 设置非阻塞
             serverSocketChannel.configureBlocking(false);
             // 绑定地址和端口
@@ -51,7 +50,7 @@ public class MultiplexServer implements Runnable {
         while (run) {
             try {
                 // 阻塞
-                int selectCnt = selector.select(500L);
+                int selectCnt = selector.select();
                 if (selectCnt == 0) {
                     System.out.print(".");
                     continue;
@@ -102,9 +101,9 @@ public class MultiplexServer implements Runnable {
 
     private void handleConnection(SelectionKey selectionKey) throws IOException {
         System.out.println("handle connection");
-        ServerSocketChannel ssc = (ServerSocketChannel) selectionKey.channel();
+        // ServerSocketChannel ssc = (ServerSocketChannel) selectionKey.channel();
         // 三次握手
-        SocketChannel sc = ssc.accept();
+        SocketChannel sc = serverSocketChannel.accept();
         sc.configureBlocking(false);
 
         // 返回信息

@@ -111,9 +111,6 @@ public class SecretKeyUtils {
         RSAPublicKey rsaPublicKey;
         RSAPrivateKey rsaPrivateKey;
 
-        public RSAKeyPair() {
-        }
-
         public RSAKeyPair(RSAPublicKey rsaPublicKey, RSAPrivateKey rsaPrivateKey) {
             this.rsaPublicKey = rsaPublicKey;
             this.rsaPrivateKey = rsaPrivateKey;
