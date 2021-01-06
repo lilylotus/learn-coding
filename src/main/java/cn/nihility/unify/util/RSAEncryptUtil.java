@@ -92,6 +92,23 @@ public class RSAEncryptUtil {
     }
 
     /**
+     * 使用指定的 RSA 公钥加密
+     * @param publicKey RSA 公钥
+     * @param encryptContent 要加密文本内容
+     * @return 加密后的文本
+     */
+    public static String publicKeyEncrypt(PublicKey publicKey, String encryptContent) throws Exception {
+        AssertUtil.assertStringNotNull(encryptContent);
+        AssertUtil.assertObjectNotNull(publicKey);
+
+        // RSA加密
+        Cipher cipherEncrypt = Cipher.getInstance("RSA");
+        cipherEncrypt.init(Cipher.ENCRYPT_MODE, publicKey);
+        return new String(Base64.encodeBase64(cipherEncrypt.doFinal(encryptContent.getBytes(StandardCharsets.UTF_8))),
+                StandardCharsets.UTF_8);
+    }
+
+    /**
      * 使用指定的 RSA 公钥字符串加密
      * @param publicKey 公钥文本, 公钥经过 base64 加密
      * @param str 要加密文本
@@ -146,6 +163,23 @@ public class RSAEncryptUtil {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, priKey);
         return new String(cipher.doFinal(inputByte), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * 指定的 RSA 私钥解密
+     * @param privateKey 指定解密的 RSA 私钥
+     * @param decryptContent 要解密的文本内容
+     * @return 解密后的文本
+     */
+    public static String privateKeyDecrypt(PrivateKey privateKey, String decryptContent) throws Exception {
+        AssertUtil.assertStringNotNull(decryptContent);
+        AssertUtil.assertObjectNotNull(privateKey);
+
+        // RSA解密
+        Cipher cipherDecrypt = Cipher.getInstance("RSA");
+        cipherDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
+        return new String(cipherDecrypt.doFinal(Base64.decodeBase64(
+                decryptContent.getBytes(StandardCharsets.UTF_8))), StandardCharsets.UTF_8);
     }
 
     /**
