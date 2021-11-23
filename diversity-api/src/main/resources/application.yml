@@ -4,4 +4,4 @@ server:
 api:
   unify:
     exception:
-      debugStackTrace: false
+      debugStackTrace: true
