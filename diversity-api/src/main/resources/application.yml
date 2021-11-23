@@ -1,0 +1,7 @@
+server:
+  port: 30010
+
+api:
+  unify:
+    exception:
+      debugStackTrace: false

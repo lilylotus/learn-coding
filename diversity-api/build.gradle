@@ -1,0 +1,14 @@
+
+configurations {
+    all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
+}
+
+dependencies {
+
+    implementation project(":plugins:plugin-log4j2")
+    implementation project(":diversity-common")
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+}

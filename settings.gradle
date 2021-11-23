@@ -1,0 +1,10 @@
+rootProject.name = 'diversity'
+
+include 'demonstration'
+include 'diversity-api'
+include 'diversity-common'
+include 'plugins'
+include 'plugins:plugin-log4j2'
+
+findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
+
