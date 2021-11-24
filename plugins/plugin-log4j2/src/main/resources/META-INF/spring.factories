@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-cn.nihility.plugins.log4j2.configuration.Log4j2TraceIdInterceptorConfiguration
+cn.nihility.plugin.log4j2.configuration.Log4j2TraceIdInterceptorConfiguration

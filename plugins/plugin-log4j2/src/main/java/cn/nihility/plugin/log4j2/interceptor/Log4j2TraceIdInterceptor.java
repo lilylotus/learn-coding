@@ -1,6 +1,6 @@
-package cn.nihility.plugins.log4j2.interceptor;
+package cn.nihility.plugin.log4j2.interceptor;
 
-import cn.nihility.plugins.log4j2.constant.Constant;
+import cn.nihility.plugin.log4j2.constant.Constant;
 import org.slf4j.MDC;
 import org.springframework.web.servlet.HandlerInterceptor;
 

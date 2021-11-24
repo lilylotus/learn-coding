@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/test?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: mysql
+    # org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10

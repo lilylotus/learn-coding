@@ -1,4 +1,4 @@
-package cn.nihility.plugins.log4j2.constant;
+package cn.nihility.plugin.log4j2.constant;
 
 public final class Constant {
 

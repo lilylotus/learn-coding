@@ -61,6 +61,12 @@ allprojects {
 
 }
 
+subprojects {
+    dependencies {
+        //implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
+    }
+}
+
 task cleanAll(type: Delete, dependsOn: [clean]) {
     subprojects.forEach({
         /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/

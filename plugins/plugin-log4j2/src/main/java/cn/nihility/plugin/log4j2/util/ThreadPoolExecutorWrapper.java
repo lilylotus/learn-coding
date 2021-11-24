@@ -1,4 +1,4 @@
-package cn.nihility.plugins.log4j2.util;
+package cn.nihility.plugin.log4j2.util;
 
 import org.slf4j.MDC;
 
@@ -43,5 +43,5 @@ public class ThreadPoolExecutorWrapper extends ThreadPoolExecutor {
     public <T> Future<T> submit(Runnable task, T result) {
         return super.submit(ThreadMDCUtil.wrapper(task, MDC.getCopyOfContextMap()), result);
     }
-    
+
 }

@@ -1,6 +1,6 @@
-package cn.nihility.plugins.log4j2.util;
+package cn.nihility.plugin.log4j2.util;
 
-import cn.nihility.plugins.log4j2.constant.Constant;
+import cn.nihility.plugin.log4j2.constant.Constant;
 import org.slf4j.MDC;
 
 import java.util.Map;

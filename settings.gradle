@@ -5,6 +5,14 @@ include 'diversity-api'
 include 'diversity-common'
 include 'plugins'
 include 'plugins:plugin-log4j2'
+include 'plugins:plugin-jdbc'
+include 'plugins:plugin-redis'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
+findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'
+findProject(':plugins:plugin-redis')?.name = 'plugin-redis'
+
+findProject(':plugins').children.each {
+    project -> println "project [" + project.name + "]"
+}
 
