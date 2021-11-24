@@ -3,7 +3,7 @@ package cn.nihility.common.util;
 import cn.nihility.common.constant.UnifyCodeMapping;
 import cn.nihility.common.pojo.UnifyResult;
 
-public class UnifyResultUtil {
+public final class UnifyResultUtil {
 
     private UnifyResultUtil() {
     }

@@ -1,5 +1,6 @@
 package cn.nihility.api.controller;
 
+import cn.nihility.api.annotation.UnifyResponseResult;
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
@@ -20,6 +21,19 @@ public class WelcomeController {
     public UnifyResult welcome() {
         logger.info("welcome");
         return UnifyResultUtil.success("Welcome");
+    }
+
+    @GetMapping("/welcome/string")
+    public String welcomeString() {
+        logger.info("welcome string");
+        return "Welcome String，欢迎来到 String 返回。";
+    }
+
+    @GetMapping("/welcome/response")
+    @UnifyResponseResult
+    public Integer welcomeUnifyResponseResult() {
+        logger.info("welcome UnifyResponseResult");
+        return 520;
     }
 
     @GetMapping("/welcome/exception")
