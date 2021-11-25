@@ -1,5 +1,6 @@
 package cn.nihility.api.config;
 
+import cn.nihility.api.interceptor.ApiAuthenticationCheckInterceptor;
 import cn.nihility.api.interceptor.IdempotentInterceptor;
 import cn.nihility.api.service.IdempotentService;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,9 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new IdempotentInterceptor(idempotentService))
             .addPathPatterns("/**").excludePathPatterns("/**/idempotent/token");
 
+        /* 身份认证校验 */
+        registry.addInterceptor(new ApiAuthenticationCheckInterceptor())
+            .addPathPatterns("/**");
     }
 
 }

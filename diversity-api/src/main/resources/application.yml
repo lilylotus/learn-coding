@@ -7,8 +7,9 @@ api:
       debugStackTrace: false
 
 spring:
-  jackson:
-    defaultPropertyInclusion: NON_EMPTY
+#  jackson:
+     # 空值字段不返回
+#    defaultPropertyInclusion: NON_EMPTY
   redis:
     database: 0
     host: 127.0.0.1

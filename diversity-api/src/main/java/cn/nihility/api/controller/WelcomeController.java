@@ -2,12 +2,15 @@ package cn.nihility.api.controller;
 
 import cn.nihility.api.annotation.UnifyResponseResult;
 import cn.nihility.api.exception.HttpRequestException;
+import cn.nihility.api.pojo.DateContainer;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Random;
@@ -55,6 +58,18 @@ public class WelcomeController {
     public UnifyResult welcomeHttpRequestException() {
         logger.info("welcome HttpRequestException");
         throw new HttpRequestException(HttpStatus.BAD_GATEWAY, UnifyResultUtil.failure("welcome HttpRequestException"));
+    }
+
+    @PostMapping("/welcome/date")
+    public UnifyResult welcomeDate(@RequestBody DateContainer dateContainer) {
+        logger.info("date container [{}]", dateContainer);
+        return UnifyResultUtil.success(dateContainer);
+    }
+
+    @GetMapping("/welcome/date")
+    public UnifyResult welcomeDateGet(DateContainer dateContainer) {
+        logger.info("Get date container [{}]", dateContainer);
+        return UnifyResultUtil.success(dateContainer);
     }
 
 }

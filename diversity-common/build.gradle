@@ -1,10 +1,12 @@
 
 dependencies {
-
     compileOnly("org.slf4j:slf4j-api")
     compile("com.fasterxml.jackson.core:jackson-core")
     compile("com.fasterxml.jackson.core:jackson-databind")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("org.apache.commons:commons-lang3:${commonsLang3Version}")
-
+    // jwt
+    compile("com.auth0:java-jwt:3.18.2")
+    compile("io.jsonwebtoken:jjwt:0.9.1")
+    compile("commons-codec:commons-codec:1.15")
 }

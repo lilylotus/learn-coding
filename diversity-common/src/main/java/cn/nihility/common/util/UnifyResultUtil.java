@@ -18,6 +18,10 @@ public final class UnifyResultUtil {
         return new UnifyResult(code, data);
     }
 
+    public static UnifyResult success(Object data, String tip) {
+        return success(UnifyCodeMapping.SUCCESS.getCode(), data, tip);
+    }
+
     public static UnifyResult success(Object data) {
         return success(UnifyCodeMapping.SUCCESS.getCode(), data);
     }

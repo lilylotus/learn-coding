@@ -26,7 +26,7 @@ public final class IdempotentInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         /* 处理拦截方法 */
         if (!(handler instanceof HandlerMethod)) {
@@ -35,7 +35,9 @@ public final class IdempotentInterceptor implements HandlerInterceptor {
 
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         ApiIdempotent apiIdempotent = handlerMethod.getMethod().getAnnotation(ApiIdempotent.class);
-        if (null != apiIdempotent && apiIdempotent.value()) {
+        ApiIdempotent clazzIdempotent = handlerMethod.getBeanType().getAnnotation(ApiIdempotent.class);
+        if ((null != apiIdempotent && apiIdempotent.value()) ||
+            (null != clazzIdempotent && clazzIdempotent.value())) {
             idempotentService.verify(acquireIdempotentKey(request));
         }
 

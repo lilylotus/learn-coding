@@ -35,15 +35,22 @@ public final class JacksonUtil {
     private JacksonUtil() {
     }
 
-    private static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE = "yyyy-MM-dd";
-    private static final String TIME = "HH:mm:ss";
+    public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE = "yyyy-MM-dd";
+    public static final String TIME = "HH:mm:ss";
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+    private static final ObjectMapper JSON_MAPPER;
     private static final JavaType OBJECT_MAP_TYPE;
     private static final JavaType MAP_LIST_TYPE;
 
     static {
+        JSON_MAPPER = newObjectMapperInstance();
+        OBJECT_MAP_TYPE = getJavaType(Map.class, String.class, Object.class);
+        MAP_LIST_TYPE = getJavaType(List.class, OBJECT_MAP_TYPE);
+    }
+
+    public static ObjectMapper newObjectMapperInstance() {
+        ObjectMapper mapper = new ObjectMapper();
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME);
         JavaTimeModule timeModule = new JavaTimeModule();
 
@@ -53,20 +60,19 @@ public final class JacksonUtil {
         timeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME)));
         timeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE)));
         timeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(TIME)));
-        JSON_MAPPER.setDateFormat(dateFormat);
-        JSON_MAPPER.registerModule(timeModule);
+        mapper.setDateFormat(dateFormat);
+        mapper.registerModule(timeModule);
 
-        JSON_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        JSON_MAPPER.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-        JSON_MAPPER.configure(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT, false);
-        JSON_MAPPER.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
-        JSON_MAPPER.disable(SerializationFeature.CLOSE_CLOSEABLE);
-        JSON_MAPPER.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        JSON_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        JSON_MAPPER.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT, false);
+        mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
+        mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 
-        OBJECT_MAP_TYPE = getJavaType(Map.class, String.class, Object.class);
-        MAP_LIST_TYPE = getJavaType(List.class, OBJECT_MAP_TYPE);
+        return mapper;
     }
 
     /**
