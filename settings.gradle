@@ -7,12 +7,13 @@ include 'plugins'
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
 include 'plugins:plugin-redis'
+include 'plugins:plugin-mybatis'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'
 findProject(':plugins:plugin-redis')?.name = 'plugin-redis'
+findProject(':plugins:plugin-mybatis')?.name = 'plugin-mybatis'
 
 findProject(':plugins').children.each {
     project -> println "project [" + project.name + "]"
 }
-

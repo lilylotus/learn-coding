@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.nihility.plugin.mybatis.mapper.FlowerMapper">
+
+  <select id="searchById" resultType="flower" parameterType="string">
+    SELECT id, name_english, name_chinese, age, add_time, update_time
+    FROM flower
+    WHERE id = #{id}
+  </select>
+
+  <select id="searchAll" resultType="flower">
+    SELECT id, name_english, name_chinese, age, add_time, update_time
+    FROM flower
+  </select>
+
+  <insert id="insertByEntity" parameterType="flower">
+    INSERT INTO flower (id, name_english, name_chinese, age, add_time, update_time)
+    VALUES (#{id}, #{nameEnglish}, #{nameChinese}, #{age}, now(), now())
+  </insert>
+
+</mapper>
