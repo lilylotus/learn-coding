@@ -9,4 +9,7 @@ dependencies {
     compile("com.auth0:java-jwt:3.18.2")
     compile("io.jsonwebtoken:jjwt:0.9.1")
     compile("commons-codec:commons-codec:1.15")
+    // http client
+    compile("org.apache.httpcomponents:httpmime:4.5.13")
+    compile("org.apache.httpcomponents:httpclient:4.5.13")
 }
