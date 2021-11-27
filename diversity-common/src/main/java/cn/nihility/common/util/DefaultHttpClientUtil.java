@@ -1,7 +1,13 @@
 package cn.nihility.common.util;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -12,15 +18,19 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -168,6 +178,46 @@ public class DefaultHttpClientUtil {
 
     public static HttpClientContext createHttpClientContext() {
         return createHttpClientContext(null);
+    }
+
+    public static <R> R executeHttpRequest(final HttpUriRequest request, Class<R> rt) {
+        try (CloseableHttpClient httpClient = createHttpClient();
+             CloseableHttpResponse httpResponse = httpClient.execute(request)) {
+            StatusLine statusLine = httpResponse.getStatusLine();
+            String respStringEntity = EntityUtils.toString(httpResponse.getEntity());
+            if (logger.isDebugEnabled()) {
+                logger.debug("响应状态 [{}], 响应消息 [{}]", statusLine, respStringEntity);
+            }
+            if (StringUtils.isNotBlank(respStringEntity)) {
+                return JacksonUtil.readJsonString(respStringEntity, rt);
+            }
+        } catch (IOException e) {
+            logger.error("请求 [{}] 异常", request.getURI(), e);
+        }
+        return null;
+    }
+
+    public static <R> R executePostRequestWithResult(final String url, final String jsonBody, Class<R> rt) {
+
+        final HttpPost post = new HttpPost(url);
+        post.addHeader("Content-Type", "application/json");
+
+        if (null != jsonBody) {
+            StringEntity body = new StringEntity(jsonBody, StandardCharsets.UTF_8);
+            body.setContentEncoding("UTF-8");
+            body.setContentType("application/json");
+            post.setEntity(body);
+        }
+
+        post.setConfig(createRequestConfig());
+
+        return executeHttpRequest(post, rt);
+    }
+
+    public static <R> R executeGetRequestWithResult(final String url, Class<R> rt) {
+        HttpGet request = new HttpGet(url);
+        request.setConfig(createRequestConfig());
+        return executeHttpRequest(request, rt);
     }
 
 }

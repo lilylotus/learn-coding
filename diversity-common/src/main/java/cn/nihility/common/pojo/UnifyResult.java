@@ -13,7 +13,7 @@ public class UnifyResult implements Serializable {
     /**
      * 响应码
      */
-    private int code;
+    private Integer code;
     /**
      * 提示信息
      */
@@ -27,27 +27,30 @@ public class UnifyResult implements Serializable {
      */
     private List<StackTraceElement> stackTrace;
 
-    public UnifyResult(int code, String message, Object data) {
+    public UnifyResult() {
+    }
+
+    public UnifyResult(Integer code, String message, Object data) {
         this.code = code;
         this.message = message;
         this.data = data;
     }
 
-    public UnifyResult(int code, Object data) {
+    public UnifyResult(Integer code, Object data) {
         this.code = code;
         this.data = data;
     }
 
-    public UnifyResult(int code, String message) {
+    public UnifyResult(Integer code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(Integer code) {
         this.code = code;
     }
 

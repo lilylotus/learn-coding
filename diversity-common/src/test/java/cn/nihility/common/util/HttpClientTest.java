@@ -1,5 +1,6 @@
 package cn.nihility.common.util;
 
+import cn.nihility.common.pojo.UnifyResult;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -14,6 +15,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -125,5 +127,16 @@ class HttpClientTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    void testExecuteApplicationJsonPostWithResult() {
+        String url = "http://127.0.0.1:8080/urm/welcome";
+        String body = "{\"id\": \"randomId\", \"name\": \"randomName\"}";
+        UnifyResult result = DefaultHttpClientUtil.executePostRequestWithResult(url, body, UnifyResult.class);
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(200, result.getCode());
+    }
+
+
 
 }
