@@ -17,3 +17,6 @@ findProject(':plugins:plugin-mybatis')?.name = 'plugin-mybatis'
 findProject(':plugins').children.each {
     project -> println "project [" + project.name + "]"
 }
+include 'plugins:plugin-rabbitmq'
+findProject(':plugins:plugin-rabbitmq')?.name = 'plugin-rabbitmq'
+

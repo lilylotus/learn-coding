@@ -222,6 +222,10 @@ public final class SnowflakeIdWorker {
         return (sums % 32);
     }
 
+    public static SnowflakeIdWorker createSnowflakeIdWorker() {
+        return new SnowflakeIdWorker(getDataCenterId(), getWorkId());
+    }
+
     /**
      * 获取雪花算法的下一个 ID
      */

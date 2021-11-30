@@ -9,30 +9,24 @@
   <Properties>
     <!-- [%date]日期，[%thread] 线程名，[%-5level] 级别从左显示5个字符宽度，%msg 日志消息，-->
     <!-- %n 换行符，%logger{36} 表示 Logger 名字最长36个字符 -->
+    <!-- [%thread] -->
     <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] [%X{TraceId}] %logger{36} - %msg%xEx%n"/>
-    <!-- System.setProperty("appName", "urm"); -->
-    <Property name="APP_PROFILE" value="${sys:profileName:-default}"/>
-    <Property name="APP_NAME" value="${sys:appName:-default}"/>
-    <!-- 定义日志存储的路径 /${ctx:spring.application.name} -->
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%X{TraceId}] %logger{36} - %msg%xEx%n"/>
+    <!--  ${sys:user.dir:-default} -->
+    <!-- 变量 sys - System Properties -->
+    <!-- 变量 env - System environment variables -->
+    <!-- 变量 ctx - Thread Context Map (MDC) -->
+    <!-- 定义日志存储的路径 -->
     <property name="BASE_DIR" value="${sys:user.dir}/logger"/>
   </Properties>
 
-  <!--先定义所有的appender-->
   <appenders>
     <!-- 控制台输出配置 -->
     <console name="Console" target="SYSTEM_OUT">
-      <!--输出日志的格式-->
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <!-- 只输出 level 及其以上级别的信息（onMatch），其它直接拒绝（onMismatch）-->
       <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
     </console>
-
-    <!-- 文件会打印出所有信息，这个 log 每次运行程序会自动清空，由 append 属性决定，适合临时测试用 -->
-    <!-- append false 每次清空， true 附加到文件末尾 -->
-    <!--<File name="FileLog" fileName="${BASE_DIR}/file-log.log" append="false">
-        <PatternLayout pattern="${LOG_PATTERN}"/>
-    </File>-->
 
     <!-- 打印出 >= DEBUG 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingFile name="RollingFileAll" fileName="${BASE_DIR}/rolling-file-all.log"
@@ -60,38 +54,6 @@
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-all*.gz"/>
-          <!-- IfLastModified: 匹配文件修改时间，精度要和日期滚动最小精度一致 -->
-          <!--age: 匹配超过 180 天的文件，单位d、h、m、s分别表示天、小时、分钟、秒-->
-          <IfLastModified age="7d"/>
-        </Delete>
-      </DefaultRolloverStrategy>
-    </RollingFile>
-
-    <!-- 打印出 trace 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingFile name="RollingFileTrace" fileName="${BASE_DIR}/rolling-file-trace.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/trace/rolling-file-trace-%d{yyyyMMdd}-%i.log.gz">
-      <PatternLayout pattern="${LOG_PATTERN}"/>
-      <Filters>
-        <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
-        <ThresholdFilter level="TRACE" onMatch="NEUTRAL" onMismatch="DENY"/>
-        <ThresholdFilter level="DEBUG" onMatch="DENY" onMismatch="NEUTRAL"/>
-      </Filters>
-      <Policies>
-        <!-- interval, integer 型，指定两次封存动作之间的时间间隔 -->
-        <!-- 需要和 filePattern 结合使用，日期格式精确到哪一位，interval 也精确到哪一个单位 -->
-        <!-- %d{yyyy-MM-dd HH-mm-ss}-%i，最小的时间粒度是 ss，即秒钟 -->
-        <!-- modulate, boolean型，说明是否对封存时间进行调制 -->
-        <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
-            那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
-        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
-      </Policies>
-      <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/trace" maxDepth="1">
-          <!-- IfFileName: 匹配文件名称 -->
-          <!-- glob: 匹配 2 级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="rolling-file-trace*.gz"/>
           <!-- IfLastModified: 匹配文件修改时间，精度要和日期滚动最小精度一致 -->
           <!--age: 匹配超过 180 天的文件，单位d、h、m、s分别表示天、小时、分钟、秒-->
           <IfLastModified age="7d"/>
@@ -218,7 +180,6 @@
 
     <!-- 异步日志配置 -->
     <Async name="Async">
-      <AppenderRef ref="RollingFileTrace"/>
       <AppenderRef ref="RollingFileAll"/>
     </Async>
   </appenders>
@@ -226,18 +187,20 @@
   <!-- Logger 节点用来单独指定日志的形式，比如要为指定包下的 class 指定不同的日志级别等 -->
   <!-- 定义 logger，只有定义了 logger 并引入 appender，appender 才会生效-->
   <Loggers>
-    <!-- 监控系统信息 -->
     <!-- 若是 additivity 设为 false，则子 Logger 只会在自己的 appender 里输出，而不会在父 Logger 的 appender 里输出 -->
-    <!-- 过滤掉 spring 和 hibernate 的一些无用的 DEBUG 信息 -->
     <!-- org.springframework | org.mybatis -->
     <Logger name="org.springframework" level="DEBUG" additivity="false">
       <AppenderRef ref="Async"/>
     </Logger>
 
+    <Logger name="org.springframework" level="INFO" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
     <Logger name="org.redisson.connection.DNSMonitor" level="INFO"/>
 
     <Root level="DEBUG">
-      <appender-ref ref="Console"/>
+      <AppenderRef ref="Console"/>
       <AppenderRef ref="RollingFileDebug"/>
       <AppenderRef ref="RollingFileInfo"/>
       <AppenderRef ref="RollingFileWarn"/>
