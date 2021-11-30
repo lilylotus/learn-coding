@@ -1,8 +1,13 @@
 
+configurations {
+    all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
+}
+
 dependencies {
 
     compile(project(":plugins:plugin-jdbc"))
-    compileOnly(project(":plugins:plugin-log4j2"))
     compile("org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisBootVersion}")
+
+    testCompile(project(":plugins:plugin-log4j2"))
 
 }

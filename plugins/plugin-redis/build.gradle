@@ -6,7 +6,7 @@ dependencies {
     compile("org.apache.commons:commons-pool2:2.8.1")
     compile("redis.clients:jedis:${jedisVersion}")
 
-    compileOnly("com.fasterxml.jackson.core:jackson-core")
-    compileOnly("com.fasterxml.jackson.core:jackson-databind")
-    compileOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    //compile("com.fasterxml.jackson.core:jackson-core")
+    compile("com.fasterxml.jackson.core:jackson-databind")
+    //compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }

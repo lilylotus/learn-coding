@@ -15,6 +15,7 @@
     <Property name="APP_PROFILE" value="${sys:profileName:-default}"/>
     <Property name="APP_NAME" value="${sys:appName:-default}"/>
     <!-- 定义日志存储的路径 /${ctx:spring.application.name} -->
+    <!--<property name="BASE_DIR" value="./logger/${APP_NAME}/${APP_PROFILE}"/>-->
     <property name="BASE_DIR" value="${sys:user.dir}/logger"/>
   </Properties>
 
