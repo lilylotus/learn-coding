@@ -1,11 +1,11 @@
 package cn.nihility.common.util;
 
+import cn.nihility.common.http.CustomHttpClientBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -21,7 +21,6 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
@@ -30,8 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class DefaultHttpClientUtil {
@@ -64,13 +63,14 @@ public class DefaultHttpClientUtil {
     public static final boolean DEFAULT_USE_REAPER = true;
 
     private static HttpClientConnectionManager httpClientConnectionManager;
+    private static CloseableHttpClient defaultHttpClient;
 
     public static HttpClientConnectionManager createHttpClientConnectionManager() {
         SSLContext sslContext;
         try {
             sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
                 @Override
-                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                public boolean isTrusted(X509Certificate[] chain, String authType) {
                     return true;
                 }
             }).build();
@@ -78,7 +78,6 @@ public class DefaultHttpClientUtil {
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        //SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
             NoopHostnameVerifier.INSTANCE);
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
@@ -107,13 +106,16 @@ public class DefaultHttpClientUtil {
         connectionManager.setMaxTotal(DEFAULT_MAX_CONNECTIONS);
         connectionManager.setValidateAfterInactivity(DEFAULT_VALIDATE_AFTER_INACTIVITY);
         connectionManager.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(DEFAULT_SOCKET_TIMEOUT).setTcpNoDelay(true).build());
+
         IdleConnectionReaper.setIdleConnectionTime(DEFAULT_IDLE_CONNECTION_TIME);
         IdleConnectionReaper.registerConnectionManager(connectionManager);
 
         return connectionManager;
     }
 
-    public static HttpClientConnectionManager getDefaultHttpClientConnectionManager() {
+    /* ============================== private, inner invoke ============================== */
+
+    private static HttpClientConnectionManager createDefaultHttpClientConnectionManager() {
         HttpClientConnectionManager mgr = httpClientConnectionManager;
         if (mgr == null) {
             synchronized (DefaultHttpClientUtil.class) {
@@ -132,6 +134,22 @@ public class DefaultHttpClientUtil {
         return mgr;
     }
 
+    private static CloseableHttpClient createDefaultHttpClient() {
+        CloseableHttpClient client = defaultHttpClient;
+        if (client == null) {
+            synchronized (DefaultHttpClientUtil.class) {
+                client = defaultHttpClient;
+                if (client == null) {
+                    defaultHttpClient = createHttpClient(createDefaultHttpClientConnectionManager());
+                    client = defaultHttpClient;
+                }
+            }
+        }
+        return client;
+    }
+
+    /* ============================== public, outer invoke ============================== */
+
     public static String getDefaultUserAgent() {
         return "HttpClient/v1.0(" + System.getProperty("os.name") + "/"
             + System.getProperty("os.version") + "/" + System.getProperty("os.arch") + ";"
@@ -139,8 +157,9 @@ public class DefaultHttpClientUtil {
     }
 
     public static CloseableHttpClient createHttpClient(HttpClientConnectionManager connectionManager) {
-        return HttpClients.custom()
-            .setConnectionManager(connectionManager)
+        final CustomHttpClientBuilder builder = new CustomHttpClientBuilder();
+        builder.closeRemoveConnectionManager(connectionManager);
+        return builder.setConnectionManager(connectionManager)
             .setUserAgent(getDefaultUserAgent())
             .disableContentCompression()
             .disableAutomaticRetries()
@@ -148,7 +167,7 @@ public class DefaultHttpClientUtil {
     }
 
     public static CloseableHttpClient createHttpClient() {
-        return createHttpClient(getDefaultHttpClientConnectionManager());
+        return createHttpClient(createHttpClientConnectionManager());
     }
 
     public static RequestConfig createRequestConfig() {
@@ -171,7 +190,7 @@ public class DefaultHttpClientUtil {
             cookieStore = new BasicCookieStore();
         }
         HttpClientContext httpContext = HttpClientContext.create();
-        httpContext.setRequestConfig(DefaultHttpClientUtil.createRequestConfig());
+        httpContext.setRequestConfig(createRequestConfig());
         httpContext.setCookieStore(cookieStore);
         return httpContext;
     }
@@ -180,16 +199,21 @@ public class DefaultHttpClientUtil {
         return createHttpClientContext(null);
     }
 
-    public static <R> R executeHttpRequest(final HttpUriRequest request, Class<R> rt) {
-        try (CloseableHttpClient httpClient = createHttpClient();
-             CloseableHttpResponse httpResponse = httpClient.execute(request)) {
+    @SuppressWarnings("unchecked")
+    public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
+                                           final HttpUriRequest request,
+                                           final Class<R> rt) {
+        // 注意：HttpClient 池化管理，不需要关闭
+        try (CloseableHttpResponse httpResponse = httpClient.execute(request)) {
             StatusLine statusLine = httpResponse.getStatusLine();
             String respStringEntity = EntityUtils.toString(httpResponse.getEntity());
             if (logger.isDebugEnabled()) {
                 logger.debug("响应状态 [{}], 响应消息 [{}]", statusLine, respStringEntity);
             }
             if (StringUtils.isNotBlank(respStringEntity)) {
-                return JacksonUtil.readJsonString(respStringEntity, rt);
+                return rt.isAssignableFrom(String.class) ?
+                    (R) respStringEntity :
+                    JacksonUtil.readJsonString(respStringEntity, rt);
             }
         } catch (IOException e) {
             logger.error("请求 [{}] 异常", request.getURI(), e);
@@ -197,9 +221,14 @@ public class DefaultHttpClientUtil {
         return null;
     }
 
-    public static <R> R executePostRequestWithResult(final String url, final String jsonBody, Class<R> rt) {
+    public static <R> R executeHttpRequest(final HttpUriRequest request, Class<R> rt) {
+        // 注意：HttpClient 池化管理，不需要关闭
+        return executeHttpRequest(createDefaultHttpClient(), request, rt);
+    }
 
-        final HttpPost post = new HttpPost(url);
+    public static <R> R executePostRequestWithResult(final URI uri, final String jsonBody, Class<R> rt) {
+
+        final HttpPost post = new HttpPost(uri);
         post.addHeader("Content-Type", "application/json");
 
         if (null != jsonBody) {
@@ -208,16 +237,7 @@ public class DefaultHttpClientUtil {
             body.setContentType("application/json");
             post.setEntity(body);
         }
-
-        post.setConfig(createRequestConfig());
-
         return executeHttpRequest(post, rt);
-    }
-
-    public static <R> R executeGetRequestWithResult(final String url, Class<R> rt) {
-        HttpGet request = new HttpGet(url);
-        request.setConfig(createRequestConfig());
-        return executeHttpRequest(request, rt);
     }
 
 }

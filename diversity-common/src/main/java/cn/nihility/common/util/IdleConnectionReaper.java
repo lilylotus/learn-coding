@@ -29,20 +29,23 @@ public final class IdleConnectionReaper extends Thread {
         setDaemon(true);
     }
 
-    public static synchronized boolean registerConnectionManager(HttpClientConnectionManager connectionManager) {
+    public static synchronized void registerConnectionManager(HttpClientConnectionManager connectionManager) {
         if (instance == null) {
             instance = new IdleConnectionReaper();
             instance.start();
         }
-        return connectionManagers.add(connectionManager);
+        if (null != connectionManager) {
+            connectionManagers.add(connectionManager);
+        }
     }
 
-    public static synchronized boolean removeConnectionManager(HttpClientConnectionManager connectionManager) {
-        boolean b = connectionManagers.remove(connectionManager);
+    public static synchronized void removeConnectionManager(HttpClientConnectionManager connectionManager) {
+        if (null != connectionManager) {
+            connectionManagers.remove(connectionManager);
+        }
         if (connectionManagers.isEmpty()) {
             shutdown();
         }
-        return b;
     }
 
     private void markShuttingDown() {
@@ -54,26 +57,27 @@ public final class IdleConnectionReaper extends Thread {
         while (true) {
             if (shuttingDown) {
                 log.debug("Shutting down reaper thread.");
-                return;
+                break;
             }
 
             try {
                 Thread.sleep(REAP_INTERVAL_MILLISECONDS);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException ex) {
+                log.warn("中断异常", ex);
+                Thread.currentThread().interrupt();
             }
 
             synchronized (IdleConnectionReaper.class) {
                 final List<HttpClientConnectionManager> copy = new ArrayList<>(connectionManagers);
-                for (HttpClientConnectionManager connectionManager : copy) {
+                for (HttpClientConnectionManager cm : copy) {
                     try {
-                        connectionManager.closeExpiredConnections();
-                        connectionManager.closeIdleConnections(idleConnectionTime, TimeUnit.MILLISECONDS);
+                        cm.closeExpiredConnections();
+                        cm.closeIdleConnections(idleConnectionTime, TimeUnit.MILLISECONDS);
                     } catch (Exception ex) {
                         log.warn("Unable to close idle connections", ex);
                     }
                 }
             }
-
         }
     }
 

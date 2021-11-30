@@ -29,11 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class HttpClientTest {
 
     @Test
-    void testHttpClient() {
-
-    }
-
-    @Test
     void testNormalHttpClientRequestGet() throws IOException {
         final HttpClientConnectionManager connectionManager = DefaultHttpClientUtil.createHttpClientConnectionManager();
         final CloseableHttpClient httpClient = DefaultHttpClientUtil.createHttpClient(connectionManager);
@@ -120,9 +115,7 @@ class HttpClientTest {
                 System.out.println(httpResponse.getFirstHeader("Set-Cookie").getValue());
             }
 
-            cookieStore.getCookies().forEach(cookie -> {
-                System.out.println(cookie.getName() + " : " + cookie.getValue());
-            });
+            cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -132,11 +125,46 @@ class HttpClientTest {
     void testExecuteApplicationJsonPostWithResult() {
         String url = "http://127.0.0.1:8080/urm/welcome";
         String body = "{\"id\": \"randomId\", \"name\": \"randomName\"}";
-        UnifyResult result = DefaultHttpClientUtil.executePostRequestWithResult(url, body, UnifyResult.class);
+        UnifyResult result = DefaultHttpClientUtil.executePostRequestWithResult(
+            RequestUtil.buildUri(url, null), body, UnifyResult.class);
         Assertions.assertNotNull(result);
         Assertions.assertEquals(200, result.getCode());
     }
 
+    @Test
+    void testGetResultString() {
+        HttpGet get = new HttpGet("http://127.0.0.1:30010/login/auth/user");
+        get.addHeader("Authorization", "xxx");
+        String result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        Assertions.assertNotNull(result);
+        System.out.println(result);
 
+        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        System.out.println(result);
+
+        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        System.out.println(result);
+
+        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        System.out.println(result);
+
+        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        System.out.println(result);
+    }
+
+    @Test
+    void testGetResultString2() {
+        HttpGet get = new HttpGet("http://127.0.0.1:30010/login/auth/user");
+        get.addHeader("Authorization", "xxx");
+        CloseableHttpClient httpClient = DefaultHttpClientUtil.createHttpClient();
+        String result = DefaultHttpClientUtil.executeHttpRequest(httpClient, get, String.class);
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Assertions.assertNotNull(result);
+        System.out.println(result);
+    }
 
 }
