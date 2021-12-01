@@ -1,12 +1,15 @@
 package cn.nihility.plugin.rabbitmq.config;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.ReturnedMessage;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 
@@ -48,6 +51,9 @@ public class PluginRabbitmqConfiguration {
         return template;
     }
 
+    /**
+     * 按照 json 序列化来处理消息
+     */
     @Bean
     public RabbitTemplate rabbitTemplateJson(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate();
@@ -70,6 +76,16 @@ public class PluginRabbitmqConfiguration {
         return rabbitTemplate;
     }
 
+    @Bean
+    public RabbitListenerContainerFactory<SimpleMessageListenerContainer> rabbitListenerContainerFactoryJson(ConnectionFactory connectionFactory){
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+        // json 序列化时，若想手动 ACK，则必须配置
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        return factory;
+    }
+
     /**
      * 确保消息从 producer 到 rabbitmq broker 发送消息成功。
      * 消息被 broker 接收到只能表示已经到达 MQ 服务器，并不能保证消息一定会被投递到目标 queue
@@ -77,6 +93,10 @@ public class PluginRabbitmqConfiguration {
     static class ConfirmCallbackServiceImpl implements RabbitTemplate.ConfirmCallback {
 
         private static final Logger logger = LoggerFactory.getLogger(ConfirmCallbackServiceImpl.class);
+
+        private String getCorrelationDataId(CorrelationData data) {
+            return null == data ? "" : data.getId();
+        }
 
         /**
          * 确认消息是否发送到 rabbitmq broker
@@ -89,10 +109,10 @@ public class PluginRabbitmqConfiguration {
         public void confirm(CorrelationData correlationData, boolean ack, String cause) {
             if (ack) {
                 logger.info("消息发送到 broker 成功，correlationData [{}], act [{}], cause [{}]",
-                    correlationData.getId(), ack, cause);
+                    getCorrelationDataId(correlationData), ack, cause);
             } else {
                 logger.warn("消息发送到 broker 异常，correlationData [{}], act [{}], cause [{}]",
-                    correlationData.getId(), ack, cause);
+                    getCorrelationDataId(correlationData), ack, cause);
             }
         }
 
@@ -111,7 +131,7 @@ public class PluginRabbitmqConfiguration {
          */
         @Override
         public void returnedMessage(ReturnedMessage rm) {
-            logger.info("消息投递 Queue 响应, message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
+            logger.info("Rabbitmq 的 broker 交换机向 Queue 投递消息失败，响应 message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
                 rm.getMessage(), rm.getReplyCode(), rm.getReplyText(), rm.getExchange(), rm.getRoutingKey());
         }
 

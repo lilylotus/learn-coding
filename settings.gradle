@@ -1,22 +1,33 @@
 rootProject.name = 'diversity'
 
-include 'demonstration'
 include 'diversity-api'
 include 'diversity-common'
-include 'plugins'
+
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
 include 'plugins:plugin-redis'
 include 'plugins:plugin-mybatis'
+include 'plugins:plugin-rabbitmq'
+
+include 'demonstration:demo'
+include 'demonstration:rabbitmq-producer'
+include 'demonstration:rabbitmq-consumer'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'
 findProject(':plugins:plugin-redis')?.name = 'plugin-redis'
 findProject(':plugins:plugin-mybatis')?.name = 'plugin-mybatis'
-
-findProject(':plugins').children.each {
-    project -> println "project [" + project.name + "]"
-}
-include 'plugins:plugin-rabbitmq'
 findProject(':plugins:plugin-rabbitmq')?.name = 'plugin-rabbitmq'
+
+findProject(':demonstration:demo')?.name = 'demo'
+findProject(':demonstration:rabbitmq-producer')?.name = 'rabbitmq-producer'
+findProject(':demonstration:rabbitmq-consumer')?.name = 'rabbitmq-consumer'
+
+findProject(':demonstration').children.each {
+    project -> println "demonstration [" + project.name + "]"
+}
+findProject(':plugins').children.each {
+    project -> println "plugins [" + project.name + "]"
+}
+
 
