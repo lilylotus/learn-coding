@@ -5,10 +5,9 @@ configurations {
 
 dependencies {
 
-    implementation project(":plugins:plugin-log4j2")
-    implementation project(":diversity-common")
-    implementation project(":plugins:plugin-redis")
-
+    compile(project(":diversity-common"))
+    compile(project(":plugins:plugin-redis"))
+    compile(project(":plugins:plugin-log4j2"))
     compile('org.springframework.boot:spring-boot-starter-web')
 
 }
