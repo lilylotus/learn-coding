@@ -4,8 +4,8 @@ configurations {
 }
 
 dependencies {
-    compile("com.fasterxml.jackson.core:jackson-databind")
-    compile("org.springframework.boot:spring-boot-starter-amqp")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    api("org.springframework.boot:spring-boot-starter-amqp")
 
-    testCompile(project(":plugins:plugin-log4j2"))
+    testImplementation(project(":plugins:plugin-log4j2"))
 }

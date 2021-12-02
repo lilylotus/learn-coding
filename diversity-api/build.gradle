@@ -3,11 +3,15 @@ configurations {
     all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
 }
 
+/*configurations.all {
+    exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
+}*/
+
 dependencies {
 
-    compile(project(":diversity-common"))
-    compile(project(":plugins:plugin-redis"))
-    compile(project(":plugins:plugin-log4j2"))
-    compile('org.springframework.boot:spring-boot-starter-web')
+    implementation(project(":diversity-common"))
+    implementation(project(":plugins:plugin-redis"))
+    implementation(project(":plugins:plugin-log4j2"))
+    api('org.springframework.boot:spring-boot-starter-web')
 
 }

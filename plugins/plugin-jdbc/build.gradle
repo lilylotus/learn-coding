@@ -1,7 +1,5 @@
 
 dependencies {
-
-    compile('org.springframework.boot:spring-boot-starter-data-jdbc')
-    compile("mysql:mysql-connector-java:${mysqlVersion}")
-
+    api('org.springframework.boot:spring-boot-starter-data-jdbc')
+    api("mysql:mysql-connector-java:${mysqlVersion}")
 }

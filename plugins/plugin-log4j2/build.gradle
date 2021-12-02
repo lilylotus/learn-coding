@@ -6,9 +6,9 @@ configurations {
 dependencies {
     compileOnly('org.springframework.boot:spring-boot-starter-web')
 
-    compile('org.springframework.boot:spring-boot-starter-log4j2')
+    api('org.springframework.boot:spring-boot-starter-log4j2')
     /* log4j2 web 项目需要 */
-    compile("org.apache.logging.log4j:log4j-web")
+    api("org.apache.logging.log4j:log4j-web")
     /* log4j2 异步日志所需 */
-    compile("com.lmax:disruptor:3.4.2")
+    api("com.lmax:disruptor:3.4.2")
 }

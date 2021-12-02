@@ -1,15 +1,15 @@
 
 dependencies {
     compileOnly("org.slf4j:slf4j-api")
-    compile("com.fasterxml.jackson.core:jackson-core")
-    compile("com.fasterxml.jackson.core:jackson-databind")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    compile("org.apache.commons:commons-lang3:${commonsLang3Version}")
+    implementation("com.fasterxml.jackson.core:jackson-core")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    api("org.apache.commons:commons-lang3:${commonsLang3Version}")
     // jwt
-    compile("com.auth0:java-jwt:3.18.2")
-    compile("io.jsonwebtoken:jjwt:0.9.1")
-    compile("commons-codec:commons-codec:1.15")
+    api("com.auth0:java-jwt:3.18.2")
+    api("io.jsonwebtoken:jjwt:0.9.1")
+    api("commons-codec:commons-codec:1.15")
     // http client
-    compile("org.apache.httpcomponents:httpmime:4.5.13")
-    compile("org.apache.httpcomponents:httpclient:4.5.13")
+    api("org.apache.httpcomponents:httpmime:${httpClientVersion}")
+    api("org.apache.httpcomponents:httpclient:${httpClientVersion}")
 }
