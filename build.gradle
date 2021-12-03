@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.13'
+    id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'java-library'
@@ -24,11 +24,10 @@ allprojects {
     apply plugin: 'java-library'
 
     group 'cn.nihility'
-
-    sourceCompatibility = 1.8
+    sourceCompatibility = '1.8'
 
     ext {
-        set('springBootVersion', "2.4.13")
+        /*set('springBootVersion', "2.4.13")*/
     }
 
     repositories {
@@ -39,17 +38,15 @@ allprojects {
 
     dependencies {
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-        testImplementation('org.springframework.boot:spring-boot-starter-test') {
-            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        }
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 
-    /*dependencyManagement {
+    dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-            mavenBom "org.springframework.security:spring-security-bom:${springSecurityVersion}"
+            /*mavenBom "org.springframework.security:spring-security-bom:${springSecurityVersion}"*/
         }
-    }*/
+    }
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'

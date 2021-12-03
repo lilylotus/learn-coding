@@ -1,0 +1,17 @@
+server:
+  port: 30030
+
+frofile:
+  value: Inner Jar application.yml value
+
+spring:
+  profiles:
+    active: pro
+
+property:
+  propertyName: property姓名
+  property-age: 20
+
+another:
+  propertyName: anotherProperty姓名
+  property-age: 18

@@ -3,6 +3,9 @@ rootProject.name = 'diversity'
 include 'diversity-api'
 include 'diversity-common'
 
+include 'cloud:eureka-server'
+include 'cloud:eureka-client'
+
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
 include 'plugins:plugin-redis'
@@ -10,8 +13,14 @@ include 'plugins:plugin-mybatis'
 include 'plugins:plugin-rabbitmq'
 
 include 'demonstration:demo'
+include 'demonstration:profile-load-test'
 include 'demonstration:rabbitmq-producer'
 include 'demonstration:rabbitmq-consumer'
+
+//project(':cloud:eureka-server').projectDir = file("$rootDir/cloud/eureka-server")
+
+findProject(':cloud:eureka-server')?.name = 'eureka-server'
+findProject(':cloud:eureka-client')?.name = 'eureka-client'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'
@@ -20,14 +29,16 @@ findProject(':plugins:plugin-mybatis')?.name = 'plugin-mybatis'
 findProject(':plugins:plugin-rabbitmq')?.name = 'plugin-rabbitmq'
 
 findProject(':demonstration:demo')?.name = 'demo'
+findProject(':demonstration:profile-load-test')?.name = 'profile-load-test'
 findProject(':demonstration:rabbitmq-producer')?.name = 'rabbitmq-producer'
 findProject(':demonstration:rabbitmq-consumer')?.name = 'rabbitmq-consumer'
 
-findProject(':demonstration').children.each {
-    project -> println "demonstration [" + project.name + "]"
+findProject(':cloud').children.each {
+    project -> println "cloud [" + project.name + "]"
 }
 findProject(':plugins').children.each {
     project -> println "plugins [" + project.name + "]"
 }
-
-
+findProject(':demonstration').children.each {
+    project -> println "demonstration [" + project.name + "]"
+}

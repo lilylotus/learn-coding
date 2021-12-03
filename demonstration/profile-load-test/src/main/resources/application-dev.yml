@@ -1,0 +1,5 @@
+server:
+  port: 30050
+
+frofile:
+  value: Inner Jar application-dev.yml value

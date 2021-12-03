@@ -1,0 +1,24 @@
+server:
+  port: 31000
+
+spring:
+  application:
+    name: CloudEurekaClient
+
+eureka:
+  instance:
+    hostname: localhost
+    preferIpAddress: false
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+    healthcheck:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["info", "health"]

@@ -1,0 +1,20 @@
+server:
+  port: 31001
+
+eureka:
+  instance:
+    hostname: es1
+    # true - 使用 ip 地址
+    preferIpAddress: false
+  server:
+    # 自我保护
+    enableSelfPreservation: true
+    # 剔除服务间隔，单位毫秒
+    evictionIntervalTimerInMs: 60000
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://es2:31002/eureka/,http://es3:31003/eureka/
+    healthcheck:
+      enabled: true

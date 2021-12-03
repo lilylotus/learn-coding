@@ -12,6 +12,9 @@ public final class NetworkUtil {
 
     private static final Logger log = LoggerFactory.getLogger(NetworkUtil.class);
 
+    public static final String LOOPBACK_ADDRESS = "127.0.0.1";
+    public static final String LOCAL_HOST_NAME = "localhost";
+
     private NetworkUtil() {
     }
 
@@ -53,7 +56,7 @@ public final class NetworkUtil {
         } catch (SocketException e) {
             log.error("Get Local IP Address Error", e);
         }
-        return "127.0.0.1";
+        return LOOPBACK_ADDRESS;
     }
 
     /**
@@ -66,7 +69,7 @@ public final class NetworkUtil {
                 hostName = InetAddress.getLocalHost().getHostName();
             } catch (UnknownHostException e) {
                 log.error("Get LocalHost Name Error", e);
-                hostName = "default";
+                hostName = LOCAL_HOST_NAME;
             }
         }
         return hostName;

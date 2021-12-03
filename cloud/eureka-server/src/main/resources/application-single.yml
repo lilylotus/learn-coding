@@ -1,0 +1,20 @@
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+    # true - 使用 ip 地址
+    preferIpAddress: true
+  server:
+    # 自我保护
+    enableSelfPreservation: true
+    # 剔除服务间隔，单位毫秒
+    evictionIntervalTimerInMs: 60000
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+    healthcheck:
+      enabled: true
