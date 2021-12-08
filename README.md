@@ -32,6 +32,13 @@ In Gradle 7, both the `compile` and `runtime` configurations are removed. Theref
 | `requires static`            | `compileOnly`        | Declaring compile only dependencies     |
 | `requires static transitive` | `compileOnlyApi`     | Declaring compile only API dependencies |
 
+# Spring Cloud 匹配的 Spring Boot 版本
+
+| Spring Cloud Version  | Spring Boot Version        |
+| :-------------------- | :------------------------ |
+| Hoxton.SR12           | 2.3.12.RELEASE            |
+| 2020.0.4-SNAPSHOT     | 2.4.10                    |
+
 # Spring Boot v2.4.x 开始，配置文件处理方式改变
 
 Spring Boot 2.4 版本开始对 `application.properties` 和 `application.yml` 文件的处理方式进行了彻底的修改。

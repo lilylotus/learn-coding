@@ -5,6 +5,7 @@ include 'diversity-common'
 
 include 'cloud:eureka-server'
 include 'cloud:eureka-client'
+include 'cloud:openfeign'
 
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
@@ -21,6 +22,7 @@ include 'demonstration:rabbitmq-consumer'
 
 findProject(':cloud:eureka-server')?.name = 'eureka-server'
 findProject(':cloud:eureka-client')?.name = 'eureka-client'
+findProject(':cloud:openfeign')?.name = 'openfeign'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'

@@ -3,7 +3,7 @@ spring:
     name: CloudEurekaServer
   profiles:
     # single, v1, v2, v3
-    active: v1
+    active: single
 
 management:
   endpoints:
