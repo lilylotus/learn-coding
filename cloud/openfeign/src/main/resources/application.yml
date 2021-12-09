@@ -38,6 +38,35 @@ feign:
         readTimeout: 3000
         loggerLevel: BASIC
 
+# 默认 SemaphoreBulkhead - 信号量
+resilience4j.bulkhead:
+  configs:
+    default:
+      # 舱壁允许的最大并行执行量
+      maxConcurrentCalls: 4
+      # 尝试进入饱和舱壁时，应阻塞线程的最长时间。
+      maxWaitDuration: 20ms
+  instances:
+    DefaultBulkhead:
+      baseConfig: default
+    SpecificBulkhead:
+      maxWaitDuration: 10ms
+      maxConcurrentCalls: 6
+# FixedThreadPoolBulkhead
+resilience4j.thread-pool-bulkhead:
+  configs:
+    default:
+      maxThreadPoolSize: 4
+      coreThreadPoolSize: 2
+      queueCapacity: 2
+  instances:
+    DefaultThreadPoolBulkhead:
+      baseConfig: default
+    SpecificThreadPoolBulkhead:
+      maxThreadPoolSize: 2
+      coreThreadPoolSize: 2
+      queueCapacity: 2
+
 management:
   endpoints:
     web:

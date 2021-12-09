@@ -39,6 +39,14 @@ In Gradle 7, both the `compile` and `runtime` configurations are removed. Theref
 | Hoxton.SR12           | 2.3.12.RELEASE            |
 | 2020.0.4-SNAPSHOT     | 2.4.10                    |
 
+# Spring Cloud 重要版本修改
+
+## Hystrix 从 Spring Cloud Netflix 移除
+`@EnableCircuitBreaker` as of the 3.0.1 release. Hystrix has been removed from Spring Cloud Netflix。
+
+取而代之的是 `Resilience4J Circuit Breakers`. 
+[resilience4j-circuit-breakers](https://docs.spring.io/spring-cloud-circuitbreaker/docs/2.0.3-SNAPSHOT/reference/html/#configuring-resilience4j-circuit-breakers)
+
 # Spring Boot v2.4.x 开始，配置文件处理方式改变
 
 Spring Boot 2.4 版本开始对 `application.properties` 和 `application.yml` 文件的处理方式进行了彻底的修改。

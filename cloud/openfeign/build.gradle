@@ -2,8 +2,14 @@
 dependencies {
     implementation(project(":diversity-common"))
     api("org.springframework.boot:spring-boot-starter-web")
+    // Resilience4j Bulkhead 依赖于 Spring AOP
+    api("org.springframework.boot:spring-boot-starter-aop")
     api("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     api("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+    // hystrix 已经从 netflix 移除
+    //implementation("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
+    implementation("io.github.resilience4j:resilience4j-bulkhead")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 }
