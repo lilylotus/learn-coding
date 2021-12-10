@@ -13,5 +13,6 @@ dependencies {
     implementation(project(":plugins:plugin-redis"))
     implementation(project(":plugins:plugin-log4j2"))
     api('org.springframework.boot:spring-boot-starter-web')
+    api('org.springframework.boot:spring-boot-starter-thymeleaf')
 
 }

@@ -4,9 +4,9 @@ server:
 frofile:
   value: Inner Jar application.yml value
 
-spring:
-  profiles:
-    active: pro
+#spring:
+#  profiles:
+#    active: pro
 
 property:
   propertyName: property姓名
@@ -15,3 +15,7 @@ property:
 another:
   propertyName: anotherProperty姓名
   property-age: 18
+
+logging:
+  level:
+    org.apache.http.impl.conn.PoolingHttpClientConnectionManager: info

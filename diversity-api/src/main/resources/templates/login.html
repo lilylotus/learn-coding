@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+
+<form action="/cas/auth/password/login" method="post">
+    <p>
+        <label for="username">用户名：</label>
+        <input id="username" type="text" name="username"/> <br/>
+    </p>
+    <p>
+        <label for="password">密码：</label>
+        <input id="password" type="password" name="password"/> <br/>
+    </p>
+    <!--<input name="_csrf" type="hidden" value="1bb16687-e11f-4f9b-ae2e-3f9a3eaab491">-->
+    <input type="submit" value="登录">
+</form>
+
+</body>
+</html>
