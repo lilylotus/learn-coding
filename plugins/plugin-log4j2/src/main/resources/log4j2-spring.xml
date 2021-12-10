@@ -50,7 +50,7 @@
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="10">
         <!-- testMode=true，实际的文件不会被删除，打印删除日志 -->
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/all" maxDepth="1">
+        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/all" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-all*.gz"/>
@@ -82,7 +82,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/debug" maxDepth="1">
+        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/debug" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-debug*.gz"/>
@@ -116,7 +116,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/info" maxDepth="1">
+        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/info" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-info*.gz"/>
@@ -143,7 +143,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件，这里设置了 20 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/warn" maxDepth="1">
+        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/warn" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-warn*.gz"/>
@@ -167,7 +167,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/error" maxDepth="1">
+        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/error" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-error*.gz"/>
@@ -198,6 +198,8 @@
     </Logger>
 
     <Logger name="org.redisson.connection.DNSMonitor" level="INFO"/>
+    <Logger name="org.apache.http.impl.conn" level="INFO"/>
+    <Logger name="org.thymeleaf" level="INFO"/>
 
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>

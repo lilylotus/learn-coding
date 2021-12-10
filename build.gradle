@@ -71,5 +71,6 @@ task cleanAll(type: Delete, dependsOn: [clean]) {
         /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/
         println "clean [$it.projectDir\\out]"
         delete "$it.projectDir\\out"
+        delete "$it.projectDir\\build"
     })
 }
