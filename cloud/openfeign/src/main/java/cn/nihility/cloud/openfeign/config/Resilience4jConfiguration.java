@@ -23,7 +23,7 @@ public class Resilience4jConfiguration {
     @Bean
     public Customizer<Resilience4JCircuitBreakerFactory> defaultResilience4JCircuitBreakerCustomizer() {
         return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
-            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(4)).build())
+            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(2)).build())
             .circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
             .build());
     }

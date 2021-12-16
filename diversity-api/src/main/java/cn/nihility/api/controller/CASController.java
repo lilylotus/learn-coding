@@ -28,7 +28,8 @@ public class CASController {
 
     private static final Logger logger = LoggerFactory.getLogger(CASController.class);
 
-    private static final String TGT = "TGT";
+    //private static final String TGT = "TGT";
+    private static final String CAS_TGC = "CASTGC";
     private static final String TICKET = "ticket";
     private static final String ST_PREFIX = "ST-";
     private static final String COOKIE_JSESSIONID = "JSESSIONID";
@@ -99,7 +100,7 @@ public class CASController {
 
         logRequestCookies(request);
 
-        final String tgt = RequestUtil.obtainHttpRequestCookieValue(TGT, request);
+        final String tgt = RequestUtil.obtainHttpRequestCookieValue(CAS_TGC, request);
         String jsessionid = RequestUtil.obtainCookieJSESSIONID(request);
         logger.info("CAS Auth Service [{}] TGT [{}] JSESSIONID [{}]", service, tgt, jsessionid);
         if (null != jsessionid) {
@@ -136,7 +137,7 @@ public class CASController {
 
         String uuid = ST_PREFIX + UuidUtil.jdkUUID();
         logger.info("CAS ticket = [{}]", uuid);
-        RequestUtil.addCookie(TGT, uuid, CAS_DOMAIN, CAS_COOKIE_PATH, 3600, response);
+        RequestUtil.addCookie(CAS_TGC, uuid, null, CAS_COOKIE_PATH, 3600, response);
 
         /*redirectAttributes.addAttribute(TICKET, uuid);
         String serviceUrl = RequestUtil.urlParamsEncode(service);*/

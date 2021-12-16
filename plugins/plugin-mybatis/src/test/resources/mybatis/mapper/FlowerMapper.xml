@@ -18,4 +18,12 @@
     VALUES (#{id}, #{nameEnglish}, #{nameChinese}, #{age}, now(), now())
   </insert>
 
+  <insert id="batchInsertListEntity" parameterType="list">
+    INSERT INTO flower (id, name_english, name_chinese, age, add_time, update_time)
+    VALUES
+    <foreach collection="flowerList" item="item" separator=",">
+      (#{item.id}, #{item.nameEnglish}, #{item.nameChinese}, #{item.age}, #{item.addTime}, #{item.updateTime})
+    </foreach>
+  </insert>
+
 </mapper>

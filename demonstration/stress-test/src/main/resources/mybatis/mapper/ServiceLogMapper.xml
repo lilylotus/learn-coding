@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.nihility.demo.stress.mapper.ServiceLogMapper">
+
+  <insert id="insertByEntity" parameterType="serviceLog">
+    INSERT INTO service_log (id, operation, content, add_by, update_by, add_time, update_time)
+    VALUES (#{id}, #{operation}, #{content}, #{addBy}, #{updateBy}, #{addTime}, #{updateTime})
+  </insert>
+
+</mapper>

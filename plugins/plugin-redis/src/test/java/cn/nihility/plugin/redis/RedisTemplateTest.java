@@ -4,9 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStringCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.types.Expiration;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +26,19 @@ class RedisTemplateTest {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Test
+    void testNX() {
+        assertNotNull(stringRedisTemplate);
+        RedisConnectionFactory factory = stringRedisTemplate.getConnectionFactory();
+        assertNotNull(factory);
+        try (RedisConnection conn = factory.getConnection()) {
+            Boolean ok = conn.set("buy:nx_lock_key".getBytes(StandardCharsets.UTF_8),
+                "nx_lock_value".getBytes(StandardCharsets.UTF_8),
+                Expiration.seconds(100L), RedisStringCommands.SetOption.SET_IF_ABSENT);
+            assertEquals(Boolean.TRUE, ok);
+        }
+    }
 
     @Test
     void testGetValue() {
