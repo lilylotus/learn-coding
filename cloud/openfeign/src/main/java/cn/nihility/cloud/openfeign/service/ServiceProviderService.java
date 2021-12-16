@@ -28,7 +28,7 @@ public class ServiceProviderService {
         return UnifyResultUtil.success(serviceProviderClient.randomTimeOut());
     }
 
-    @CircuitBreaker(name = "slowRandomTimeOut", fallbackMethod = "randomTimeOutFallback")
+    @CircuitBreaker(name = "slowRandomTimeOut", fallbackMethod = "circuitBreakerWithExceptionFallback")
     public UnifyResult circuitBreakerWithException() {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }
@@ -38,14 +38,19 @@ public class ServiceProviderService {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }
 
-    public UnifyResult randomTimeOutFallback(Exception ex) {
-        logger.error("CircuitBreaker randomTimeOut fallback", ex);
-        return UnifyResultUtil.failure("randomTimeOutFallback [" + ex.getMessage() + "]");
+    public UnifyResult circuitBreakerWithExceptionFallback(Throwable ex) {
+        logger.error("CircuitBreaker slowRandomTimeOut fallback", ex);
+        return UnifyResultUtil.failure("slowRandomTimeOut [" + ex.getMessage() + "]");
     }
 
-    public UnifyResult slowBulkheadFallback(Exception ex) {
-        logger.error("CircuitBreaker slowBulkheadFallback fallback", ex);
-        return UnifyResultUtil.failure("slowBulkheadFallback [" + ex.getMessage() + "]");
+    public UnifyResult randomTimeOutFallback(Throwable ex) {
+        logger.error("CircuitBreaker randomTimeOut fallback", ex);
+        return UnifyResultUtil.failure("randomTimeOut [" + ex.getMessage() + "]");
+    }
+
+    public UnifyResult slowBulkheadFallback(Throwable ex) {
+        logger.error("CircuitBreaker slowBulkhead fallback", ex);
+        return UnifyResultUtil.failure("slowBulkhead [" + ex.getMessage() + "]");
     }
 
 }
