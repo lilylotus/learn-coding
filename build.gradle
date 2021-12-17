@@ -61,6 +61,11 @@ allprojects {
 }
 
 subprojects {
+
+    configurations {
+        all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
+    }
+
     dependencies {
         //implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
     }

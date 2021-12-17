@@ -1,0 +1,99 @@
+server:
+  port: 31020
+
+spring:
+  application:
+    name: Resilience4j
+
+# 熔断器配置
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      # 熔断器关闭时的缓冲区大小
+      ringBufferSizeInClosedState: 5
+      # 熔断器半开时的缓冲区大小
+      ringBufferSizeInHalfOpenState: 2
+      # 熔断器从打开到半开需要的时间
+      waitDurationInOpenState: 10000
+      # 熔断器打开的失败阈值
+      failureRateThreshold: 60
+      # 事件缓冲区大小
+      eventConsumerBufferSize: 10
+      # 健康监测
+      registerHealthIndicator: true
+      # 是否自动从打开到半开，不需要新请求触发, true - 自定触发
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      # 谓词设置异常是否为失败, 0.16.0
+      #recordFailurePredicate: cn.nihility.cloud.resilience4j.service.RecordFailurePredicate
+      recordExceptions: # 记录的异常
+        - cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionA
+        - cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionB
+      ignoreExceptions: # 忽略的异常
+        - cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionA
+  instances:
+    CircuitBreakerA:
+      baseConfig: default
+      # 从 HALF_OPEN 到 OPEN 状态需要等待时间 ms
+      waitDurationInOpenState: 5000
+      failureRateThreshold: 20
+    CircuitBreakerB:
+      baseConfig: default
+# 对方法调用进行超时控制
+resilience4j.timelimiter:
+  configs:
+    default:
+      # 超时时长
+      timeoutDuration: 3000
+      # 发生异常是否关闭线程
+      cancelRunningFuture: true
+  instances:
+    TimeLimiterA:
+      baseConfig: default
+      timeoutDuration: 2000
+      cancelRunningFuture: true
+# 重试组件
+resilience4j.retry:
+  configs:
+    default:
+      maxRetryAttempts: 3
+      waitDuration: 5s
+      # 是否允许使用指数退避算法进行重试间隔时间的计算
+      enableExponentialBackoff: true
+      # 指数退避算法的乘数
+      expontialBackoffMultiplier: 2
+      # 是否允许使用随机的重试间隔
+      enableRandomizedWait: false
+      # 随机因子
+      randomizedWaitFactor: 0.5
+      resultPredicate: cn.nihility.cloud.resilience4j.predicate.RetryOnResultPredicate
+      retryExceptionPredicate: cn.nihility.cloud.resilience4j.predicate.RetryOnExceptionPredicate
+      retryExceptions:
+        - cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionA
+        - cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionB
+        - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+      ignoreExceptions:
+        - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+  instances:
+    RetryA:
+      baseConfig: default
+      waitDuration: 2s
+    RetryB:
+      baseConfig: default
+      maxRetryAttempts: 2
+# 1. 基于信号量 2. 基于有等待队列的固定大小的线程池
+resilience4j.bulkhead:
+  configs:
+    default:
+      maxConcurrentCalls: 10
+      maxWaitDuration: 1000
+  instances:
+    BulkheadA:
+      baseConfig: default
+      maxConcurrentCalls: 3
+    BackendB:
+      baseConfig: default
+      maxWaitDuration: 100
+
+logging:
+  level:
+    io.github.resilience4j.circuitbreaker.internal.CircuitBreakerStateMachine: info

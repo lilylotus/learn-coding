@@ -1,4 +1,4 @@
-package cn.nihility.cloud.openfeign.exception;
+package cn.nihility.cloud.resilience4j.exception;
 
 public class CircuitBreakerExceptionA extends RuntimeException {
 

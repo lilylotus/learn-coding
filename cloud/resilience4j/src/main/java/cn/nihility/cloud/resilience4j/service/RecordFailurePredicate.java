@@ -1,6 +1,6 @@
-package cn.nihility.cloud.openfeign.service;
+package cn.nihility.cloud.resilience4j.service;
 
-import cn.nihility.cloud.openfeign.exception.CircuitBreakerExceptionA;
+import cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionA;
 
 import java.util.function.Predicate;
 

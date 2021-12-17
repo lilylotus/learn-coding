@@ -3,9 +3,10 @@ rootProject.name = 'diversity'
 include 'diversity-api'
 include 'diversity-common'
 
+include 'cloud:openfeign'
+include 'cloud:resilience4j'
 include 'cloud:eureka-server'
 include 'cloud:eureka-client'
-include 'cloud:openfeign'
 
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
@@ -21,9 +22,10 @@ include 'demonstration:rabbitmq-consumer'
 
 //project(':cloud:eureka-server').projectDir = file("$rootDir/cloud/eureka-server")
 
+findProject(':cloud:openfeign')?.name = 'openfeign'
+findProject(':cloud:resilience4j')?.name = 'resilience4j'
 findProject(':cloud:eureka-server')?.name = 'eureka-server'
 findProject(':cloud:eureka-client')?.name = 'eureka-client'
-findProject(':cloud:openfeign')?.name = 'openfeign'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'

@@ -3,7 +3,7 @@
 <!-- 日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
 <!-- Configuration 后面的 status，设置 log4j2 自身内部的信息输出，可以不设置，trace 时会看到 log4j2 内部各种详细输出 -->
 <!-- monitorInterval: Log4j 能够自动检测修改配置 文件和重新配置本身，设置间隔秒数 -->
-<configuration status="INFO" monitorInterval="60">
+<configuration status="DEBUG" monitorInterval="60">
 
   <!--变量配置-->
   <Properties>
@@ -29,8 +29,8 @@
     </console>
 
     <!-- 打印出 >= DEBUG 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingFile name="RollingFileAll" fileName="${BASE_DIR}/rolling-file-all.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/all/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileAll" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-all.log"
+                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/all/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -43,14 +43,14 @@
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="10 MB"/>
       </Policies>
       <!-- Seconds(0-59) Minutes(0-59) Hours(0-23) Day-of-mouth(1-31) Mount(1-11) Day-of-week(1-7) Year(Optional) -->
       <!--<CronTriggeringPolicy schedule="0/10 * * * * ?"/>-->
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="10">
+      <DefaultRolloverStrategy max="20">
         <!-- testMode=true，实际的文件不会被删除，打印删除日志 -->
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/all" maxDepth="2">
+        <Delete basePath="${BASE_DIR}/${date:yyyyMMdd}/all" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-all*.gz"/>
@@ -62,8 +62,8 @@
     </RollingFile>
 
     <!-- 打印出 debug 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingFile name="RollingFileDebug" fileName="${BASE_DIR}/rolling-file-debug.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/debug/rolling-file-debug-%d{yyyyMMddHH}-%i.log.gz">
+    <RollingFile name="RollingFileDebug" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-debug.log"
+                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/debug/rolling-file-debug-%d{yyyyMMddHH}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
@@ -82,7 +82,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/debug" maxDepth="2">
+        <Delete basePath="${BASE_DIR}/${date:yyyyMMdd}/debug" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-debug*.gz"/>
@@ -94,8 +94,8 @@
     </RollingFile>
 
     <!-- 打印出 info 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingFile name="RollingFileInfo" fileName="${BASE_DIR}/rolling-file-info.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/info/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileInfo" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-info.log"
+                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/info/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
@@ -116,7 +116,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/info" maxDepth="2">
+        <Delete basePath="${BASE_DIR}/${date:yyyyMMdd}/info" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-info*.gz"/>
@@ -128,8 +128,8 @@
     </RollingFile>
 
     <!-- 打印 warn 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingFile name="RollingFileWarn" fileName="${BASE_DIR}/rolling-file-warn.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/warn/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileWarn" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-warn.log"
+                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/warn/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立) -->
@@ -143,7 +143,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件，这里设置了 20 -->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/warn" maxDepth="2">
+        <Delete basePath="${BASE_DIR}/${date:yyyyMMdd}/warn" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-warn*.gz"/>
@@ -155,8 +155,8 @@
     </RollingFile>
 
     <!-- 打印 error 级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
-    <RollingFile name="RollingFileError" fileName="${BASE_DIR}/rolling-file-error.log"
-                 filePattern="${BASE_DIR}/$${date:yyyyMMdd}/error/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileError" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-error.log"
+                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/error/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
       <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -167,7 +167,7 @@
       </Policies>
       <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
       <DefaultRolloverStrategy max="20">
-        <Delete basePath="${BASE_DIR}/$${date:yyyyMMdd}/error" maxDepth="2">
+        <Delete basePath="${BASE_DIR}/${date:yyyyMMdd}/error" maxDepth="2">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="rolling-file-error*.gz"/>
@@ -200,6 +200,11 @@
     <Logger name="org.redisson.connection.DNSMonitor" level="INFO"/>
     <Logger name="org.apache.http.impl.conn" level="INFO"/>
     <Logger name="org.thymeleaf" level="INFO"/>
+
+    <!-- 异步日志配置 -->
+    <!--<AsyncLogger name="org.springframework" level="trace" includeLocation="true">
+      <AppenderRef ref="RollingFileAll"/>
+    </AsyncLogger>-->
 
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>

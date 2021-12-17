@@ -1,0 +1,12 @@
+
+dependencies {
+    implementation(project(":diversity-common"))
+    implementation(project(":plugins:plugin-log4j2"))
+    // Resilience4j Bulkhead 依赖于 Spring AOP
+    api("org.springframework.boot:spring-boot-starter-aop")
+    api("org.springframework.boot:spring-boot-starter-web")
+    // TimeLimiter 没有整合进 resilience4j-spring-boot 中，需要单独添加依赖
+    api("io.github.resilience4j:resilience4j-bulkhead")
+    api("io.github.resilience4j:resilience4j-timelimiter")
+    api("io.github.resilience4j:resilience4j-spring-boot2")
+}
