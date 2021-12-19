@@ -3,6 +3,7 @@ package cn.nihility.cloud.resilience4j.service;
 import cn.nihility.cloud.resilience4j.constant.Constant;
 import cn.nihility.cloud.resilience4j.util.BulkhdadUtil;
 import cn.nihility.cloud.resilience4j.util.CircuitBreakerUtil;
+import cn.nihility.cloud.resilience4j.util.RateLimiterUtil;
 import cn.nihility.cloud.resilience4j.util.RetryUtil;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
@@ -10,6 +11,9 @@ import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.timelimiter.TimeLimiter;
@@ -49,23 +53,27 @@ public class CircuitBreakerServiceImpl {
     private static AtomicInteger timeLimiterCount = new AtomicInteger(1);
     private static AtomicInteger retryCount = new AtomicInteger(1);
     private static AtomicInteger bulkheadCount = new AtomicInteger(1);
+    private static AtomicInteger rateLimiterCount = new AtomicInteger(1);
     private static ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     private CircuitBreakerRegistry circuitBreakerRegistry;
     private TimeLimiterRegistry timeLimiterRegistry;
     private RetryRegistry retryRegistry;
     private BulkheadRegistry bulkheadRegistry;
+    private RateLimiterRegistry rateLimiterRegistry;
     private RemoteCallService remoteCallService;
 
     public CircuitBreakerServiceImpl(CircuitBreakerRegistry circuitBreakerRegistry,
                                      TimeLimiterRegistry timeLimiterRegistry,
                                      RetryRegistry retryRegistry,
                                      BulkheadRegistry bulkheadRegistry,
+                                     RateLimiterRegistry rateLimiterRegistry,
                                      RemoteCallService remoteCallService) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
         this.timeLimiterRegistry = timeLimiterRegistry;
         this.retryRegistry = retryRegistry;
         this.bulkheadRegistry = bulkheadRegistry;
+        this.rateLimiterRegistry = rateLimiterRegistry;
         this.remoteCallService = remoteCallService;
     }
 
@@ -256,6 +264,40 @@ public class CircuitBreakerServiceImpl {
         return tryResult.get();
     }
 
+    public ResponseEntity<String> rateLimiter() {
+        final int currentIndex = rateLimiterCount.getAndIncrement();
+
+        RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter(Constant.RATELIMITER_A);
+        RateLimiterUtil.getRateLimiterStatus(currentIndex + ":执行开始前：", rateLimiter);
+
+        CheckedFunction1<Integer, ResponseEntity<String>> limiterFunc = RateLimiter.decorateCheckedFunction(rateLimiter,
+            new CheckedFunction1<Integer, ResponseEntity<String>>() {
+                @Override
+                public ResponseEntity<String> apply(Integer integer) throws Throwable {
+                    return remoteCallService.uuidRateLimiter(currentIndex);
+                }
+            });
+
+        Try<ResponseEntity<String>> tryResult = Try.of(new CheckedFunction0<ResponseEntity<String>>() {
+            @Override
+            public ResponseEntity<String> apply() throws Throwable {
+                return limiterFunc.apply(currentIndex);
+            }
+        }).recover(RequestNotPermitted.class, throwable -> {
+            logger.error("[{}]服务调用失败 RequestNotPermitted，返回垫底数据 [{}]", currentIndex, throwable.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(currentIndex + ":服务调用失败 RequestNotPermitted，返回垫底数据");
+        }).recover(throwable -> {
+            logger.error("[{}]服务调用失败 throwable，返回垫底数据 [{}]", currentIndex, throwable.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(currentIndex + ":服务调用失败 throwable，返回垫底数据");
+        });
+
+        RateLimiterUtil.getRateLimiterStatus(currentIndex + ":执行结束：", rateLimiter);
+
+        return tryResult.get();
+    }
+
     public ResponseEntity<String> circuitBreakerAOP() {
         CircuitBreakerUtil.getCircuitBreakerStatus("执行开始前：",
             circuitBreakerRegistry.circuitBreaker(Constant.CIRCUIT_BREAKER_A));
@@ -279,9 +321,16 @@ public class CircuitBreakerServiceImpl {
     public ResponseEntity<String> bulkheadAop() {
         final int index = bulkheadCount.getAndIncrement();
         Bulkhead bulkhead = bulkheadRegistry.bulkhead(Constant.BULKHEAD_B);
-        BulkhdadUtil.getBulkheadStatus(index + ":执行开始前：", bulkhead);
         ResponseEntity<String> result = remoteCallService.bulkheadAop(index);
         BulkhdadUtil.getBulkheadStatus(index + ":执行结束：", bulkhead);
+        return result;
+    }
+
+    public ResponseEntity<String> rateLimiterAop() {
+        final int index = rateLimiterCount.getAndIncrement();
+        RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter(Constant.RATELIMITER_B);
+        ResponseEntity<String> result = remoteCallService.rateLimiterAop(index);
+        RateLimiterUtil.getRateLimiterStatus(index + ":执行结束：", rateLimiter);
         return result;
     }
 

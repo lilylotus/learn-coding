@@ -85,14 +85,36 @@ resilience4j.bulkhead:
   configs:
     default:
       maxConcurrentCalls: 10
+      # 大等待时间为 1s，超过 1s 的会走降级方法
       maxWaitDuration: 1000
   instances:
     BulkheadA:
       baseConfig: default
       maxConcurrentCalls: 3
-    BackendB:
+    BulkheadB:
+      # 单个线程
+      maxConcurrentCalls: 1
+      maxWaitDuration: 200ms
+# 限流
+resilience4j.ratelimiter:
+  configs:
+    default:
+      # 一个限制刷新期间的可用权限数
+      limitForPeriod: 5
+      # 权限刷新的时间，每个周期结束后，RateLimiter 将会把权限计数设置为 limitForPeriod 的值
+      limitRefreshPeriod: 1s
+      # 线程等待权限的默认等待时间
+      timeoutDuration: 5s
+  instances:
+    # 10s 只能处理 1 个请求
+    RatelimiterA:
       baseConfig: default
-      maxWaitDuration: 100
+      limitRefreshPeriod: 10s
+      limitForPeriod: 1
+    RatelimiterB:
+      baseConfig: default
+      limitForPeriod: 1
+      timeoutDuration: 1s
 
 logging:
   level:

@@ -16,4 +16,7 @@ public class Constant {
     public static final String BULKHEAD_A = "BulkheadA";
     public static final String BULKHEAD_B = "BulkheadB";
 
+    public static final String RATELIMITER_A = "RatelimiterA";
+    public static final String RATELIMITER_B = "RatelimiterB";
+
 }

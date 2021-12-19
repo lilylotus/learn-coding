@@ -7,11 +7,13 @@ import cn.nihility.cloud.resilience4j.util.BulkhdadUtil;
 import cn.nihility.cloud.resilience4j.util.CircuitBreakerUtil;
 import cn.nihility.cloud.resilience4j.util.RetryUtil;
 import cn.nihility.common.util.UuidUtil;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
@@ -87,8 +89,15 @@ public class RemoteCallService {
     }
 
     public ResponseEntity<String> uuidBulkhead(int num) {
-        call(num, "uuidBulkhead");
+        //call(num, "uuidBulkhead");
+        CircuitBreakerUtil.threadSleep(500L);
         return ResponseEntity.ok(UuidUtil.jdkUUID());
+    }
+
+    public ResponseEntity<String> uuidRateLimiter(int num) {
+        //call(num, "uuidBulkhead");
+        CircuitBreakerUtil.threadSleep(500L);
+        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
     }
 
     @CircuitBreaker(name = Constant.CIRCUIT_BREAKER_A, fallbackMethod = "fallBack")
@@ -105,11 +114,44 @@ public class RemoteCallService {
         return index % 4 == 3 ? null : ResponseEntity.ok(UuidUtil.jdkUUID());
     }
 
+    /**
+     * NOTE : ThreadPool bulkhead is only applicable for completable futures
+     * 注意： ThreadPool 线程池模式，仅支持返回异步返回值的方法 Future
+     * <p>
+     * Retry、CircuitBreaker、Bulkhead 同时注解在方法上
+     * 默认的顺序是 Retry>CircuitBreaker>Bulkhead
+     * 即先控制并发再熔断最后重试，之后直接调用方法
+     */
     @Bulkhead(name = Constant.BULKHEAD_B, fallbackMethod = "bulkheadFallBack", type = Bulkhead.Type.SEMAPHORE)
     public ResponseEntity<String> bulkheadAop(int num) {
-        int index = count.getAndIncrement();
-        call(index, "bulkheadAop [" + num + "]");
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        //int index = count.getAndIncrement();
+        //call(index, "bulkheadAop [" + num + "]");
+        CircuitBreakerUtil.threadSleep(1000L);
+        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
+    }
+
+    /**
+     * 如果 Retry、CircuitBreaker、Bulkhead、RateLimiter 同时注解在方法上
+     * 默认的顺序是 Retry>CircuitBreaker>RateLimiter>Bulkhead
+     * 即先控制并发再限流然后熔断最后重试
+     */
+    @RateLimiter(name = Constant.RATELIMITER_B, fallbackMethod = "rateLimiterFallBack")
+    public ResponseEntity<String> rateLimiterAop(int num) {
+        //int index = count.getAndIncrement();
+        //call(index, "bulkheadAop [" + num + "]");
+        //CircuitBreakerUtil.threadSleep(1000L);
+        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
+    }
+
+    private ResponseEntity<String> bulkheadFallBack(BulkheadFullException throwable) {
+        logger.error("方法被降级了~~ bulkheadFallBack [{}]", throwable.getLocalizedMessage());
+        BulkhdadUtil.getBulkheadStatus("降级 bulkheadFallBack 方法中:", bulkheadRegistry.bulkhead(Constant.BULKHEAD_B));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("方法被降级了~~ bulkheadFallBack");
+    }
+
+    private ResponseEntity<String> rateLimiterFallBack(Throwable throwable) {
+        logger.error("方法被降级了~~ rateLimiterFallBack [{}]", throwable.getLocalizedMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("方法被降级了~~ rateLimiterFallBack");
     }
 
     private ResponseEntity<String> bulkheadFallBack(Throwable throwable) {

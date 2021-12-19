@@ -44,4 +44,19 @@ public class CircuitBreakerController {
         return circuitBreakerService.bulkheadAop();
     }
 
+    @GetMapping("/breaker/bulkhead")
+    public ResponseEntity<String> bulkhead() {
+        return circuitBreakerService.bulkhead();
+    }
+
+    @GetMapping("/breaker/ratelimiter")
+    public ResponseEntity<String> rateLimiter() {
+        return circuitBreakerService.rateLimiter();
+    }
+
+    @GetMapping("/breaker/ratelimiter/aop")
+    public ResponseEntity<String> rateLimiterAop() {
+        return circuitBreakerService.rateLimiterAop();
+    }
+
 }
