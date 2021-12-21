@@ -32,6 +32,7 @@ public class CASController {
     private static final String CAS_TGC = "CASTGC";
     private static final String TICKET = "ticket";
     private static final String ST_PREFIX = "ST-";
+    private static final String TGT_PREFIX = "TGT-";
     private static final String COOKIE_JSESSIONID = "JSESSIONID";
     private static final String CAS_DOMAIN = "localhost";
     private static final String CAS_COOKIE_PATH = "/cas";
@@ -135,14 +136,16 @@ public class CASController {
             service = "http://localhost:30030/cas/business/callback?chinese=中文&english=English";
         }
 
-        String uuid = ST_PREFIX + UuidUtil.jdkUUID();
-        logger.info("CAS ticket = [{}]", uuid);
-        RequestUtil.addCookie(CAS_TGC, uuid, null, CAS_COOKIE_PATH, 3600, response);
+        String tgt = TGT_PREFIX + UuidUtil.jdkUUID();
+        String st = ST_PREFIX + UuidUtil.jdkUUID();
+        TGT_SET.add(tgt);
+        logger.info("CAS TGC = [{}]", tgt);
+        RequestUtil.addCookie(CAS_TGC, tgt, null, CAS_COOKIE_PATH, 3600, response);
 
         /*redirectAttributes.addAttribute(TICKET, uuid);
         String serviceUrl = RequestUtil.urlParamsEncode(service);*/
 
-        String serviceUrl = RequestUtil.urlParamsEncode(RequestUtil.addUrlParam(service, TICKET, uuid));
+        String serviceUrl = RequestUtil.urlParamsEncode(RequestUtil.addUrlParam(service, TICKET, st));
         logger.info("CAS Auth Redirect Service [{}]", serviceUrl);
 
         return "redirect:" + serviceUrl;

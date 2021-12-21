@@ -2,7 +2,9 @@ package cn.nihility.demo.stress.controller;
 
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.UuidUtil;
 import cn.nihility.demo.stress.service.JdbcService;
+import cn.nihility.demo.stress.service.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -13,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,12 +27,33 @@ public class ServiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceController.class);
 
+    private static final long SECKILL_GAP = 10000;
+    private static final String SECKILL_LOCK_KEY = "goods:SECKILL_LOCK";
+
     private JdbcService jdbcService;
     private StringRedisTemplate stringRedisTemplate;
+    private RedisService redisService;
 
-    public ServiceController(JdbcService jdbcService, StringRedisTemplate stringRedisTemplate) {
+    public ServiceController(JdbcService jdbcService, StringRedisTemplate stringRedisTemplate, RedisService redisService) {
         this.jdbcService = jdbcService;
         this.stringRedisTemplate = stringRedisTemplate;
+        this.redisService = redisService;
+    }
+
+    @GetMapping("/redis/setnx")
+    public UnifyResult redisSetNX() {
+        logger.info("进入 redisSetNX");
+        boolean result = redisService.setNX("nx", "nx-value", 60);
+        logger.info("Set NX Result [{}]", result);
+        return UnifyResultUtil.success(result);
+    }
+
+    @GetMapping("/redis/del/setnx")
+    public UnifyResult redisDelSetNX() {
+        logger.info("进入 redisDelSetNX");
+        boolean result = redisService.delNX("nx", "nx-value");
+        logger.info("DEL NX Result [{}]", result);
+        return UnifyResultUtil.success(result);
     }
 
     @PostMapping("/shop/service")
@@ -48,6 +72,62 @@ public class ServiceController {
         } catch (NumberFormatException ex) {
             return -1;
         }
+    }
+
+    @GetMapping("/buy/seckill")
+    public ResponseEntity<UnifyResult> redisSeckill() {
+
+        long start = System.currentTimeMillis();
+        String uuid = UuidUtil.jdkUUID(10);
+        String val = uuid + "=" + start;
+        boolean success = false;
+        boolean loopFailure = true;
+        String resultMsg = "购买失败";
+        BoundValueOperations<String, String> ops = stringRedisTemplate.boundValueOps("goods:count");
+        int goodsCount = stringToInt(ops.get());
+        if (goodsCount < 1) {
+            resultMsg = "预判当前商品已抢购完成，没有库存了，请下次再试";
+            logger.error(resultMsg);
+            jdbcService.recordServiceLog(resultMsg);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure(resultMsg));
+        }
+        while ((System.currentTimeMillis() - start) < SECKILL_GAP) {
+            if (redisService.setNX(SECKILL_LOCK_KEY, val, 5)) {
+                loopFailure = false;
+                goodsCount = stringToInt(ops.get());
+                if (goodsCount < 1) {
+                    resultMsg = "用户 [" + uuid + "]:[" + val + "] 获取到购买资格，但是商品已售完，无法购买";
+                    logger.error("用户 [{}]:[{}] 获取到购买资格，但是商品已售完，无法购买", uuid, val);
+                } else {
+                    int remain = goodsCount - 1;
+                    resultMsg = "用户 [" + uuid + "]:[" + val + "] 获取到购买资格，购买到一件商品，剩余库存 [" + remain + "]";
+                    logger.error("用户 [{}]:[{}] 获取到购买资格，购买到一件商品，剩余库存 [{}]", uuid, val, remain);
+                    ops.set(Integer.toString(remain));
+                    success = true;
+                }
+
+                redisService.delNX(SECKILL_LOCK_KEY, val);
+                break;
+            }
+            try {
+                Thread.sleep(10L);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        if (loopFailure) {
+            logger.error("[{}]:[{}] 经过多次轮询抢购，还是未抢购到指定商品", uuid, val);
+            resultMsg = "[" + uuid + "]:[" + val + "] 经过多次轮询抢购，还是未抢购到指定商品";
+        }
+
+        jdbcService.recordServiceLog(resultMsg);
+
+        if (success) {
+            return ResponseEntity.ok(UnifyResultUtil.success(resultMsg));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure(resultMsg));
+        }
+
     }
 
     /**

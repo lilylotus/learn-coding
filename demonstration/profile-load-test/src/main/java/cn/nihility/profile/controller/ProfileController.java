@@ -1,4 +1,4 @@
-package cn.nihility.profile;
+package cn.nihility.profile.controller;
 
 import cn.nihility.profile.bean.PropertyBean;
 import org.slf4j.Logger;

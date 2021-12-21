@@ -99,22 +99,22 @@ resilience4j.bulkhead:
 resilience4j.ratelimiter:
   configs:
     default:
-      # 一个限制刷新期间的可用权限数
+      # 每时间单位可执行处理数
       limitForPeriod: 5
-      # 权限刷新的时间，每个周期结束后，RateLimiter 将会把权限计数设置为 limitForPeriod 的值
-      limitRefreshPeriod: 1s
-      # 线程等待权限的默认等待时间
+      # 等待调用服务的时间，超出时间返回异常
       timeoutDuration: 5s
+      # 单位时间（毫秒），令牌刷新的时间
+      limitRefreshPeriod: 1s
   instances:
-    # 10s 只能处理 1 个请求
+    # 2s 只能处理 1 个请求
     RatelimiterA:
-      baseConfig: default
-      limitRefreshPeriod: 10s
-      limitForPeriod: 1
-    RatelimiterB:
-      baseConfig: default
       limitForPeriod: 1
       timeoutDuration: 1s
+      limitRefreshPeriod: 2s
+    RatelimiterB:
+      limitForPeriod: 1
+      timeoutDuration: 1s
+      limitRefreshPeriod: 10s
 
 logging:
   level:

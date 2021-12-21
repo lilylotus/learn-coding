@@ -11,7 +11,7 @@
     <!-- %n 换行符，%logger{36} 表示 Logger 名字最长36个字符 -->
     <!-- [%thread] -->
     <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%X{TraceId}] %logger{36} - %msg%xEx%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%X{TraceId}] [%thread] %logger{36} - %msg%xEx%n"/>
     <!--  ${sys:user.dir:-default} -->
     <!-- 变量 sys - System Properties -->
     <!-- 变量 env - System environment variables -->
@@ -198,6 +198,7 @@
     </Logger>
 
     <Logger name="org.redisson.connection.DNSMonitor" level="INFO"/>
+    <Logger name="io.lettuce.core" level="INFO"/>
     <Logger name="org.apache.http.impl.conn" level="INFO"/>
     <Logger name="org.thymeleaf" level="INFO"/>
 

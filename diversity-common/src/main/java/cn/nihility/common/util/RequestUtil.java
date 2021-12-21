@@ -115,14 +115,10 @@ public class RequestUtil {
         }
 
         int index = url.indexOf("?");
-        String preUrl = url;
-        String encodeParams = "";
-        if (index > 0) {
-            preUrl = url.substring(0, index);
-            encodeParams = url.substring(index + 1);
-        }
 
-        return preUrl + "?" + splitEncodeUrlParam(encodeParams);
+        return index > 0 ?
+            url.substring(0, index) + "?" + splitEncodeUrlParam(url.substring(index + 1)) :
+            url;
     }
 
     public static String obtainHttpRequestHeaderValue(String key, HttpServletRequest request) {
