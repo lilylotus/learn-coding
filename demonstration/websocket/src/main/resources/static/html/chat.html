@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatting</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Chatting</h1>
+
+<div>
+    <div class="row">
+        <div class="col-xs-1">
+            <div id="wsUserListId" class="text-center">
+                <div id="all" class="radio"><label><input type="radio" name="option" value="all" checked>所有用户</label></div>
+                <div id="newUserListId">
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-10">
+            <div class="input-group col-lg-6">
+                <input type='text' value='ws://127.0.0.1:30080/ws/test' class="form-control" id='wsAddr'/>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" id="socketConnectId">连接</button>
+                    <button type="button" class="btn btn-default" id="socketCloseId">断开</button>
+                </span>
+            </div>
+            <div class="input-group col-lg-9">
+                <input type="text" id='wsSendMsgId' class="form-control" placeholder='待发信息'>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="socketSendId">发送</button>
+                </span>
+            </div>
+            <div id="wsMsgFlow" style="border:1px solid #ccc; height:365px; overflow: auto;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/websocket.js"></script>
+</body>
+</html>
