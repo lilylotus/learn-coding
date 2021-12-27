@@ -55,8 +55,9 @@ public class UnifyResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         Method returnTypeMethod = returnType.getMethod();
         final Object resultBody = (body instanceof UnifyResult) ? body : UnifyResultUtil.success(body);
 
-        if ((MediaType.TEXT_HTML.equals(selectedContentType) ||
-            MediaType.TEXT_PLAIN.equals(selectedContentType))) {
+        if ((MediaType.TEXT_HTML.equals(selectedContentType))) {
+            return body;
+        } else if (MediaType.TEXT_PLAIN.equals(selectedContentType)) {
             String result = JacksonUtil.toJsonString(resultBody);
             if (returnTypeMethod != null && Stream.of(returnTypeMethod.getAnnotations())
                 .anyMatch(a -> (a instanceof RequestMapping) &&

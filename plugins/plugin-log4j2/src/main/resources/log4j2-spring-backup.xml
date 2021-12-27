@@ -28,12 +28,9 @@
       <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
     </console>
 
-    <!-- RollingRandomAccessFileAppender (RollingRandomAccessFile) with 20-200% performance improvement
-          compared to RollingFileAppender(RollingFile) with "bufferedIO=true" -->
-
     <!-- 打印出 >= DEBUG 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingRandomAccessFile name="RollingFileAll" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-all.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/all/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileAll" fileName="${BASE_DIR}/all/rolling-file-all.log"
+                 filePattern="${BASE_DIR}/all/${date:yyyyMMdd}/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -51,25 +48,24 @@
       <!-- Seconds(0-59) Minutes(0-59) Hours(0-23) Day-of-mouth(1-31) Mount(1-11) Day-of-week(1-7) Year(Optional) -->
       <!--<CronTriggeringPolicy schedule="0/10 * * * * ?"/>-->
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="40">
+      <DefaultRolloverStrategy max="20">
         <!-- testMode=true，实际的文件不会被删除，打印删除日志 -->
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+        <Delete basePath="${BASE_DIR}/all" maxDepth="3">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-all-*.log.gz"/>
+          <IfFileName glob="*/rolling-file-all*.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingRandomAccessFile>
+    </RollingFile>
 
     <!-- 打印出 debug 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingRandomAccessFile name="RollingFileDebug" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-debug.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/debug/rolling-file-debug-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileDebug" fileName="${BASE_DIR}/debug/rolling-file-debug.log"
+                 filePattern="${BASE_DIR}/debug/${date:yyyyMMdd}/rolling-file-debug-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
-        <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立) -->
-        <!-- NEUTRAL 表示交给下个 Filter 处理， onMatch 配置 level 及其以上，onMismatch level 及其以下 -->
+        <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
         <ThresholdFilter level="DEBUG" onMatch="NEUTRAL" onMismatch="DENY"/>
         <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
       </Filters>
@@ -84,20 +80,20 @@
         <SizeBasedTriggeringPolicy size="50 MB"/>
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="20">
+        <Delete basePath="${BASE_DIR}/debug" maxDepth="3">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-debug-*.gz"/>
+          <IfFileName glob="*/rolling-file-debug*.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingRandomAccessFile>
+    </RollingFile>
 
     <!-- 打印出 info 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingRandomAccessFile name="RollingFileInfo" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-info.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/info/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileInfo" fileName="${BASE_DIR}/info/rolling-file-info.log"
+                 filePattern="${BASE_DIR}/info/${date:yyyyMMdd}/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
@@ -117,20 +113,20 @@
         <SizeBasedTriggeringPolicy size="50 MB"/>
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="20">
+        <Delete basePath="${BASE_DIR}/info" maxDepth="3">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-info-*.gz"/>
+          <IfFileName glob="*/rolling-file-info*.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingRandomAccessFile>
+    </RollingFile>
 
     <!-- 打印 warn 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
-    <RollingRandomAccessFile name="RollingFileWarn" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-warn.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/warn/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileWarn" fileName="${BASE_DIR}/warn/rolling-file-warn.log"
+                 filePattern="${BASE_DIR}/warn/${date:yyyyMMdd}/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立) -->
@@ -143,20 +139,20 @@
         <SizeBasedTriggeringPolicy size="50 MB"/>
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件，这里设置了 20 -->
-      <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="20">
+        <Delete basePath="${BASE_DIR}/warn" maxDepth="3">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-warn-*.gz"/>
+          <IfFileName glob="*/rolling-file-warn*.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingRandomAccessFile>
+    </RollingFile>
 
     <!-- 打印 error 级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
-    <RollingRandomAccessFile name="RollingFileError" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-error.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/error/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFileError" fileName="${BASE_DIR}/error/rolling-file-error.log"
+                 filePattern="${BASE_DIR}/error/${date:yyyyMMdd}/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
       <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -166,16 +162,16 @@
         <SizeBasedTriggeringPolicy size="50 MB"/>
       </Policies>
       <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
-      <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="20">
+        <Delete basePath="${BASE_DIR}/error" maxDepth="3">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-error-*.gz"/>
+          <IfFileName glob="*/rolling-file-error*.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
-    </RollingRandomAccessFile>
+    </RollingFile>
 
     <!-- 异步日志配置 -->
     <Async name="Async">
@@ -196,9 +192,6 @@
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Logger name="com.zaxxer.hikari.pool.HikariPool" additivity="false">
-      <AppenderRef ref="Async"/>
-    </Logger>
     <Logger name="org.redisson.connection.DNSMonitor" level="INFO"/>
     <Logger name="io.lettuce.core" level="INFO"/>
     <Logger name="org.apache.http.impl.conn" level="INFO"/>

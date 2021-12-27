@@ -69,6 +69,11 @@ subprojects {
     dependencies {
         //implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
     }
+
+    // 依赖包打包时需要 jar 包
+    jar {
+        enabled(true)
+    }
 }
 
 task cleanAll(type: Delete, dependsOn: [clean]) {

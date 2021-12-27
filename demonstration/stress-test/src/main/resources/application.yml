@@ -30,9 +30,14 @@ spring:
     username: root
     password: mysql
     # org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
+    # com.zaxxer.hikari.HikariConfig
     hikari:
-      maximum-pool-size: 30
-      minimum-idle: 10
+      # default 10
+      maximumPoolSize: 20
+      # default 10
+      minimumIdle: 10
+      # 10 * 1000 Millis
+      #idleTimeout: 5000
 
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
