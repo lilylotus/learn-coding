@@ -45,20 +45,20 @@
         <!-- modulate, boolean型，说明是否对封存时间进行调制 -->
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
-        <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>-->
-        <CronTriggeringPolicy schedule="0 0/1 * * * ?"/>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- Seconds(0-59) Minutes(0-59) Hours(0-23) Day-of-mouth(1-31) Mount(1-11) Day-of-week(1-7) Year(Optional) -->
       <!--<CronTriggeringPolicy schedule="0/10 * * * * ?"/>-->
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="10">
+      <DefaultRolloverStrategy max="40">
         <!-- testMode=true，实际的文件不会被删除，打印删除日志 -->
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称，glob: 匹配 2 级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-all-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
-          <IfLastModified age="PT6M"/>
+          <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>
@@ -80,17 +80,17 @@
         <!-- modulate, boolean型，说明是否对封存时间进行调制 -->
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
-        <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>-->
-        <CronTriggeringPolicy schedule="0 0/1 * * * ?"/>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="10">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="40">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-debug-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
-          <IfLastModified age="PT6M"/>
+          <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>
@@ -113,17 +113,17 @@
         <!-- modulate, boolean型，说明是否对封存时间进行调制 -->
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
-        <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>-->
-        <CronTriggeringPolicy schedule="0 0/1 * * * ?"/>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
-      <DefaultRolloverStrategy max="10">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="40">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-info-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
-          <IfLastModified age="PT6M"/>
+          <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>
@@ -139,18 +139,18 @@
       </Filters>
       <Policies>
         <!-- interval属性用来指定多久滚动一次，默认是 1 hour -->
-        <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>-->
-        <CronTriggeringPolicy schedule="0 0/1 * * * ?"/>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件，这里设置了 20 -->
-      <DefaultRolloverStrategy max="10">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="40">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-warn-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
-          <IfLastModified age="PT6M"/>
+          <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>
@@ -163,18 +163,18 @@
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
       <Policies>
         <!-- interval 属性用来指定多久滚动一次，默认是 1 hour-->
-        <!--<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>-->
-        <CronTriggeringPolicy schedule="0 0/1 * * * ?"/>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
-      <DefaultRolloverStrategy max="10">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+      <DefaultRolloverStrategy max="40">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-error-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
-          <IfLastModified age="6m"/>
+          <IfLastModified age="P7D"/>
         </Delete>
       </DefaultRolloverStrategy>
     </RollingRandomAccessFile>

@@ -1,7 +1,4 @@
-package cn.nihility.api.config;
-
-import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.context.annotation.Configuration;
+package cn.nihility.api.filter;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -11,10 +8,8 @@ import java.io.IOException;
 /**
  * CORS 跨域过滤器配置，Spring Framework 5.x 版本推荐
  */
-@Configuration
-@ServletComponentScan
 @WebFilter(filterName = "CorsFilter ", urlPatterns = "/*")
-public class CorsFilterConfiguration implements Filter {
+public class CorsFilter implements Filter {
 
     /*
       Access-Control-Allow-Headers：

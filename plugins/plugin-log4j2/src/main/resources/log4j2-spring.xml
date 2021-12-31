@@ -33,7 +33,7 @@
 
     <!-- 打印出 >= DEBUG 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingRandomAccessFile name="RollingFileAll" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-all.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/all/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
+                             filePattern="${BASE_DIR}/${date:yyyyMMdd}/all/rolling-file-all-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -46,16 +46,16 @@
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- Seconds(0-59) Minutes(0-59) Hours(0-23) Day-of-mouth(1-31) Mount(1-11) Day-of-week(1-7) Year(Optional) -->
       <!--<CronTriggeringPolicy schedule="0/10 * * * * ?"/>-->
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="40">
         <!-- testMode=true，实际的文件不会被删除，打印删除日志 -->
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
-          <!-- IfFileName: 匹配文件名称 -->
-          <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
+          <!-- IfFileName: 匹配文件名称，glob: 匹配 2 级目录深度下的以 .log.gz 结尾的备份文件 -->
           <IfFileName glob="*/rolling-file-all-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
@@ -65,7 +65,7 @@
 
     <!-- 打印出 debug 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingRandomAccessFile name="RollingFileDebug" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-debug.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/debug/rolling-file-debug-%d{yyyyMMdd}-%i.log.gz">
+                             filePattern="${BASE_DIR}/${date:yyyyMMdd}/debug/rolling-file-debug-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立) -->
@@ -81,14 +81,14 @@
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
-          <!-- IfFileName: 匹配文件名称 -->
-          <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-debug-*.gz"/>
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
+          <!-- IfFileName: 匹配文件名称 glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
+          <IfFileName glob="*/rolling-file-debug-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
@@ -97,7 +97,7 @@
 
     <!-- 打印出 info 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingRandomAccessFile name="RollingFileInfo" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-info.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/info/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
+                             filePattern="${BASE_DIR}/${date:yyyyMMdd}/info/rolling-file-info-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立)-->
@@ -114,14 +114,14 @@
         <!-- modulate=true， 则封存时间将以 0 点为边界进行偏移计算。如: modulate=true，interval=4hours，
             那么假设上次封存日志的时间为03:00，则下次封存日志的时间为 04:00， 之后的封存时间依次为 08:00，12:00，16:00 -->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件开始覆盖 -->
       <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
-          <!-- IfFileName: 匹配文件名称 -->
-          <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-info-*.gz"/>
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
+          <!-- IfFileName: 匹配文件名称 glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
+          <IfFileName glob="*/rolling-file-info-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
@@ -130,7 +130,7 @@
 
     <!-- 打印 warn 级别的信息，每次大小超过 size，则这 size 大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
     <RollingRandomAccessFile name="RollingFileWarn" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-warn.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/warn/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
+                             filePattern="${BASE_DIR}/${date:yyyyMMdd}/warn/rolling-file-warn-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <Filters>
         <!-- 过滤条件有三个值：ACCEPT(接受)，DENY(拒绝)，NEUTRAL(中立) -->
@@ -140,14 +140,15 @@
       <Policies>
         <!-- interval属性用来指定多久滚动一次，默认是 1 hour -->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy 属性如不设置，则默认为最多同一文件夹下 7 个文件，这里设置了 20 -->
       <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-warn-*.gz"/>
+          <IfFileName glob="*/rolling-file-warn-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
@@ -156,21 +157,22 @@
 
     <!-- 打印 error 级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
     <RollingRandomAccessFile name="RollingFileError" fileName="${BASE_DIR}/${date:yyyyMMdd}/rolling-file-error.log"
-                 filePattern="${BASE_DIR}/${date:yyyyMMdd}/error/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
+                             filePattern="${BASE_DIR}/${date:yyyyMMdd}/error/rolling-file-error-%d{yyyyMMdd}-%i.log.gz">
       <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
       <PatternLayout pattern="${LOG_PATTERN}"/>
       <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
       <Policies>
         <!-- interval 属性用来指定多久滚动一次，默认是 1 hour-->
         <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        <SizeBasedTriggeringPolicy size="50 MB"/>
+        <SizeBasedTriggeringPolicy size="100 MB"/>
+        <!--<CronTriggeringPolicy schedule="0 0/1 * * * ?"/>-->
       </Policies>
       <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
       <DefaultRolloverStrategy max="40">
-        <Delete basePath="${BASE_DIR}" maxDepth="3">
+        <Delete basePath="${BASE_DIR}" maxDepth="1">
           <!-- IfFileName: 匹配文件名称 -->
           <!-- glob: 匹配2级目录深度下的以 .log.gz 结尾的备份文件 -->
-          <IfFileName glob="*/rolling-file-error-*.gz"/>
+          <IfFileName glob="*/rolling-file-error-*.log.gz"/>
           <!-- P30D - 30 天， "D", "H", "M" and "S" for days, hours, minutes and seconds -->
           <IfLastModified age="P7D"/>
         </Delete>
