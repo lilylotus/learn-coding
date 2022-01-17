@@ -56,6 +56,14 @@ public class ServiceController {
         return UnifyResultUtil.success(result);
     }
 
+    @GetMapping("/redis/del2/setnx")
+    public UnifyResult redisDel2SetNX() {
+        logger.info("进入 redisDel2SetNX");
+        boolean result = redisService.delNX("nx", "nx-error");
+        logger.info("DEL NX redisDel2SetNX [{}]", result);
+        return UnifyResultUtil.success(result);
+    }
+
     @PostMapping("/shop/service")
     public UnifyResult service() {
         logger.info("进入 Shopping");

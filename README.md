@@ -61,6 +61,10 @@ Spring Boot 2.4 版本开始对 `application.properties` 和 `application.yml` �
 [External Application Properties](https://docs.spring.io/spring-boot/docs/2.4.0-SNAPSHOT/reference/html/spring-boot-features.html#boot-features-external-config-files)
 [External Application Properties (Spring Boot 2.4.x 以前版本)](https://docs.spring.io/spring-boot/docs/2.3.12.RELEASE/reference/html/spring-boot-features.html#boot-features-external-config-application-property-files)
 
+*v2.4.x* 以前的配置文件解析类 `org.springframework.boot.context.config.ConfigFileApplicationListener`
+
+*v2.4.x* 配置文件加载重构使用类 `org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor#postProcessEnvironment(ConfigurableEnvironment, ResourceLoader, java.util.Collection<java.lang.String>)` + `org.springframework.boot.context.config.ConfigDataEnvironment`
+
 ## 配置加载顺序
 
 列表按优先顺序排列：（来自较低项的值覆盖较早的项），来自加载文件的文档作为 `PropertySource` 添加到 Spring `Environment`。
