@@ -16,6 +16,16 @@ another:
   propertyName: anotherProperty姓名
   property-age: 18
 
+binder:
+  list:
+    - a
+    - b
+    - c
+  map:
+    key1: value1
+    key2: value2
+    key3: value3
+
 logging:
   level:
     org.apache.http.impl.conn.PoolingHttpClientConnectionManager: info
