@@ -1,0 +1,11 @@
+server:
+  port: 30010
+
+spring:
+  application:
+    name: springSecurity
+
+logging:
+  level:
+    root: info
+    cn.nihility: debug

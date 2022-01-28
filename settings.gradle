@@ -1,0 +1,6 @@
+rootProject.name = 'cloud-demostrate'
+include 'cloud-common'
+include 'spring-security'
+include 'spring-security-oauth2'
+include 'spring-security-oauth2-sso'
+

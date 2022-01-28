@@ -1,0 +1,83 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.3.8.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'idea'
+}
+
+group 'cn.nihility'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/spring' }
+    maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    group 'cn.nihility'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        mavenCentral()
+    }
+
+    ext {
+        set('springCloudVersion', "Hoxton.SR8")
+    }
+
+    dependencies {
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'utf-8'
+    [compileJava, compileTestJava]*.sourceCompatibility = "1.8"
+    [compileJava, compileTestJava]*.targetCompatibility = "1.8"
+
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+
+}
+
+subprojects {
+
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+}

@@ -1,0 +1,25 @@
+server:
+  port: 30040
+  servlet:
+    session:
+      cookie:
+        name: OAUTH2-CLIENT-SESSIONID01
+
+spring:
+  application:
+    name: springSecurityOAuth2SSO
+
+oauth2-sso-server-uri: http://127.0.0.1:30020
+
+security:
+  oauth2:
+    client:
+      client-id: admin_clientId
+      client-secret: 224466
+      user-authorization-uri: ${oauth2-sso-server-uri}/oauth/authorize
+      access-token-uri: ${oauth2-sso-server-uri}/oauth/token
+    resource:
+      user-info-uri: ${oauth2-sso-server-uri}/user/getCurrentUser
+#      jwt:
+#        key-uri: ${oauth2-sso-server-uri}/oauth/token_key
+

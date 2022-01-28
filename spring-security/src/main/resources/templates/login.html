@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+
+    <form th:action="@{/login}" method="post">
+        <!--<input type="hidden" th:if="${_csrf}" th:name="${_csrf.getParameterName()}" th:value="${_csrf.getToken()}"/>-->
+        <p>
+            <label for="username">用户名： </label>
+            <input type="text" name="username" placeholder="username" id="username"/>
+        </p>
+        <p>
+            <label for="password">密码：</label>
+            <input type="password" name="password" placeholder="password" id="password" />
+        </p>
+        <p>
+            <label for="rememberMe">记住我：</label>
+            <input type="checkbox" name="remember-me" id="rememberMe" />
+        </p>
+        <input type="submit" value="Sign in">
+    </form>
+
+</body>
+</html>

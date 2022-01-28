@@ -1,0 +1,17 @@
+server:
+  port: 30020
+  servlet:
+    session:
+      cookie:
+        http-only: true
+      tracking-modes: cookie
+
+spring:
+  application:
+    name: springSecurityOAuth2
+
+
+logging:
+  level:
+    root: info
+    cn.nihility: debug
