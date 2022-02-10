@@ -1,4 +1,4 @@
-package cn.nihility.plugin.mybatis;
+package cn.nihility.plugin.mybatis.test;
 
 import cn.nihility.plugin.mybatis.mapper.FlowerMapper;
 import cn.nihility.plugin.mybatis.pojo.Flower;

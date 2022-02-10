@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStringCommands;
+import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
@@ -26,6 +27,30 @@ class RedisTemplateTest {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Test
+    void testRedisTemplateSet() {
+        Assertions.assertNotNull(redisTemplate);
+        redisTemplate.boundValueOps("redis:serialize:string").set("Redis Serialize Value");
+        List<String> list = new ArrayList<>();
+        list.add("one");
+        list.add("two");
+        redisTemplate.boundValueOps("redis:serialize:list").set(list);
+    }
+
+    @Test
+    void testRedisTemplateGet() {
+        Assertions.assertNotNull(redisTemplate);
+
+        Object stringValue = redisTemplate.boundValueOps("redis:serialize:string").get();
+        Object listValue = redisTemplate.boundValueOps("redis:serialize:list").get();
+
+        Assertions.assertNotNull(stringValue);
+        Assertions.assertNotNull(listValue);
+
+        Assertions.assertEquals(String.class.getName(), stringValue.getClass().getName());
+        Assertions.assertEquals(ArrayList.class.getName(), listValue.getClass().getName());
+    }
 
     @Test
     void testNX() {

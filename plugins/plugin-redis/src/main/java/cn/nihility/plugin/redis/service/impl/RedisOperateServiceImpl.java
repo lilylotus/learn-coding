@@ -1,6 +1,6 @@
 package cn.nihility.plugin.redis.service.impl;
 
-import cn.nihility.plugin.redis.service.RedisManagementService;
+import cn.nihility.plugin.redis.service.RedisOperateService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.StringUtils;
 
@@ -10,12 +10,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * redis 管理操作接口具体实现
  */
-public class RedisManagementServiceImpl implements RedisManagementService {
+public class RedisOperateServiceImpl implements RedisOperateService {
 
     private RedisTemplate<String, Object> redisTemplate;
     private static final String NULL_STRING = null;
 
-    public RedisManagementServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+    public RedisOperateServiceImpl(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

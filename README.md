@@ -4,6 +4,7 @@
 # Gradle `api` And `implementation`
 
 [Removal of compile and runtime configurations](https://docs.gradle.org/current/userguide/upgrading_version_6.html#sec:configuration_removal)
+[java_library_plugin (api/implementation)](https://docs.gradle.org/6.9.1/userguide/java_library_plugin.html#java_library_plugin)
 
 Since its inception, Gradle provided the `compile` and `runtime` configurations to declare dependencies. These however did not support a fine grained scoping of dependencies. Hence, better replacements were introduced in Gradle 3.4:
 

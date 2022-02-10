@@ -3,7 +3,7 @@ package cn.nihility.api.service.impl;
 import cn.nihility.api.exception.IdempotentException;
 import cn.nihility.api.service.IdempotentService;
 import cn.nihility.common.util.SnowflakeIdWorker;
-import cn.nihility.plugin.redis.service.RedisManagementService;
+import cn.nihility.plugin.redis.service.RedisOperateService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +21,10 @@ public class IdempotentServiceImpl implements IdempotentService {
 
     private static final String IDEMPOTENT_REDIS_KEY = "idempotent:";
 
-    private RedisManagementService redisManagementService;
+    private RedisOperateService redisOperateService;
 
-    public IdempotentServiceImpl(RedisManagementService redisManagementService) {
-        this.redisManagementService = redisManagementService;
+    public IdempotentServiceImpl(RedisOperateService redisOperateService) {
+        this.redisOperateService = redisOperateService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class IdempotentServiceImpl implements IdempotentService {
         if (log.isDebugEnabled()) {
             log.debug("生成幂等 token [{}]", token);
         }
-        redisManagementService.set(IDEMPOTENT_REDIS_KEY + token, token, 1, TimeUnit.MINUTES);
+        redisOperateService.set(IDEMPOTENT_REDIS_KEY + token, token, 1, TimeUnit.MINUTES);
         return token;
     }
 
@@ -44,8 +44,8 @@ public class IdempotentServiceImpl implements IdempotentService {
         }
 
         /* 校验该 token 是否存在，可能被消费掉了或过期了 */
-        if (token.equals(redisManagementService.get(IDEMPOTENT_REDIS_KEY + token)) &&
-            redisManagementService.deleteKey(IDEMPOTENT_REDIS_KEY + token)) {
+        if (token.equals(redisOperateService.get(IDEMPOTENT_REDIS_KEY + token)) &&
+            redisOperateService.deleteKey(IDEMPOTENT_REDIS_KEY + token)) {
             return true;
         }
 

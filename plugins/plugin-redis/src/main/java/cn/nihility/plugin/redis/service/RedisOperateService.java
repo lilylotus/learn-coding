@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * redis 管理操作接口
  */
-public interface RedisManagementService {
+public interface RedisOperateService {
 
     boolean set(String key, String val, long duration, TimeUnit timeUnit);
 
