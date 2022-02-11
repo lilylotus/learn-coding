@@ -2,18 +2,15 @@ package cn.nihility.api.config;
 
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.pojo.UnifyBaseResult;
-import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.WebUtils;
 
@@ -36,8 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<UnifyBaseResult> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex,
                                                                                   WebRequest request) {
-        final HttpHeaders headers = new HttpHeaders();
-        return handleException(ex, UnifyResultUtil.failure(ex.getMessage()), headers, request);
+        return handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpRequestException.class)
@@ -46,15 +42,16 @@ public class GlobalExceptionHandler {
         if (null == body) {
             body = UnifyResultUtil.failure(ex.getMessage());
         }
-        final HttpHeaders headers = new HttpHeaders();
-        return handleExceptionInternal(ex, body, headers, ex.getStatus(), request);
+        HttpStatus httpStatus = ex.getHttpStatus();
+        if (null == httpStatus) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return handleExceptionInternal(ex, body, httpStatus);
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(NullPointerException ex, WebRequest request) {
-        UnifyBaseResult body = UnifyResultUtil.failure("空指针异常");
-        final HttpHeaders headers = new HttpHeaders();
-        return handleException(ex, body, headers, request);
+        return handleExceptionInternal(ex, UnifyResultUtil.failure("空指针异常"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -66,15 +63,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<UnifyBaseResult> exceptionHandler(Exception ex, WebRequest request) {
-        final HttpHeaders headers = new HttpHeaders();
-        return handleException(ex, UnifyResultUtil.failure(ex.getMessage()), headers, request);
-    }
-
-    /**
-     * 异常类的统一处理
-     */
-    protected ResponseEntity<UnifyBaseResult> handleException(Exception ex, UnifyBaseResult body, HttpHeaders headers, WebRequest request) {
-        return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -85,16 +74,12 @@ public class GlobalExceptionHandler {
      * request attribute and creates a {@link ResponseEntity} from the given
      * body, headers, and status.
      */
-    protected ResponseEntity<UnifyBaseResult> handleExceptionInternal(Exception ex, UnifyBaseResult body, HttpHeaders headers,
-                                                                      HttpStatus status, WebRequest request) {
-        if (debugStackTrace && body instanceof UnifyResult) {
+    protected ResponseEntity<UnifyBaseResult> handleExceptionInternal(Exception ex, UnifyBaseResult body, HttpStatus status) {
+        if (debugStackTrace) {
             body.setStackTrace(formatStackTrace(ex.getStackTrace()));
         }
-        if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
-            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, RequestAttributes.SCOPE_REQUEST);
-        }
         logger.error("Unify Handler Exception", ex);
-        return new ResponseEntity<>(body, headers, status);
+        return new ResponseEntity<>(body, status);
     }
 
     protected List<StackTraceElement> formatStackTrace(StackTraceElement[] traceElements) {
