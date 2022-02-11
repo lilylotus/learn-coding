@@ -50,14 +50,21 @@ public class ApiAuthenticationCheckInterceptor implements HandlerInterceptor {
             token = request.getParameter(Constant.AUTHENTICATION_TOKEN_KEY);
         }
         if (StringUtils.isBlank(token)) {
-            for (Cookie cookie : request.getCookies()) {
-                if (Constant.AUTHENTICATION_TOKEN_KEY.equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if (Constant.AUTHENTICATION_TOKEN_KEY.equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
                 }
             }
         }
-        return StringUtils.isBlank(token) ? null :
-            token.replace(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX, "");
+
+        if (null != token && token.startsWith(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX)) {
+            token = token.substring(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX.length());
+        }
+
+        return token;
     }
 }

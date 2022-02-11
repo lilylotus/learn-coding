@@ -1,7 +1,7 @@
 package cn.nihility.api.config;
 
 import cn.nihility.api.annotation.UnifyResponseResult;
-import cn.nihility.common.pojo.UnifyResult;
+import cn.nihility.common.pojo.UnifyBaseResult;
 import cn.nihility.common.util.JacksonUtil;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.springframework.core.MethodParameter;
@@ -53,7 +53,7 @@ public class UnifyResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request, ServerHttpResponse response) {
 
         Method returnTypeMethod = returnType.getMethod();
-        final Object resultBody = (body instanceof UnifyResult) ? body : UnifyResultUtil.success(body);
+        final Object resultBody = (body instanceof UnifyBaseResult) ? body : UnifyResultUtil.success(body);
 
         if ((MediaType.TEXT_HTML.equals(selectedContentType))) {
             return body;

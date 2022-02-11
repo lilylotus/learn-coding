@@ -12,14 +12,14 @@ public class ServiceProviderClientFallback implements ServiceProviderClient {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProviderClientFallback.class);
 
     @Override
-    public UnifyResult echo(String msg) {
+    public UnifyResult<String> echo(String msg) {
         return UnifyResultUtil.success("Fallback [" + msg + "]");
     }
 
     @Override
-    public UnifyResult randomTimeOut() {
+    public UnifyResult<String> randomTimeOut() {
         logger.warn("CircuitBreaker randomTimeOut");
-        return UnifyResultUtil.success(-1);
+        return UnifyResultUtil.success("CircuitBreaker randomTimeOut");
     }
 
 }

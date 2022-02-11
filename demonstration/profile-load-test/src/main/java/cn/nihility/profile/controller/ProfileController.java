@@ -41,4 +41,10 @@ public class ProfileController {
         return ResponseEntity.ok(bean);
     }
 
+    @GetMapping("/profile/echo")
+    public ResponseEntity<Object> profileEcho() {
+        logger.info("invoke /profile/echo");
+        return ResponseEntity.ok("echo");
+    }
+
 }

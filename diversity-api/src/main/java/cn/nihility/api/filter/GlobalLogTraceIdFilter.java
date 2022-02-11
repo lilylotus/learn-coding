@@ -19,13 +19,20 @@ public class GlobalLogTraceIdFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String traceId;
+        // slf4j
         MDC.put(Constant.TRACE_ID,
             ((traceId = ((HttpServletRequest) request).getHeader(Constant.TRACE_ID)) == null ?
                 UuidUtil.snowflakeId() : traceId));
-        if (logger.isDebugEnabled()) {
-            logger.debug("request uri [{}]", ((HttpServletRequest) request).getRequestURI());
-        }
+        // log4j2 -> ThreadContext.put(Constant.TRACE_ID, traceId);
+        long startMillis = System.currentTimeMillis();
+        String uri = ((HttpServletRequest) request).getRequestURI();
+        String method = ((HttpServletRequest) request).getMethod();
+        logger.info("start request [{}:{}]", method, uri);
+
         chain.doFilter(request, response);
+
+        long endMillis = System.currentTimeMillis();
+        logger.info("end request [{}:{}] cost [{}]ms", method, uri, (endMillis - startMillis));
         MDC.remove(Constant.TRACE_ID);
     }
 

@@ -11,7 +11,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
     // hystrix 已经从 netflix 移除
     //implementation("org.springframework.cloud:spring-cloud-starter-netflix-hystrix")
-    implementation("io.github.resilience4j:resilience4j-bulkhead")
+    /*implementation("io.github.resilience4j:resilience4j-bulkhead")*/
     // api("io.github.resilience4j:resilience4j-spring-boot2")
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
+    api('io.github.resilience4j:resilience4j-spring-boot2')
 }

@@ -17,17 +17,17 @@ public class Resilience4jBulkheadController {
     }
 
     @GetMapping("/bulkhead/default")
-    public UnifyResult defaultBulkhead() {
+    public UnifyResult<String> defaultBulkhead() {
         return UnifyResultUtil.success(bulkheadService.defaultBulkhead());
     }
 
     @GetMapping("/bulkhead/specific/{id}")
-    public UnifyResult specificBulkhead(@PathVariable("id") String id) {
+    public UnifyResult<String> specificBulkhead(@PathVariable("id") String id) {
         return UnifyResultUtil.success(bulkheadService.specificBulkhead(id));
     }
 
     @GetMapping("/bulkhead/config")
-    public UnifyResult specificConfigBulkhead() {
+    public UnifyResult<String> specificConfigBulkhead() {
         return UnifyResultUtil.success(bulkheadService.specificConfigBulkhead());
     }
 

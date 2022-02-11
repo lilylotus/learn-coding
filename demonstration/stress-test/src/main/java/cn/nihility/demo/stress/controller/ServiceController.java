@@ -41,7 +41,7 @@ public class ServiceController {
     }
 
     @GetMapping("/redis/setnx")
-    public UnifyResult redisSetNX() {
+    public UnifyResult<Boolean> redisSetNX() {
         logger.info("进入 redisSetNX");
         boolean result = redisService.setNX("nx", "nx-value", 60);
         logger.info("Set NX Result [{}]", result);
@@ -49,7 +49,7 @@ public class ServiceController {
     }
 
     @GetMapping("/redis/del/setnx")
-    public UnifyResult redisDelSetNX() {
+    public UnifyResult<Boolean> redisDelSetNX() {
         logger.info("进入 redisDelSetNX");
         boolean result = redisService.delNX("nx", "nx-value");
         logger.info("DEL NX Result [{}]", result);
@@ -57,7 +57,7 @@ public class ServiceController {
     }
 
     @GetMapping("/redis/del2/setnx")
-    public UnifyResult redisDel2SetNX() {
+    public UnifyResult<Boolean> redisDel2SetNX() {
         logger.info("进入 redisDel2SetNX");
         boolean result = redisService.delNX("nx", "nx-error");
         logger.info("DEL NX redisDel2SetNX [{}]", result);
@@ -65,7 +65,7 @@ public class ServiceController {
     }
 
     @PostMapping("/shop/service")
-    public UnifyResult service() {
+    public UnifyResult<String> service() {
         logger.info("进入 Shopping");
         jdbcService.addServiceLog();
         return UnifyResultUtil.success("ok");
@@ -83,7 +83,7 @@ public class ServiceController {
     }
 
     @GetMapping("/buy/seckill")
-    public ResponseEntity<UnifyResult> redisSeckill() {
+    public ResponseEntity<UnifyResult<String>> redisSeckill() {
 
         long start = System.currentTimeMillis();
         String uuid = UuidUtil.jdkUUID(10);
@@ -97,7 +97,7 @@ public class ServiceController {
             resultMsg = "预判当前商品已抢购完成，没有库存了，请下次再试";
             logger.error(resultMsg);
             jdbcService.recordServiceLog(resultMsg);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure(resultMsg));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success(resultMsg));
         }
         while ((System.currentTimeMillis() - start) < SECKILL_GAP) {
             if (redisService.setNX(SECKILL_LOCK_KEY, val, 5)) {
@@ -133,7 +133,7 @@ public class ServiceController {
         if (success) {
             return ResponseEntity.ok(UnifyResultUtil.success(resultMsg));
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure(resultMsg));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success(resultMsg));
         }
 
     }
@@ -142,7 +142,7 @@ public class ServiceController {
      * 并发完全错误
      */
     @PostMapping("/buy/service/redis")
-    public ResponseEntity<UnifyResult> buyServiceByRedis() {
+    public ResponseEntity<UnifyResult<String>> buyServiceByRedis() {
         logger.info("进入 buyServiceByRedis");
         BoundValueOperations<String, String> ops = stringRedisTemplate.boundValueOps("buy:count");
         int remainCount = stringToInt(ops.get());
@@ -150,7 +150,7 @@ public class ServiceController {
         if (remainCount < 1) {
             logger.warn("库存 [{}] 不足，无法购买", remainCount);
             jdbcService.recordServiceLog("库存 [" + remainCount + "] 不足，无法购买");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure("库存不足，无法购买"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("库存不足，无法购买"));
         } else {
             int remain = stringToInt(ops.get()) - 1;
             ops.set(Integer.toString(remain));
@@ -196,7 +196,7 @@ public class ServiceController {
         return result;
     }
 
-    private ResponseEntity<UnifyResult> buyLogic(Predicate<RedisConnection> func) {
+    private ResponseEntity<UnifyResult<String>> buyLogic(Predicate<RedisConnection> func) {
         BoundValueOperations<String, String> ops = stringRedisTemplate.boundValueOps("buy:count");
         RedisConnectionFactory factory = stringRedisTemplate.getConnectionFactory();
         if (null != factory) {
@@ -210,7 +210,7 @@ public class ServiceController {
                         logger.warn("库存 [{}] 不足，无法购买", remainCount);
                         jdbcService.recordServiceLog("库存 [" + remainCount + "] 不足，无法购买");
                         conn.del("buy:nx_lock_key".getBytes(StandardCharsets.UTF_8));
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure("库存不足，无法购买"));
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("库存不足，无法购买"));
                     } else {
                         int remain = stringToInt(ops.get()) - 1;
                         ops.set(Integer.toString(remain));
@@ -221,22 +221,22 @@ public class ServiceController {
                 } else {
                     jdbcService.recordServiceLog("没有抢购到购买资格，无法购买。");
                     logger.warn("没有抢购到购买资格，下次再试。");
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure("没有抢购到购买资格，下次再试"));
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("没有抢购到购买资格，下次再试"));
                 }
             }
         }
         jdbcService.recordServiceLog("系统异常");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.failure("系统异常"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("系统异常"));
     }
 
     @PostMapping("/buy/service/redisNX")
-    public ResponseEntity<UnifyResult> buyServiceByRedisNX() {
+    public ResponseEntity<UnifyResult<String>> buyServiceByRedisNX() {
         logger.info("进入 buyServiceByRedisNX");
         return buyLogic(this::obtainBuyLock);
     }
 
     @PostMapping("/buy/service/redisNX2")
-    public ResponseEntity<UnifyResult> buyServiceByRedisNX2() {
+    public ResponseEntity<UnifyResult<String>> buyServiceByRedisNX2() {
         logger.info("进入 buyServiceByRedisNX2");
         return buyLogic(this::obtainBuyLockWhile);
     }

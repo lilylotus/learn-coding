@@ -1,6 +1,7 @@
 package cn.nihility.cloud.eureka.controller;
 
 import cn.nihility.common.pojo.UnifyResult;
+import cn.nihility.common.util.ServletRequestUtil;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Random;
 
 @RestController
@@ -16,13 +18,14 @@ public class ServiceProviderController {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProviderController.class);
 
     @RequestMapping("/service/echo/{msg}")
-    public UnifyResult echo(@PathVariable String msg) {
-        logger.info("Echo [{}]", msg);
+    public UnifyResult<String> echo(@PathVariable String msg, HttpServletRequest request) {
+        String feignHeadValue = ServletRequestUtil.obtainHttpRequestHeaderValue("Feign-Attach", request);
+        logger.info("Echo [{}], feignHeadValue [{}]", msg, feignHeadValue);
         return UnifyResultUtil.success(msg);
     }
 
     @RequestMapping("/service/random/timeout")
-    public UnifyResult randomTimeOut() {
+    public UnifyResult<String> randomTimeOut() {
         Random random = new Random(System.currentTimeMillis());
         int duration = random.nextInt(10);
         logger.info("randomTimeOut [{}] s", duration);

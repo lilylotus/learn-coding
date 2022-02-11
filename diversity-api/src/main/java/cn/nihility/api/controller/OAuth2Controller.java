@@ -4,7 +4,7 @@ import cn.nihility.api.constant.Constant;
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.DefaultHttpClientUtil;
-import cn.nihility.common.util.RequestUtil;
+import cn.nihility.common.util.ServletRequestUtil;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
@@ -73,7 +73,7 @@ public class OAuth2Controller {
         redirectAttributes.addAttribute("code", UUID.randomUUID().toString().replace("-", ""));
 
         // 对跳转 url 的参数编码，防止中文乱码
-        return "redirect:" + RequestUtil.urlParamsEncode(redirectUri);
+        return "redirect:" + ServletRequestUtil.urlParamsEncode(redirectUri);
 
     }
 
@@ -117,7 +117,7 @@ public class OAuth2Controller {
 
     @GetMapping("/login/auth/callback")
     @ResponseBody
-    public UnifyResult authCallback(@RequestParam("code") String code) {
+    public UnifyResult<Map<String, String>> authCallback(@RequestParam("code") String code) {
 
         log.info("callback code [{}]", code);
 
@@ -130,9 +130,9 @@ public class OAuth2Controller {
         params.put("grant_type", "authorization_code");
         params.put("code", code);
 
-        URI uri = RequestUtil.buildUri(url, params);
+        URI uri = ServletRequestUtil.buildUri(url, params);
         HttpPost post = new HttpPost(uri);
-        RequestUtil.addApplicationJsonHeader(post);
+        ServletRequestUtil.addApplicationJsonHeader(post);
         @SuppressWarnings("unchecked")
         Map<String, String> accessTokenMap = DefaultHttpClientUtil.executeHttpRequest(post, Map.class);
         log.info("获取 access_token 响应数据 [{}]", accessTokenMap);
@@ -149,7 +149,7 @@ public class OAuth2Controller {
         // 依据 access token 获取用户信息
         String userUrl = "http://127.0.0.1:30010/login/auth/user";
         HttpGet get = new HttpGet(userUrl);
-        RequestUtil.addHeader(get, Constant.AUTHENTICATION_TOKEN_KEY,
+        ServletRequestUtil.addHeader(get, Constant.AUTHENTICATION_TOKEN_KEY,
             Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX + accessToken);
         @SuppressWarnings("unchecked")
         Map<String, String> userInfoResult = DefaultHttpClientUtil.executeHttpRequest(get, Map.class);
@@ -168,7 +168,7 @@ public class OAuth2Controller {
             token = request.getParameter(Constant.AUTHENTICATION_TOKEN_KEY);
         }
         if (StringUtils.isBlank(token)) {
-            token = RequestUtil.obtainHttpRequestCookieValue(Constant.AUTHENTICATION_TOKEN_KEY, request);
+            token = ServletRequestUtil.obtainHttpRequestCookieValue(Constant.AUTHENTICATION_TOKEN_KEY, request);
         }
         log.info("Authorization [{}]", token);
 

@@ -21,13 +21,13 @@ public class IdempotentController {
     }
 
     @GetMapping("/idempotent/token")
-    public UnifyResult token() {
+    public UnifyResult<String> token() {
         return UnifyResultUtil.success(idempotentService.generateToken());
     }
 
     @PostMapping("/idempotent/do")
     @ApiIdempotent
-    public UnifyResult doSomethings() {
+    public UnifyResult<String> doSomethings() {
         return UnifyResultUtil.success("Done");
     }
 

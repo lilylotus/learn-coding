@@ -16,17 +16,15 @@ public class AuthenticationController {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     @PostMapping("/jwt/{id}")
-    public UnifyResult jwt(@PathVariable String id) {
+    public UnifyResult<String> jwt(@PathVariable String id) {
         String token = JwtUtil.createJwtToken(id, null);
-        if (logger.isDebugEnabled()) {
-            logger.debug("jwt [{}]", token);
-        }
+        logger.info("jwt [{}]", token);
         return UnifyResultUtil.success(token);
     }
 
     @PostMapping("/jwt/verify")
     @ApiAuthenticationCheck
-    public UnifyResult authentication() {
+    public UnifyResult<String> authentication() {
         logger.info("jwt verify");
         return UnifyResultUtil.success("Jwt Verify Success!");
     }

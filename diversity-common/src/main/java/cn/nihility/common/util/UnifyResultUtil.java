@@ -1,7 +1,10 @@
 package cn.nihility.common.util;
 
 import cn.nihility.common.constant.UnifyCodeMapping;
+import cn.nihility.common.pojo.UnifyBaseResult;
 import cn.nihility.common.pojo.UnifyResult;
+
+import java.util.List;
 
 public final class UnifyResultUtil {
 
@@ -10,42 +13,57 @@ public final class UnifyResultUtil {
 
     /* ==================== 成功 ==================== */
 
-    public static UnifyResult success(int code, Object data, String tip) {
-        return new UnifyResult(code, tip, data);
+    public static <T> UnifyResult<T> success(Integer code, T data, String message) {
+        UnifyResult<T> result = new UnifyResult<>();
+        result.setCode(code);
+        result.setData(data);
+        result.setMessage(message);
+        result.setTimestamp(System.currentTimeMillis());
+        return result;
     }
 
-    public static UnifyResult success(int code, Object data) {
-        return new UnifyResult(code, data);
+    public static <T> UnifyResult<T> success(T data, String message) {
+        return success(UnifyCodeMapping.SUCCESS.getCode(), data, message);
     }
 
-    public static UnifyResult success(Object data, String tip) {
-        return success(UnifyCodeMapping.SUCCESS.getCode(), data, tip);
+    public static <T> UnifyResult<T> success(T data) {
+        return success(UnifyCodeMapping.SUCCESS.getCode(), data, null);
     }
 
-    public static UnifyResult success(Object data) {
-        return success(UnifyCodeMapping.SUCCESS.getCode(), data);
-    }
 
-    public static UnifyResult success() {
-        return success(UnifyCodeMapping.SUCCESS.getCode(), null);
-    }
-
-    public static UnifyResult success(UnifyCodeMapping result) {
-        return success(result.getCode(), result.getMessage());
+    public static UnifyResult<Object> success() {
+        return success(UnifyCodeMapping.SUCCESS.getCode(), null, null);
     }
 
     /* ==================== 失败/错误/异常 ==================== */
 
-    public static UnifyResult failure(int code, String message) {
-        return new UnifyResult(code, message);
+    public static UnifyBaseResult failure(Integer code, String message, List<StackTraceElement> stackTrace) {
+        UnifyBaseResult result = new UnifyBaseResult();
+        result.setCode(code);
+        result.setMessage(message);
+        result.setStackTrace(stackTrace);
+        result.setTimestamp(System.currentTimeMillis());
+        return result;
     }
 
-    public static UnifyResult failure(String tipMessage) {
-        return new UnifyResult(UnifyCodeMapping.INTERNAL_SERVER_ERROR.getCode(), tipMessage);
+    public static UnifyBaseResult failure(Integer code, String message) {
+        return failure(code, message, null);
     }
 
-    public static UnifyResult failure(UnifyCodeMapping codeMapping) {
-        return failure(codeMapping.getCode(), codeMapping.getMessage());
+    public static UnifyBaseResult failure(UnifyCodeMapping unifyCode, List<StackTraceElement> stackTrace) {
+        return failure(unifyCode.getCode(), unifyCode.getMessage(), stackTrace);
+    }
+
+    public static UnifyBaseResult failure(UnifyCodeMapping unifyCode) {
+        return failure(unifyCode, null);
+    }
+
+    public static UnifyBaseResult failure(String message, List<StackTraceElement> stackTrace) {
+        return failure(UnifyCodeMapping.INTERNAL_SERVER_ERROR.getCode(), message, stackTrace);
+    }
+
+    public static UnifyBaseResult failure(String message) {
+        return failure(message, null);
     }
 
 }

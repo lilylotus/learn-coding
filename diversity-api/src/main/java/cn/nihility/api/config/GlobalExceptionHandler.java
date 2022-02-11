@@ -1,6 +1,7 @@
 package cn.nihility.api.config;
 
 import cn.nihility.api.exception.HttpRequestException;
+import cn.nihility.common.pojo.UnifyBaseResult;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
 import org.slf4j.Logger;
@@ -33,15 +34,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Object> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex,
-                                                                         WebRequest request) {
+    public ResponseEntity<UnifyBaseResult> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex,
+                                                                                  WebRequest request) {
         final HttpHeaders headers = new HttpHeaders();
         return handleException(ex, UnifyResultUtil.failure(ex.getMessage()), headers, request);
     }
 
     @ExceptionHandler(HttpRequestException.class)
-    public ResponseEntity<Object> httpRequestExceptionHandler(HttpRequestException ex, WebRequest request) {
-        UnifyResult body = ex.getBody();
+    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(HttpRequestException ex, WebRequest request) {
+        UnifyBaseResult body = ex.getBody();
         if (null == body) {
             body = UnifyResultUtil.failure(ex.getMessage());
         }
@@ -50,8 +51,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<Object> httpRequestExceptionHandler(NullPointerException ex, WebRequest request) {
-        UnifyResult body = UnifyResultUtil.failure("空指针异常");
+    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(NullPointerException ex, WebRequest request) {
+        UnifyBaseResult body = UnifyResultUtil.failure("空指针异常");
         final HttpHeaders headers = new HttpHeaders();
         return handleException(ex, body, headers, request);
     }
@@ -64,7 +65,7 @@ public class GlobalExceptionHandler {
      * @return 统一异常返回数据
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> exceptionHandler(Exception ex, WebRequest request) {
+    public ResponseEntity<UnifyBaseResult> exceptionHandler(Exception ex, WebRequest request) {
         final HttpHeaders headers = new HttpHeaders();
         return handleException(ex, UnifyResultUtil.failure(ex.getMessage()), headers, request);
     }
@@ -72,8 +73,8 @@ public class GlobalExceptionHandler {
     /**
      * 异常类的统一处理
      */
-    protected ResponseEntity<Object> handleException(Exception ex, Object body, HttpHeaders headers, WebRequest request) {
-        return handleExceptionInternal(ex, body, headers, HttpStatus.OK, request);
+    protected ResponseEntity<UnifyBaseResult> handleException(Exception ex, UnifyBaseResult body, HttpHeaders headers, WebRequest request) {
+        return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
     }
 
     /**
@@ -84,10 +85,10 @@ public class GlobalExceptionHandler {
      * request attribute and creates a {@link ResponseEntity} from the given
      * body, headers, and status.
      */
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
-                                                             HttpStatus status, WebRequest request) {
+    protected ResponseEntity<UnifyBaseResult> handleExceptionInternal(Exception ex, UnifyBaseResult body, HttpHeaders headers,
+                                                                      HttpStatus status, WebRequest request) {
         if (debugStackTrace && body instanceof UnifyResult) {
-            ((UnifyResult) body).setStackTrace(formatStackTrace(ex.getStackTrace()));
+            body.setStackTrace(formatStackTrace(ex.getStackTrace()));
         }
         if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, RequestAttributes.SCOPE_REQUEST);

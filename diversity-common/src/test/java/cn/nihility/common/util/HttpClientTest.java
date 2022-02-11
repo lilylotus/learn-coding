@@ -1,5 +1,6 @@
 package cn.nihility.common.util;
 
+import cn.nihility.common.pojo.UnifyBaseResult;
 import cn.nihility.common.pojo.UnifyResult;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -126,7 +127,7 @@ class HttpClientTest {
         String url = "http://127.0.0.1:8080/urm/welcome";
         String body = "{\"id\": \"randomId\", \"name\": \"randomName\"}";
         UnifyResult result = DefaultHttpClientUtil.executePostRequestWithResult(
-            RequestUtil.buildUri(url, null), body, UnifyResult.class);
+            ServletRequestUtil.buildUri(url, null), body, UnifyResult.class);
         Assertions.assertNotNull(result);
         Assertions.assertEquals(200, result.getCode());
     }

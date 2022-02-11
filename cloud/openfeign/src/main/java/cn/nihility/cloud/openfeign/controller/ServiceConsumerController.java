@@ -2,7 +2,6 @@ package cn.nihility.cloud.openfeign.controller;
 
 import cn.nihility.cloud.openfeign.service.ServiceProviderService;
 import cn.nihility.common.pojo.UnifyResult;
-import cn.nihility.common.util.UnifyResultUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,24 +20,23 @@ public class ServiceConsumerController {
     }
 
     @RequestMapping("/consumer/echo/{msg}")
-    public UnifyResult echo(@PathVariable("msg") String msg) {
+    public UnifyResult<UnifyResult<String>> echo(@PathVariable("msg") String msg) {
         logger.info("Echo  [{}]", msg);
-        UnifyResult result = providerService.echo(msg);
+        UnifyResult<UnifyResult<String>> result = providerService.echo(msg);
         logger.info("Echo result [{}]", result);
-        return UnifyResultUtil.success(result);
+        return result;
     }
 
     @RequestMapping("/consumer/random/timeout")
-    public UnifyResult randomTimeOut() {
-        UnifyResult result = providerService.randomTimeOut();
+    public UnifyResult<UnifyResult<String>> randomTimeOut() {
+        UnifyResult<UnifyResult<String>> result = providerService.randomTimeOut();
         logger.info("RandomTimeOut result [{}]", result);
-        return UnifyResultUtil.success(result);
+        return result;
     }
 
     @RequestMapping("/consumer/exception")
-    public UnifyResult circuitBreakerWithException() {
-        UnifyResult result = providerService.circuitBreakerWithException();
-        return UnifyResultUtil.success(result);
+    public UnifyResult<Object> circuitBreakerWithException() {
+        return providerService.circuitBreakerWithException();
     }
 
 }

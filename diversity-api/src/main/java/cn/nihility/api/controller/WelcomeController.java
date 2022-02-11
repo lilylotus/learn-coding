@@ -21,7 +21,7 @@ public class WelcomeController {
     private static final Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 
     @GetMapping("/welcome")
-    public UnifyResult welcome() {
+    public UnifyResult<String> welcome() {
         logger.info("welcome");
         return UnifyResultUtil.success("Welcome");
     }
@@ -40,7 +40,7 @@ public class WelcomeController {
     }
 
     @GetMapping("/welcome/exception")
-    public UnifyResult welcomeException() {
+    public UnifyResult<String> welcomeException() {
         logger.info("welcome exception");
 
         Random random = new Random(System.currentTimeMillis());
@@ -51,23 +51,23 @@ public class WelcomeController {
             throw new NullPointerException("Welcome NullPointerException");
         }
 
-        return UnifyResultUtil.failure("Welcome welcomeException");
+        return UnifyResultUtil.success("Welcome welcomeException");
     }
 
     @GetMapping("/welcome/http")
-    public UnifyResult welcomeHttpRequestException() {
+    public UnifyResult<String> welcomeHttpRequestException() {
         logger.info("welcome HttpRequestException");
         throw new HttpRequestException(HttpStatus.BAD_GATEWAY, UnifyResultUtil.failure("welcome HttpRequestException"));
     }
 
     @PostMapping("/welcome/date")
-    public UnifyResult welcomeDate(@RequestBody DateContainer dateContainer) {
+    public UnifyResult<DateContainer> welcomeDate(@RequestBody DateContainer dateContainer) {
         logger.info("date container [{}]", dateContainer);
         return UnifyResultUtil.success(dateContainer);
     }
 
     @GetMapping("/welcome/date")
-    public UnifyResult welcomeDateGet(DateContainer dateContainer) {
+    public UnifyResult<DateContainer> welcomeDateGet(DateContainer dateContainer) {
         logger.info("Get date container [{}]", dateContainer);
         return UnifyResultUtil.success(dateContainer);
     }

@@ -1,15 +1,17 @@
 package cn.nihility.api.controller;
 
+import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.constant.UnifyCodeMapping;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.DefaultHttpClientUtil;
-import cn.nihility.common.util.RequestUtil;
+import cn.nihility.common.util.ServletRequestUtil;
 import cn.nihility.common.util.UnifyResultUtil;
 import cn.nihility.common.util.UuidUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,7 +49,7 @@ public class CASController {
     public String casLogin() {
 
         String service = "http://127.0.0.1:30010/cas/business/callback?chinese=中文&english=English";
-        String urlEncodeService = RequestUtil.urlParamsEncode(service);
+        String urlEncodeService = ServletRequestUtil.urlParamsEncode(service);
         String redirectUrl = "http://127.0.0.1:30010/cas/auth/login?service=" + urlEncodeService;
         logger.info("redirect url [{}]", redirectUrl);
 
@@ -59,7 +61,7 @@ public class CASController {
      */
     @GetMapping("/cas/business/callback")
     @ResponseBody
-    public UnifyResult casLoginCallback(@RequestParam("ticket") String ticket) {
+    public UnifyResult<Map<String, String>> casLoginCallback(@RequestParam("ticket") String ticket) {
         logger.info("CAS Server Callback Ticket [{}]", ticket);
 
         // 校验 ticket 获取用户信息
@@ -68,20 +70,21 @@ public class CASController {
         params.put("service", "http://127.0.0.1:30010/cas/business/callback");
         params.put(TICKET, ticket);
 
-        URI uri = RequestUtil.buildUri(url, params);
+        URI uri = ServletRequestUtil.buildUri(url, params);
         HttpGet request = new HttpGet(uri);
-        UnifyResult validateResultData = DefaultHttpClientUtil.executeHttpRequest(request, UnifyResult.class);
+        @SuppressWarnings("unchecked")
+        UnifyResult<Map<String, String>> validateResultData = DefaultHttpClientUtil.executeHttpRequest(request, UnifyResult.class);
         logger.info("向 CAS 服务端校验 ticket 响应数据 [{}]", validateResultData);
         if (validateResultData == null) {
             logger.error("向 CAS 服务端校验 ticket 请求失败");
-            return UnifyResultUtil.success("向 CAS 服务端校验 ticket 请求失败");
+            throw new HttpRequestException(HttpStatus.UNAUTHORIZED, UnifyResultUtil.failure("向 CAS 服务端校验 ticket 请求失败"));
         } else {
             if (UnifyCodeMapping.SUCCESS.getCode().equals(validateResultData.getCode())) {
                 return UnifyResultUtil.success(validateResultData.getData());
             } else {
                 String message = validateResultData.getMessage();
                 logger.error("向 CAS 服务端校验 ticket 异常 [{}]", message);
-                return UnifyResultUtil.failure(message);
+                throw new HttpRequestException(HttpStatus.UNAUTHORIZED, UnifyResultUtil.failure(message));
             }
         }
     }
@@ -90,7 +93,7 @@ public class CASController {
     /* ============================== CAS SERVER ============================== */
 
     private void logRequestCookies(HttpServletRequest request) {
-        logger.info("Request Cookies [{}]", RequestUtil.cookiesToMap(request));
+        logger.info("Request Cookies [{}]", ServletRequestUtil.cookiesToMap(request));
     }
 
     /**
@@ -101,8 +104,8 @@ public class CASController {
 
         logRequestCookies(request);
 
-        final String tgt = RequestUtil.obtainHttpRequestCookieValue(CAS_TGC, request);
-        String jsessionid = RequestUtil.obtainCookieJSESSIONID(request);
+        final String tgt = ServletRequestUtil.obtainHttpRequestCookieValue(CAS_TGC, request);
+        String jsessionid = ServletRequestUtil.obtainCookieJSESSIONID(request);
         logger.info("CAS Auth Service [{}] TGT [{}] JSESSIONID [{}]", service, tgt, jsessionid);
         if (null != jsessionid) {
             JSESSIONID_MAPPING_SERVICE.put(jsessionid, service);
@@ -110,7 +113,7 @@ public class CASController {
 
         if (StringUtils.isNotBlank(tgt) || TGT_SET.contains(tgt)) {
             String uuid = ST_PREFIX + UuidUtil.jdkUUID();
-            String url = RequestUtil.urlParamsEncode(RequestUtil.addUrlParam(service, TICKET, uuid));
+            String url = ServletRequestUtil.urlParamsEncode(ServletRequestUtil.addUrlParam(service, TICKET, uuid));
             logger.info("TGT [{}] 存在，直接返回业务地址 [{}] ST [{}]", tgt, url, uuid);
             return "redirect:" + url;
         }
@@ -125,7 +128,7 @@ public class CASController {
                                         HttpServletRequest request, HttpServletResponse response,
                                         RedirectAttributes redirectAttributes) {
         logRequestCookies(request);
-        String jsessionid = RequestUtil.obtainCookieJSESSIONID(request);
+        String jsessionid = ServletRequestUtil.obtainCookieJSESSIONID(request);
         logger.info("CAS Auth Password Validate Form Data [{}]:[{}] , JSESSIONID [{}]", username, password, jsessionid);
 
         String service = null;
@@ -140,12 +143,12 @@ public class CASController {
         String st = ST_PREFIX + UuidUtil.jdkUUID();
         TGT_SET.add(tgt);
         logger.info("CAS TGC = [{}]", tgt);
-        RequestUtil.addCookie(CAS_TGC, tgt, null, CAS_COOKIE_PATH, 3600, response);
+        ServletRequestUtil.addCookie(CAS_TGC, tgt, null, CAS_COOKIE_PATH, 3600, response);
 
         /*redirectAttributes.addAttribute(TICKET, uuid);
         String serviceUrl = RequestUtil.urlParamsEncode(service);*/
 
-        String serviceUrl = RequestUtil.urlParamsEncode(RequestUtil.addUrlParam(service, TICKET, st));
+        String serviceUrl = ServletRequestUtil.urlParamsEncode(ServletRequestUtil.addUrlParam(service, TICKET, st));
         logger.info("CAS Auth Redirect Service [{}]", serviceUrl);
 
         return "redirect:" + serviceUrl;
@@ -157,14 +160,14 @@ public class CASController {
      */
     @GetMapping("/cas/auth/serviceValidate")
     @ResponseBody
-    public UnifyResult casServerServiceValidate(@RequestParam("service") String service,
-                                                @RequestParam("ticket") String ticket,
-                                                HttpServletRequest request) {
+    public UnifyResult<Map<String, String>> casServerServiceValidate(@RequestParam("service") String service,
+                                                        @RequestParam("ticket") String ticket,
+                                                        HttpServletRequest request) {
         logger.info("CAS Auth Service Validate [{}]:[{}]", service, ticket);
         logRequestCookies(request);
         if (StringUtils.isBlank(ticket)) {
             logger.error("Ticket 校验票据不存在");
-            return UnifyResultUtil.failure("Ticket 校验票据不存在");
+            throw new HttpRequestException(HttpStatus.UNAUTHORIZED, UnifyResultUtil.failure("Ticket 校验票据不存在"));
         }
 
         Map<String, String> info = new HashMap<>();

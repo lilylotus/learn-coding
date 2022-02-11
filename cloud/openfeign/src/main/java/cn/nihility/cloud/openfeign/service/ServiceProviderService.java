@@ -19,38 +19,38 @@ public class ServiceProviderService {
         this.serviceProviderClient = serviceProviderClient;
     }
 
-    public UnifyResult echo(String msg) {
+    public UnifyResult<UnifyResult<String>> echo(String msg) {
         return UnifyResultUtil.success(serviceProviderClient.echo(msg));
     }
 
     @CircuitBreaker(name = "randomTimeOut", fallbackMethod = "randomTimeOutFallback")
-    public UnifyResult randomTimeOut() {
+    public UnifyResult<UnifyResult<String>> randomTimeOut() {
         return UnifyResultUtil.success(serviceProviderClient.randomTimeOut());
     }
 
     @CircuitBreaker(name = "slowRandomTimeOut", fallbackMethod = "circuitBreakerWithExceptionFallback")
-    public UnifyResult circuitBreakerWithException() {
+    public UnifyResult<Object> circuitBreakerWithException() {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }
 
     @CircuitBreaker(name = "slowBulkhead", fallbackMethod = "slowBulkheadFallback")
-    public UnifyResult slowBulkhead() {
+    public UnifyResult<Object> slowBulkhead() {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }
 
-    public UnifyResult circuitBreakerWithExceptionFallback(Throwable ex) {
+    public UnifyResult<Object> circuitBreakerWithExceptionFallback(Throwable ex) {
         logger.error("CircuitBreaker slowRandomTimeOut fallback", ex);
-        return UnifyResultUtil.failure("slowRandomTimeOut [" + ex.getMessage() + "]");
+        return UnifyResultUtil.success("slowRandomTimeOut [" + ex.getMessage() + "]");
     }
 
-    public UnifyResult randomTimeOutFallback(Throwable ex) {
+    public UnifyResult<Object> randomTimeOutFallback(Throwable ex) {
         logger.error("CircuitBreaker randomTimeOut fallback", ex);
-        return UnifyResultUtil.failure("randomTimeOut [" + ex.getMessage() + "]");
+        return UnifyResultUtil.success("randomTimeOut [" + ex.getMessage() + "]");
     }
 
-    public UnifyResult slowBulkheadFallback(Throwable ex) {
+    public UnifyResult<Object> slowBulkheadFallback(Throwable ex) {
         logger.error("CircuitBreaker slowBulkhead fallback", ex);
-        return UnifyResultUtil.failure("slowBulkhead [" + ex.getMessage() + "]");
+        return UnifyResultUtil.success("slowBulkhead [" + ex.getMessage() + "]");
     }
 
 }

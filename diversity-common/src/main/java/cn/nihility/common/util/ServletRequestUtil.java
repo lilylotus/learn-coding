@@ -28,15 +28,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class RequestUtil {
+public class ServletRequestUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServletRequestUtil.class);
 
     private static final String COOKIE_JSESSIONID = "JSESSIONID";
     private static final String URL_SPLIT_AMPERSAND = "&";
     private static final String URL_PARAM_EQUAL = "=";
 
-    private RequestUtil() {
+    private ServletRequestUtil() {
     }
 
     public static String urlEncode(final String content) {
