@@ -31,8 +31,8 @@ public class ApiAuthenticationCheckInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         ApiAuthenticationCheck apiCheck = handlerMethod.getMethod().getAnnotation(ApiAuthenticationCheck.class);
         ApiAuthenticationCheck clazzCheck = handlerMethod.getBeanType().getAnnotation(ApiAuthenticationCheck.class);
-        if ((null != apiCheck && apiCheck.value()) ||
-            (null != clazzCheck && clazzCheck.value())) {
+        boolean check = (null != apiCheck && apiCheck.value()) || (null != clazzCheck && clazzCheck.value());
+        if (check) {
             try {
                 JwtUtil.verifyJwtToken(obtainAuthenticationToken(request));
             } catch (JwtParseException ex) {

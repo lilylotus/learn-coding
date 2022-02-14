@@ -143,24 +143,24 @@ public class RemoteCallService {
         return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
     }
 
-    private ResponseEntity<String> bulkheadFallBack(BulkheadFullException throwable) {
+    public ResponseEntity<String> bulkheadFallBack(BulkheadFullException throwable) {
         logger.error("方法被降级了~~ bulkheadFallBack [{}]", throwable.getLocalizedMessage());
         BulkhdadUtil.getBulkheadStatus("降级 bulkheadFallBack 方法中:", bulkheadRegistry.bulkhead(Constant.BULKHEAD_B));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("方法被降级了~~ bulkheadFallBack");
     }
 
-    private ResponseEntity<String> rateLimiterFallBack(Throwable throwable) {
+    public ResponseEntity<String> rateLimiterFallBack(Throwable throwable) {
         logger.error("方法被降级了~~ rateLimiterFallBack [{}]", throwable.getLocalizedMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("方法被降级了~~ rateLimiterFallBack");
     }
 
-    private ResponseEntity<String> bulkheadFallBack(Throwable throwable) {
+    public ResponseEntity<String> bulkheadFallBack(Throwable throwable) {
         logger.error("方法被降级了~~ bulkheadFallBack [{}]", throwable.getLocalizedMessage());
         BulkhdadUtil.getBulkheadStatus("降级 bulkheadFallBack 方法中:", bulkheadRegistry.bulkhead(Constant.BULKHEAD_B));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("方法被降级了~~ bulkheadFallBack");
     }
 
-    private ResponseEntity<String> retryFallBack(Throwable throwable) {
+    public ResponseEntity<String> retryFallBack(Throwable throwable) {
         logger.error("方法被降级了~~ retryFallBack [{}]", throwable.getLocalizedMessage());
         RetryUtil.getRetryStatus("降级 retryFallBack 方法中:",
             retryRegistry.retry(Constant.RETRY_B));
@@ -168,7 +168,7 @@ public class RemoteCallService {
             .body("方法被降级了~~ retryFallBack");
     }
 
-    private ResponseEntity<String> fallBack(Throwable throwable) {
+    public ResponseEntity<String> fallBack(Throwable throwable) {
         logger.error("方法被降级了~~ fallBack [{}]", throwable.getLocalizedMessage());
         CircuitBreakerUtil.getCircuitBreakerStatus("降级 fallBack 方法中:",
             circuitBreakerRegistry.circuitBreaker(Constant.CIRCUIT_BREAKER_A));
@@ -176,7 +176,7 @@ public class RemoteCallService {
             .body("方法被降级了~~ fallBack");
     }
 
-    private ResponseEntity<String> fallBack(CallNotPermittedException e) {
+    public ResponseEntity<String> fallBack(CallNotPermittedException e) {
         logger.error("熔断器已经打开，拒绝访问被保护方法~ fallBack, [{}]", e.getMessage());
         CircuitBreakerUtil.getCircuitBreakerStatus("熔断器 fallBack 打开中:",
             circuitBreakerRegistry.circuitBreaker(Constant.CIRCUIT_BREAKER_A));

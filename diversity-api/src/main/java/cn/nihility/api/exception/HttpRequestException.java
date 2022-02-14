@@ -19,26 +19,30 @@ public class HttpRequestException extends RuntimeException {
      * 返回的响应消息体，可填
      * 不为空是返回该 body 对象，为空时获取异常信息在组装响应体
      */
-    private UnifyBaseResult body;
+    private final UnifyBaseResult body;
 
 
     public HttpRequestException(String message) {
         super(message);
+        body = null;
         this.httpStatus = HttpStatus.BAD_REQUEST;
     }
 
     public HttpRequestException(String message, Throwable cause) {
         super(message, cause);
+        body = null;
         this.httpStatus = HttpStatus.BAD_REQUEST;
     }
 
     public HttpRequestException(String message, HttpStatus status) {
         super(message);
+        body = null;
         this.httpStatus = status;
     }
 
     public HttpRequestException(String message, Throwable cause, HttpStatus status) {
         super(message, cause);
+        body = null;
         this.httpStatus = status;
     }
 

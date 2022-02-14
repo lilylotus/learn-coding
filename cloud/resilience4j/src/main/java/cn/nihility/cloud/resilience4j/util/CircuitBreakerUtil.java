@@ -14,7 +14,7 @@ public class CircuitBreakerUtil {
     public static void threadSleep(long millis) {
         try {
             Thread.sleep(millis);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignore) {
         }
     }
 

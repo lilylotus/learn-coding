@@ -1,5 +1,6 @@
 package cn.nihility.demo.socket;
 
+import cn.nihility.demo.constant.Constant;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,12 +93,12 @@ public class WebSocketSessionManager {
             return;
         }
 
-        String[] sp = message.split(":");
-        if (2 == sp.length) {
+        String[] sp = message.split(Constant.MESSAGE_SPLIT_TAG);
+        if (Constant.MESSAGE_SPLIT_LEN == sp.length) {
             String key = sp[0];
             String msg = sp[1];
             log.info("消息路由 key [{}], msg [{}]", key, msg);
-            if ("all".equals(key)) {
+            if (Constant.ALL_USER_KEY.equals(key)) {
                 sendMsgToAllSession(id, id + " > " + msg);
             } else {
                 sendMsgToSpecifySession(key, id + " > " + msg);
