@@ -3,7 +3,7 @@ package cn.nihility.plugin.rabbitmq.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.ReturnedMessage;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -46,7 +46,8 @@ public class PluginRabbitmqConfiguration {
         /*
          * 消息投递到队列失败回调处理
          */
-        template.setReturnsCallback(new ReturnsCallbackServiceImpl());
+        //template.setReturnsCallback(new ReturnsCallbackServiceImpl());
+        template.setReturnCallback(new ReturnsCallbackServiceImpl());
 
         return template;
     }
@@ -71,7 +72,8 @@ public class PluginRabbitmqConfiguration {
         /*
          * 消息投递到队列失败回调处理
          */
-        rabbitTemplate.setReturnsCallback(new ReturnsCallbackServiceImpl());
+        //rabbitTemplate.setReturnsCallback(new ReturnsCallbackServiceImpl());
+        rabbitTemplate.setReturnCallback(new ReturnsCallbackServiceImpl());
 
         return rabbitTemplate;
     }
@@ -122,19 +124,24 @@ public class PluginRabbitmqConfiguration {
      * 如果消息未能由 broker 投递到目标 queue 将触发回调 returnCallback
      * 一旦向 queue 投递消息未成功，一般会记录下当前消息的详细投递数据，方便后续做重发或者补偿等操作
      */
-    static class ReturnsCallbackServiceImpl implements RabbitTemplate.ReturnsCallback {
+    static class ReturnsCallbackServiceImpl implements RabbitTemplate.ReturnCallback {
 
         private static final Logger logger = LoggerFactory.getLogger(ReturnsCallbackServiceImpl.class);
 
         /**
          * ReturnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey)
          */
-        @Override
+        /*@Override
         public void returnedMessage(ReturnedMessage rm) {
             logger.info("Rabbitmq 的 broker 交换机向 Queue 投递消息失败，响应 message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
                 rm.getMessage(), rm.getReplyCode(), rm.getReplyText(), rm.getExchange(), rm.getRoutingKey());
-        }
+        }*/
 
+        @Override
+        public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+            logger.info("Rabbitmq 的 broker 交换机向 Queue 投递消息失败，响应 message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
+                message, replyCode, replyText, exchange, routingKey);
+        }
     }
 
 }

@@ -1,0 +1,8 @@
+
+dependencies {
+    implementation(project(":plugins:plugin-log4j2"))
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:${cloudNacosVersion}")
+    implementation("com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:${cloudNacosVersion}")
+}

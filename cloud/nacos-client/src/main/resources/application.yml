@@ -1,0 +1,6 @@
+server:
+  port: 30030
+
+spring:
+  application:
+    name: NacosClient
