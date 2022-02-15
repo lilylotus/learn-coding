@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * redis 管理操作接口具体实现
+ * @author nihility
  */
 public class RedisOperateServiceImpl implements RedisOperateService {
 

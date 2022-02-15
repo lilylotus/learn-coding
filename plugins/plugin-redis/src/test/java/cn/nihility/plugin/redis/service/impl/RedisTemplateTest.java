@@ -1,4 +1,4 @@
-package cn.nihility.plugin.redis;
+package cn.nihility.plugin.redis.service.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,11 +39,20 @@ class RedisTemplateTest {
     }
 
     @Test
-    void testRedisTemplateGet() {
+    void testRedisTemplateSerialize() {
         Assertions.assertNotNull(redisTemplate);
+        List<String> list = new ArrayList<>();
+        list.add("one");
+        list.add("two");
 
-        Object stringValue = redisTemplate.boundValueOps("redis:serialize:string").get();
-        Object listValue = redisTemplate.boundValueOps("redis:serialize:list").get();
+        BoundValueOperations<String, Object> ops = redisTemplate.boundValueOps("redis:serialize:string");
+        BoundValueOperations<String, Object> listOps = redisTemplate.boundValueOps("redis:serialize:list");
+
+        ops.set("Redis Serialize Value");
+        listOps.set(list);
+
+        Object stringValue = ops.get();
+        Object listValue = listOps.get();
 
         Assertions.assertNotNull(stringValue);
         Assertions.assertNotNull(listValue);
