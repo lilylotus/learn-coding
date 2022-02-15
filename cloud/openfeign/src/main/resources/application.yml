@@ -19,10 +19,29 @@ eureka:
     healthcheck:
       enabled: true
 
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+
+# When Hystrix is enabled, its timeout configuration defaults to 1000 milliseconds.
+# org.springframework.cloud.openfeign.FeignAutoConfiguration
 # openfeign
 feign:
+  hystrix:
+    enabled: true
   httpclient:
     enabled: true
+    # feign 最大连接数
+    max-connections: 200
+    # feign 单个路径的最大连接数
+    max-connections-per-route: 32
+    connection-timeout: 3000
   circuitbreaker:
     enabled: true
   client:
@@ -31,67 +50,12 @@ feign:
       default:
         connectTimeout: 5000
         readTimeout: 5000
-        loggerLevel: FULL
+        loggerLevel: basic
       # 针对具体的 client 定制参数
       CloudEurekaClient:
         connectTimeout: 3000
         readTimeout: 3000
-        loggerLevel: BASIC
-
-# 熔断器配置
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        ringBufferSizeInClosedState: 5 # 熔断器关闭时的缓冲区大小
-        ringBufferSizeInHalfOpenState: 2 # 熔断器半开时的缓冲区大小
-        waitDurationInOpenState: 10000 # 熔断器从打开到半开需要的时间
-        failureRateThreshold: 60 # 熔断器打开的失败阈值
-        eventConsumerBufferSize: 10 # 事件缓冲区大小
-        registerHealthIndicator: true # 健康监测
-        automaticTransitionFromOpenToHalfOpenEnabled: false # 是否自动从打开到半开，不需要触发
-        # 谓词设置异常是否为失败, 0.16.0
-        #recordFailurePredicate:    com.example.resilience4j.exceptions.RecordFailurePredicate
-#        recordExceptions: # 记录的异常
-#          - cn.nihility.cloud.openfeign.exception.CircuitBreakerExceptionA
-#          - cn.nihility.cloud.openfeign.exception.CircuitBreakerExceptionB
-#        ignoreExceptions: # 忽略的异常
-#          - cn.nihility.cloud.openfeign.exception.CircuitBreakerExceptionA
-    instances:
-      backendA:
-        baseConfig: default
-        waitDurationInOpenState: 5000
-        failureRateThreshold: 20
-      backendB:
-        baseConfig: default
-# 默认 SemaphoreBulkhead - 信号量
-resilience4j.bulkhead:
-  configs:
-    default:
-      # 舱壁允许的最大并行执行量
-      maxConcurrentCalls: 4
-      # 尝试进入饱和舱壁时，应阻塞线程的最长时间。
-      maxWaitDuration: 20ms
-  instances:
-    DefaultBulkhead:
-      baseConfig: default
-    SpecificBulkhead:
-      maxWaitDuration: 10ms
-      maxConcurrentCalls: 6
-# FixedThreadPoolBulkhead
-resilience4j.thread-pool-bulkhead:
-  configs:
-    default:
-      maxThreadPoolSize: 4
-      coreThreadPoolSize: 2
-      queueCapacity: 2
-  instances:
-    DefaultThreadPoolBulkhead:
-      baseConfig: default
-    SpecificThreadPoolBulkhead:
-      maxThreadPoolSize: 2
-      coreThreadPoolSize: 2
-      queueCapacity: 2
+        loggerLevel: full
 
 management:
   endpoints:
@@ -103,3 +67,9 @@ management:
 info:
   application: ${spring.application.name}
   port: ${server.port}
+
+logging:
+  level:
+    com.netflix.discovery: info
+    org.apache.http: info
+    com.netflix.loadbalancer: info

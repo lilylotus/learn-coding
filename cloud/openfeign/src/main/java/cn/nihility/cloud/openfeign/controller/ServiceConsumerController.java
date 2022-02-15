@@ -28,8 +28,8 @@ public class ServiceConsumerController {
     }
 
     @RequestMapping("/consumer/random/timeout")
-    public UnifyResult<UnifyResult<String>> randomTimeOut() {
-        UnifyResult<UnifyResult<String>> result = providerService.randomTimeOut();
+    public UnifyResult<String> randomTimeOut() {
+        UnifyResult<String> result = providerService.randomTimeOut();
         logger.info("RandomTimeOut result [{}]", result);
         return result;
     }

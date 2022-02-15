@@ -76,11 +76,11 @@ subprojects {
     }
 }
 
-task cleanAll(type: Delete, dependsOn: [clean]) {
-    subprojects.forEach({
-        /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/
-        println "clean [$it.projectDir\\out]"
-        delete "$it.projectDir\\out"
-        delete "$it.projectDir\\build"
-    })
-}
+//task cleanAll(type: Delete, dependsOn: [clean]) {
+//    subprojects.forEach({
+//        /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/
+//        println "clean [$it.projectDir\\out]"
+//        delete "$it.projectDir\\out"
+//        delete "$it.projectDir\\build"
+//    })
+//}

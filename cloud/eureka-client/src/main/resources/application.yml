@@ -29,3 +29,7 @@ management:
 info:
   application: ${spring.application.name}
   port: ${server.port}
+
+logging:
+  level:
+    root: info

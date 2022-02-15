@@ -1,0 +1,2 @@
+org.springframework.cloud.bootstrap.BootstrapConfiguration=cn.nihility.cloud.nacos.config.PropertySourceLocatorConfiguration
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=

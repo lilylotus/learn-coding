@@ -3,7 +3,6 @@ package cn.nihility.cloud.openfeign.service;
 import cn.nihility.cloud.openfeign.client.ServiceProviderClient;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.UnifyResultUtil;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,17 +22,15 @@ public class ServiceProviderService {
         return UnifyResultUtil.success(serviceProviderClient.echo(msg));
     }
 
-    @CircuitBreaker(name = "randomTimeOut", fallbackMethod = "randomTimeOutFallback")
-    public UnifyResult<UnifyResult<String>> randomTimeOut() {
-        return UnifyResultUtil.success(serviceProviderClient.randomTimeOut());
+    public UnifyResult<String> randomTimeOut() {
+        UnifyResult<String> result = serviceProviderClient.randomTimeOut();
+        return null != result ? UnifyResultUtil.success(result.getData()) : UnifyResultUtil.success("empty");
     }
 
-    @CircuitBreaker(name = "slowRandomTimeOut", fallbackMethod = "circuitBreakerWithExceptionFallback")
     public UnifyResult<Object> circuitBreakerWithException() {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }
 
-    @CircuitBreaker(name = "slowBulkhead", fallbackMethod = "slowBulkheadFallback")
     public UnifyResult<Object> slowBulkhead() {
         throw new IllegalArgumentException("circuitBreakerWithException");
     }

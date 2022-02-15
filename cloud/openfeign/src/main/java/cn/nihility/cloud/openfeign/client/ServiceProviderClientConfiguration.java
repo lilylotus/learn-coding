@@ -1,6 +1,5 @@
 package cn.nihility.cloud.openfeign.client;
 
-import feign.Feign;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -10,10 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServiceProviderClientConfiguration {
 
+    /* To disable Hystrix support on a per-client basis
+    create a vanilla Feign.Builder with the "prototype" scope
+     */
     /*@Bean
-    @Scope("prototype")*/
+    @Scope("prototype")
     public Feign.Builder feignBuilder() {
         return Feign.builder();
-    }
+    }*/
 
 }
