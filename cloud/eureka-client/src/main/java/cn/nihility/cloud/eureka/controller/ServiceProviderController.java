@@ -1,8 +1,8 @@
 package cn.nihility.cloud.eureka.controller;
 
 import cn.nihility.common.pojo.UnifyResult;
-import cn.nihility.common.util.ServletRequestUtil;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.HttpRequestUtils;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +19,9 @@ public class ServiceProviderController {
 
     @RequestMapping("/service/echo/{msg}")
     public UnifyResult<String> echo(@PathVariable String msg, HttpServletRequest request) {
-        String feignHeadValue = ServletRequestUtil.obtainHttpRequestHeaderValue("Feign-Attach", request);
+        String feignHeadValue = HttpRequestUtils.obtainHttpRequestHeaderValue("Feign-Attach", request);
         logger.info("Echo [{}], feignHeadValue [{}]", msg, feignHeadValue);
-        return UnifyResultUtil.success(msg);
+        return UnifyResultUtils.success(msg);
     }
 
     @RequestMapping("/service/random/timeout")
@@ -34,7 +34,7 @@ public class ServiceProviderController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return UnifyResultUtil.success("randomTimeOut [" + duration + "]");
+        return UnifyResultUtils.success("randomTimeOut [" + duration + "]");
     }
 
 }

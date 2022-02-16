@@ -1,6 +1,6 @@
 package cn.nihility.api.filter;
 
-import cn.nihility.common.util.UuidUtil;
+import cn.nihility.common.util.UuidUtils;
 import cn.nihility.plugin.log4j2.constant.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class GlobalLogTraceIdFilter implements Filter {
         // slf4j
         MDC.put(Constant.TRACE_ID,
             ((traceId = ((HttpServletRequest) request).getHeader(Constant.TRACE_ID)) == null ?
-                UuidUtil.snowflakeId() : traceId));
+                UuidUtils.snowflakeId() : traceId));
         // log4j2 -> ThreadContext.put(Constant.TRACE_ID, traceId);
         long startMillis = System.currentTimeMillis();
         String uri = ((HttpServletRequest) request).getRequestURI();

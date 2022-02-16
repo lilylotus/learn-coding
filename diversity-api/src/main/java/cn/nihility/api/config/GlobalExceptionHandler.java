@@ -2,7 +2,7 @@ package cn.nihility.api.config;
 
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.pojo.UnifyBaseResult;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +33,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<UnifyBaseResult> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex,
                                                                                   WebRequest request) {
-        return handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getMessage()), HttpStatus.BAD_REQUEST);
+        return handleExceptionInternal(ex, UnifyResultUtils.failure(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpRequestException.class)
     public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(HttpRequestException ex, WebRequest request) {
         UnifyBaseResult body = ex.getBody();
         if (null == body) {
-            body = UnifyResultUtil.failure(ex.getMessage());
+            body = UnifyResultUtils.failure(ex.getMessage());
         }
         HttpStatus httpStatus = ex.getHttpStatus();
         if (null == httpStatus) {
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(NullPointerException ex, WebRequest request) {
-        return handleExceptionInternal(ex, UnifyResultUtil.failure("空指针异常"), HttpStatus.INTERNAL_SERVER_ERROR);
+        return handleExceptionInternal(ex, UnifyResultUtils.failure("空指针异常"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<UnifyBaseResult> exceptionHandler(Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, UnifyResultUtil.failure(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return handleExceptionInternal(ex, UnifyResultUtils.failure(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

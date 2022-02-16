@@ -2,9 +2,9 @@ package cn.nihility.profile.controller;
 
 import cn.nihility.common.constant.UnifyCodeMapping;
 import cn.nihility.common.pojo.UnifyResult;
-import cn.nihility.common.util.DefaultHttpClientUtil;
-import cn.nihility.common.util.ServletRequestUtil;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.HttpClientUtils;
+import cn.nihility.common.util.HttpRequestUtils;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class CASClientController {
     private static final String CAS_VALIDATE_URL = "http://localhost:30010/cas/auth/serviceValidate";
 
     private void logRequestCookies(HttpServletRequest request) {
-        logger.info("Request Cookies [{}]", ServletRequestUtil.cookiesToMap(request));
+        logger.info("Request Cookies [{}]", HttpRequestUtils.cookiesToMap(request));
     }
 
     /**
@@ -39,7 +39,7 @@ public class CASClientController {
 
         logRequestCookies(request);
 
-        String urlEncodeService = ServletRequestUtil.urlParamsEncode(SERVICE_URL);
+        String urlEncodeService = HttpRequestUtils.urlParamsEncode(SERVICE_URL);
         String redirectUrl = "http://localhost:30010/cas/auth/login?service=" + urlEncodeService;
         logger.info("redirect url [{}]", redirectUrl);
 
@@ -59,21 +59,21 @@ public class CASClientController {
         params.put("service", SERVICE_URL);
         params.put("ticket", ticket);
 
-        URI uri = ServletRequestUtil.buildUri(CAS_VALIDATE_URL, params);
+        URI uri = HttpRequestUtils.buildUri(CAS_VALIDATE_URL, params);
         HttpGet request = new HttpGet(uri);
         @SuppressWarnings("unchecked")
-        UnifyResult<String> validateResultData = DefaultHttpClientUtil.executeHttpRequest(request, UnifyResult.class);
+        UnifyResult<String> validateResultData = HttpClientUtils.executeHttpRequest(request, UnifyResult.class);
         logger.info("向 CAS 服务端校验 ticket 响应数据 [{}]", validateResultData);
         if (validateResultData == null) {
             logger.error("向 CAS 服务端校验 ticket 请求失败");
-            return UnifyResultUtil.success("向 CAS 服务端校验 ticket 请求失败");
+            return UnifyResultUtils.success("向 CAS 服务端校验 ticket 请求失败");
         } else {
             if (UnifyCodeMapping.SUCCESS.getCode().equals(validateResultData.getCode())) {
-                return UnifyResultUtil.success(validateResultData.getData());
+                return UnifyResultUtils.success(validateResultData.getData());
             } else {
                 String message = validateResultData.getMessage();
                 logger.error("向 CAS 服务端校验 ticket 异常 [{}]", message);
-                return UnifyResultUtil.success(message);
+                return UnifyResultUtils.success(message);
             }
         }
     }

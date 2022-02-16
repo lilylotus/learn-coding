@@ -5,8 +5,8 @@ import cn.nihility.api.constant.Constant;
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.constant.UnifyCodeMapping;
 import cn.nihility.common.exception.JwtParseException;
-import cn.nihility.common.util.JwtUtil;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.JwtUtils;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.method.HandlerMethod;
@@ -34,10 +34,10 @@ public class ApiAuthenticationCheckInterceptor implements HandlerInterceptor {
         boolean check = (null != apiCheck && apiCheck.value()) || (null != clazzCheck && clazzCheck.value());
         if (check) {
             try {
-                JwtUtil.verifyJwtToken(obtainAuthenticationToken(request));
+                JwtUtils.verifyJwtToken(obtainAuthenticationToken(request));
             } catch (JwtParseException ex) {
                 throw new HttpRequestException(HttpStatus.UNAUTHORIZED,
-                    UnifyResultUtil.failure(UnifyCodeMapping.UNAUTHORIZED.getCode(), ex.getMessage()));
+                    UnifyResultUtils.failure(UnifyCodeMapping.UNAUTHORIZED.getCode(), ex.getMessage()));
             }
         }
 

@@ -1,6 +1,6 @@
 package cn.nihility.api.config;
 
-import cn.nihility.common.util.JacksonUtil;
+import cn.nihility.common.util.JacksonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class ApiConfiguration {
      */
     @Bean
     public ObjectMapper objectMapper() {
-        return JacksonUtil.newObjectMapperInstance();
+        return JacksonUtils.newObjectMapperInstance();
     }
 
     @Configuration

@@ -2,8 +2,8 @@ package cn.nihility.api.config;
 
 import cn.nihility.api.annotation.UnifyResponseResult;
 import cn.nihility.common.pojo.UnifyBaseResult;
-import cn.nihility.common.util.JacksonUtil;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.JacksonUtils;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.MediaType;
@@ -53,12 +53,12 @@ public class UnifyResponseBodyAdvice implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request, ServerHttpResponse response) {
 
         Method returnTypeMethod = returnType.getMethod();
-        final Object resultBody = (body instanceof UnifyBaseResult) ? body : UnifyResultUtil.success(body);
+        final Object resultBody = (body instanceof UnifyBaseResult) ? body : UnifyResultUtils.success(body);
 
         if ((MediaType.TEXT_HTML.equals(selectedContentType))) {
             return body;
         } else if (MediaType.TEXT_PLAIN.equals(selectedContentType)) {
-            String result = JacksonUtil.toJsonString(resultBody);
+            String result = JacksonUtils.toJsonString(resultBody);
             if (returnTypeMethod != null && Stream.of(returnTypeMethod.getAnnotations())
                 .anyMatch(a -> (a instanceof RequestMapping) &&
                     ((RequestMapping) a).produces().length > 0)) {

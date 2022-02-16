@@ -13,4 +13,6 @@ dependencies {
     // http client
     api("org.apache.httpcomponents:httpmime:${httpClientVersion}")
     api("org.apache.httpcomponents:httpclient:${httpClientVersion}")
+
+    testImplementation(project(":plugins:plugin-log4j2"))
 }

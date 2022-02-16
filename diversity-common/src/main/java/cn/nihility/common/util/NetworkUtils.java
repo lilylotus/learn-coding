@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-public final class NetworkUtil {
+public final class NetworkUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(NetworkUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(NetworkUtils.class);
 
     public static final String LOOPBACK_ADDRESS = "127.0.0.1";
     public static final String LOCAL_HOST_NAME = "localhost";
 
-    private NetworkUtil() {
+    private NetworkUtils() {
     }
 
     /**

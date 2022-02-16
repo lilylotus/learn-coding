@@ -1,13 +1,13 @@
 package cn.nihility.common.util;
 
-import cn.nihility.common.pojo.UnifyBaseResult;
-import cn.nihility.common.pojo.UnifyResult;
+import cn.nihility.common.constant.RequestMethodEnum;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.cookie.Cookie;
@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,14 +33,14 @@ class HttpClientTest {
 
     @Test
     void testNormalHttpClientRequestGet() throws IOException {
-        final HttpClientConnectionManager connectionManager = DefaultHttpClientUtil.createHttpClientConnectionManager();
-        final CloseableHttpClient httpClient = DefaultHttpClientUtil.createHttpClient(connectionManager);
+        final HttpClientConnectionManager connectionManager = HttpClientUtils.createHttpClientConnectionManager();
+        final CloseableHttpClient httpClient = HttpClientUtils.createHttpClient(connectionManager);
 
         HttpGet httpRequest = new HttpGet("http://www.baidu.com");
 
         final BasicCookieStore cookieStore = new BasicCookieStore();
         HttpClientContext httpContext = HttpClientContext.create();
-        httpContext.setRequestConfig(DefaultHttpClientUtil.createRequestConfig());
+        httpContext.setRequestConfig(HttpClientUtils.createRequestConfig());
         httpContext.setCookieStore(cookieStore);
 
         CloseableHttpResponse httpResponse = null;
@@ -62,13 +64,13 @@ class HttpClientTest {
 
         httpResponse.close();
         httpClient.close();
-        DefaultHttpClientUtil.shutdown(connectionManager);
+        HttpClientUtils.shutdown(connectionManager);
 
     }
 
     @Test
     void testNormalPost() {
-        final HttpClientConnectionManager connectionManager = DefaultHttpClientUtil.createHttpClientConnectionManager();
+        final HttpClientConnectionManager connectionManager = HttpClientUtils.createHttpClientConnectionManager();
 
         final HttpPost post = new HttpPost("http://10.0.41.80:50012/manage-central/umm/v1/admin/login");
         post.addHeader("Content-Type", "application/json");
@@ -79,9 +81,9 @@ class HttpClientTest {
         stringEntity.setContentType("application/json");
 
         post.setEntity(stringEntity);
-        post.setConfig(DefaultHttpClientUtil.createRequestConfig());
+        post.setConfig(HttpClientUtils.createRequestConfig());
 
-        try (final CloseableHttpClient httpClient = DefaultHttpClientUtil.createHttpClient(connectionManager)) {
+        try (final CloseableHttpClient httpClient = HttpClientUtils.createHttpClient(connectionManager)) {
             try (CloseableHttpResponse httpResponse = httpClient.execute(post)) {
                 final StatusLine statusLine = httpResponse.getStatusLine();
                 assertNotNull(statusLine);
@@ -92,15 +94,46 @@ class HttpClientTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DefaultHttpClientUtil.shutdown(connectionManager);
+        HttpClientUtils.shutdown(connectionManager);
+    }
+
+    @Test
+    void testPostFormData2() {
+
+        Map<String, String> params = new HashMap<>(4);
+        params.put("userName", "admin");
+        params.put("password", "123456");
+
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        HttpClientContext httpContext = HttpClientContext.create();
+        httpContext.setCookieStore(cookieStore);
+
+        HttpUriRequest request = HttpClientUtils.buildFormHttpRequest("http://10.0.249.190:81/xxl-job-admin/login",
+            RequestMethodEnum.POST, params);
+
+        try (CloseableHttpClient httpClient = HttpClientUtils.createHttpClient(false)) {
+            @SuppressWarnings("unchecked")
+            Map<String, String> result = HttpClientUtils.executeHttpRequest(httpClient, request, httpContext, Map.class);
+            Assertions.assertNotNull(result);
+            System.out.println(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Cookies:");
+        cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
+
     }
 
     @Test
     void testPostFormData() {
-        final BasicCookieStore cookieStore = new BasicCookieStore();
-        try (CloseableHttpClient httpClient = ApacheHttpClientUtil.createHttpClient(false, cookieStore)) {
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        HttpClientContext httpContext = HttpClientContext.create();
+        httpContext.setCookieStore(cookieStore);
 
-            HttpPost httpPost = new HttpPost("http://10.0.1.170:23806/xxl-job-admin/login");
+        try (CloseableHttpClient httpClient = HttpClientUtils.createHttpClient(true)) {
+
+            HttpPost httpPost = new HttpPost("http://10.0.249.190:81/xxl-job-admin/login");
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // 将参数放入键值对类 NameValuePair 中,再放入集合中
@@ -110,12 +143,16 @@ class HttpClientTest {
             UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params, StandardCharsets.UTF_8);
             httpPost.setEntity(formEntity);
 
-            try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
+            try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost, httpContext)) {
+
+                Assertions.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+
                 System.out.println("响应状态为:" + httpResponse.getStatusLine());
                 System.out.println("响应消息为:" + EntityUtils.toString(httpResponse.getEntity()));
                 System.out.println(httpResponse.getFirstHeader("Set-Cookie").getValue());
             }
 
+            System.out.println("Cookies:");
             cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,33 +160,23 @@ class HttpClientTest {
     }
 
     @Test
-    void testExecuteApplicationJsonPostWithResult() {
-        String url = "http://127.0.0.1:8080/urm/welcome";
-        String body = "{\"id\": \"randomId\", \"name\": \"randomName\"}";
-        UnifyResult result = DefaultHttpClientUtil.executePostRequestWithResult(
-            ServletRequestUtil.buildUri(url, null), body, UnifyResult.class);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(200, result.getCode());
-    }
-
-    @Test
     void testGetResultString() {
         HttpGet get = new HttpGet("http://127.0.0.1:30010/login/auth/user");
         get.addHeader("Authorization", "xxx");
-        String result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        String result = HttpClientUtils.executeHttpRequest(get, String.class);
         Assertions.assertNotNull(result);
         System.out.println(result);
 
-        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        result = HttpClientUtils.executeHttpRequest(get, String.class);
         System.out.println(result);
 
-        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        result = HttpClientUtils.executeHttpRequest(get, String.class);
         System.out.println(result);
 
-        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        result = HttpClientUtils.executeHttpRequest(get, String.class);
         System.out.println(result);
 
-        result = DefaultHttpClientUtil.executeHttpRequest(get, String.class);
+        result = HttpClientUtils.executeHttpRequest(get, String.class);
         System.out.println(result);
     }
 
@@ -157,8 +184,8 @@ class HttpClientTest {
     void testGetResultString2() {
         HttpGet get = new HttpGet("http://127.0.0.1:30010/login/auth/user");
         get.addHeader("Authorization", "xxx");
-        CloseableHttpClient httpClient = DefaultHttpClientUtil.createHttpClient();
-        String result = DefaultHttpClientUtil.executeHttpRequest(httpClient, get, String.class);
+        CloseableHttpClient httpClient = HttpClientUtils.createHttpClient();
+        String result = HttpClientUtils.executeHttpRequest(httpClient, get, String.class);
         try {
             httpClient.close();
         } catch (IOException e) {

@@ -2,17 +2,17 @@ package cn.nihility.common.util;
 
 import java.util.UUID;
 
-public class UuidUtil {
+public class UuidUtils {
 
     private static SnowflakeIdWorker snowflakeIdWorker;
 
-    private UuidUtil() {
+    private UuidUtils() {
     }
 
     private static SnowflakeIdWorker snowflakeIdWorker() {
         SnowflakeIdWorker idWorker = snowflakeIdWorker;
         if (null == idWorker) {
-            synchronized (UuidUtil.class) {
+            synchronized (UuidUtils.class) {
                 idWorker = snowflakeIdWorker;
                 if (null == idWorker) {
                     snowflakeIdWorker = SnowflakeIdWorker.createSnowflakeIdWorker();

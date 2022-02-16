@@ -28,11 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class JacksonUtil {
+public final class JacksonUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(JacksonUtils.class);
 
-    private JacksonUtil() {
+    private JacksonUtils() {
     }
 
     public static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";

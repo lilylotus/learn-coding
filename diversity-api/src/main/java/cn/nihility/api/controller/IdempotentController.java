@@ -3,7 +3,7 @@ package cn.nihility.api.controller;
 import cn.nihility.api.annotation.ApiIdempotent;
 import cn.nihility.api.service.IdempotentService;
 import cn.nihility.common.pojo.UnifyResult;
-import cn.nihility.common.util.UnifyResultUtil;
+import cn.nihility.common.util.UnifyResultUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,13 +22,13 @@ public class IdempotentController {
 
     @GetMapping("/idempotent/token")
     public UnifyResult<String> token() {
-        return UnifyResultUtil.success(idempotentService.generateToken());
+        return UnifyResultUtils.success(idempotentService.generateToken());
     }
 
     @PostMapping("/idempotent/do")
     @ApiIdempotent
     public UnifyResult<String> doSomethings() {
-        return UnifyResultUtil.success("Done");
+        return UnifyResultUtils.success("Done");
     }
 
 }

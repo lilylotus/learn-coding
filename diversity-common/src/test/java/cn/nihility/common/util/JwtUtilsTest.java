@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class JwtUtilTest {
+class JwtUtilsTest {
 
     @Test
     void testCreateJwtToken() {
@@ -21,8 +19,8 @@ class JwtUtilTest {
 
         Algorithm al = Algorithm.HMAC256("1234567890");
 
-        String jwt = JwtUtil.createJwtToken("jti-Id", 5000L, cliams);
-        String jwt2 = JwtUtil.createJwtToken("jti-Id", 5000L, cliams, Algorithm.HMAC256("12345678901111"));
+        String jwt = JwtUtils.createJwtToken("jti-Id", 5000L, cliams);
+        String jwt2 = JwtUtils.createJwtToken("jti-Id", 5000L, cliams, Algorithm.HMAC256("12345678901111"));
 
         Assertions.assertNotNull(jwt);
 
@@ -34,21 +32,21 @@ class JwtUtilTest {
 
         //JwtUtil.verifyJwtToken(jwt2);
 
-        String userId = JwtUtil.obtainJwtClaim("userId", jwt);
+        String userId = JwtUtils.obtainJwtClaim("userId", jwt);
         Assertions.assertEquals("uid", userId);
 
-        Map<String, String> claims = JwtUtil.obtainJwtClaims(jwt);
+        Map<String, String> claims = JwtUtils.obtainJwtClaims(jwt);
         System.out.println(claims);
 
-        String is = JwtUtil.jwtDecodeClaim("userId1", jwt);
+        String is = JwtUtils.jwtDecodeClaim("userId1", jwt);
         Assertions.assertEquals("uid", is);
 
     }
 
     @Test
     void jwtTest() {
-        String jwt = JwtUtil.createJwtToken("jwt-id", null);
-        DecodedJWT decodedJWT = JwtUtil.verifyJwtToken(jwt);
+        String jwt = JwtUtils.createJwtToken("jwt-id", null);
+        DecodedJWT decodedJWT = JwtUtils.verifyJwtToken(jwt);
         Assertions.assertNotNull(decodedJWT);
     }
 

@@ -2,12 +2,10 @@ package cn.nihility.common.util;
 
 import cn.nihility.common.constant.Constant;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
@@ -28,15 +26,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class ServletRequestUtil {
+public class HttpRequestUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServletRequestUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpRequestUtils.class);
 
     private static final String COOKIE_JSESSIONID = "JSESSIONID";
     private static final String URL_SPLIT_AMPERSAND = "&";
     private static final String URL_PARAM_EQUAL = "=";
 
-    private ServletRequestUtil() {
+    private HttpRequestUtils() {
     }
 
     public static String urlEncode(final String content) {
@@ -68,10 +66,10 @@ public class ServletRequestUtil {
             return content;
         }
         String t1 = urlDecode(content);
-        String t2 = urlDecode(content);
+        String t2 = urlDecode(t1);
         while (!t1.equals(t2)) {
-            t2 = t1;
-            t1 = urlDecode(content);
+            t1 = t2;
+            t2 = urlDecode(t1);
         }
         return t2;
     }
@@ -146,7 +144,7 @@ public class ServletRequestUtil {
         return value;
     }
 
-    public static String obtainCookieJSESSIONID(HttpServletRequest request) {
+    public static String obtainCookieJsessionid(HttpServletRequest request) {
         return obtainHttpRequestCookieValue(COOKIE_JSESSIONID, request);
     }
 
@@ -211,14 +209,14 @@ public class ServletRequestUtil {
         addCookie(name, value, null, null, -1, response);
     }
 
-    public static void addCookieJSESSIONID(HttpServletResponse response) {
-        addCookie(COOKIE_JSESSIONID, UuidUtil.jdkUUID(), response);
+    public static void addCookieJsessionid(HttpServletResponse response) {
+        addCookie(COOKIE_JSESSIONID, UuidUtils.jdkUUID(), response);
     }
 
-    public static void addCookieJSESSIONIDIfAbsent(HttpServletRequest request, HttpServletResponse response) {
-        String id = obtainCookieJSESSIONID(request);
+    public static void addCookieJsessionidIfAbsent(HttpServletRequest request, HttpServletResponse response) {
+        String id = obtainCookieJsessionid(request);
         if (null == id) {
-            addCookieJSESSIONID(response);
+            addCookieJsessionid(response);
         }
     }
 
@@ -250,13 +248,17 @@ public class ServletRequestUtil {
         }
     }
 
-    public static void addApplicationJsonHeader(final HttpUriRequest request) {
+    public static URI buildUri(final String url) {
+        return buildUri(url, null);
+    }
+
+    public static void setApplicationJsonHeader(final HttpUriRequest request) {
         if (null != request) {
             request.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         }
     }
 
-    public static void addFormHeader(final HttpUriRequest request) {
+    public static void setFormHeader(final HttpUriRequest request) {
         if (null != request) {
             request.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         }
@@ -276,17 +278,16 @@ public class ServletRequestUtil {
 
     public static StringEntity buildJsonStringEntity(String content) {
         if (StringUtils.isBlank(content)) {
-            throw new IllegalArgumentException("构建 application/json Entity 内容不可为空");
+            return null;
         }
-        final StringEntity entity = new StringEntity(content,
-            ContentType.create(ContentType.APPLICATION_JSON.getMimeType(), Consts.UTF_8));
+        StringEntity entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         entity.setContentEncoding(Constant.UTF8);
         return entity;
     }
 
     public static UrlEncodedFormEntity buildUrlEncodedFormEntity(Map<String, String> params) {
         if (null == params || params.isEmpty()) {
-            throw new IllegalArgumentException("构建 form 表单的参数不可为空");
+            return null;
         }
         final List<NameValuePair> pairList = new ArrayList<>();
         params.forEach((k, v) -> pairList.add(new BasicNameValuePair(k, v)));
@@ -299,13 +300,6 @@ public class ServletRequestUtil {
         if (null != request && null != entity) {
             request.setEntity(entity);
         }
-    }
-
-    public static HttpPost buildJsonHttpPost(final URI uri, final String jsonBody) {
-        HttpPost post = new HttpPost(uri);
-        addApplicationJsonHeader(post);
-        setEntity(post, buildJsonStringEntity(jsonBody));
-        return post;
     }
 
 }

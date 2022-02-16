@@ -6,7 +6,7 @@ import cn.nihility.cloud.resilience4j.exception.CircuitBreakerExceptionB;
 import cn.nihility.cloud.resilience4j.util.BulkhdadUtil;
 import cn.nihility.cloud.resilience4j.util.CircuitBreakerUtil;
 import cn.nihility.cloud.resilience4j.util.RetryUtil;
-import cn.nihility.common.util.UuidUtil;
+import cn.nihility.common.util.UuidUtils;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
@@ -66,12 +66,12 @@ public class RemoteCallService {
 
     public ResponseEntity<String> uuidEcho() {
         call("uuidEcho");
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        return ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     public ResponseEntity<String> uuidEchoWithId(int num) {
         call(num, "uuidEchoWithId");
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        return ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     public ResponseEntity<String> uuidEchoTimeLimiter(int num) {
@@ -79,31 +79,31 @@ public class RemoteCallService {
         if (num % 4 == 3) {
             CircuitBreakerUtil.threadSleep(5000L);
         }
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        return ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     public ResponseEntity<String> uuidEchoRetry(int num) {
         int index = count.getAndIncrement();
         call(index, "uuidEchoRetry [" + num + "]");
-        return index % 4 == 3 ? null : ResponseEntity.ok(UuidUtil.jdkUUID());
+        return index % 4 == 3 ? null : ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     public ResponseEntity<String> uuidBulkhead(int num) {
         //call(num, "uuidBulkhead");
         CircuitBreakerUtil.threadSleep(500L);
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        return ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     public ResponseEntity<String> uuidRateLimiter(int num) {
         //call(num, "uuidBulkhead");
         CircuitBreakerUtil.threadSleep(500L);
-        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
+        return ResponseEntity.ok(UuidUtils.jdkUUID() + ":" + num);
     }
 
     @CircuitBreaker(name = Constant.CIRCUIT_BREAKER_A, fallbackMethod = "fallBack")
     public ResponseEntity<String> echoWithCircuitBreaker() {
         call("echoWithCircuitBreaker");
-        return ResponseEntity.ok(UuidUtil.jdkUUID());
+        return ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     @CircuitBreaker(name = Constant.CIRCUIT_BREAKER_A, fallbackMethod = "fallBack")
@@ -111,7 +111,7 @@ public class RemoteCallService {
     public ResponseEntity<String> echoWithCircuitBreakerAndRetry(int num) {
         int index = count.getAndIncrement();
         call(index, "echoWithCircuitBreakerAndRetry [" + num + "]");
-        return index % 4 == 3 ? null : ResponseEntity.ok(UuidUtil.jdkUUID());
+        return index % 4 == 3 ? null : ResponseEntity.ok(UuidUtils.jdkUUID());
     }
 
     /**
@@ -127,7 +127,7 @@ public class RemoteCallService {
         //int index = count.getAndIncrement();
         //call(index, "bulkheadAop [" + num + "]");
         CircuitBreakerUtil.threadSleep(1000L);
-        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
+        return ResponseEntity.ok(UuidUtils.jdkUUID() + ":" + num);
     }
 
     /**
@@ -140,7 +140,7 @@ public class RemoteCallService {
         //int index = count.getAndIncrement();
         //call(index, "bulkheadAop [" + num + "]");
         //CircuitBreakerUtil.threadSleep(1000L);
-        return ResponseEntity.ok(UuidUtil.jdkUUID() + ":" + num);
+        return ResponseEntity.ok(UuidUtils.jdkUUID() + ":" + num);
     }
 
     public ResponseEntity<String> bulkheadFallBack(BulkheadFullException throwable) {

@@ -199,7 +199,7 @@ public final class SnowflakeIdWorker {
     }
 
     private static Long getWorkId() {
-        String hostAddress = NetworkUtil.getFirstHostAddress();
+        String hostAddress = NetworkUtils.getFirstHostAddress();
         if (log.isDebugEnabled()) {
             log.debug("host address [{}]", hostAddress);
         }
@@ -207,7 +207,7 @@ public final class SnowflakeIdWorker {
     }
 
     private static Long getDataCenterId() {
-        final String hostName = NetworkUtil.getLocalHostName();
+        final String hostName = NetworkUtils.getLocalHostName();
         if (log.isDebugEnabled()) {
             log.debug("host name [{}]", hostName);
         }

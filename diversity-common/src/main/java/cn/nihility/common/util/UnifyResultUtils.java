@@ -6,9 +6,9 @@ import cn.nihility.common.pojo.UnifyResult;
 
 import java.util.List;
 
-public final class UnifyResultUtil {
+public final class UnifyResultUtils {
 
-    private UnifyResultUtil() {
+    private UnifyResultUtils() {
     }
 
     /* ==================== 成功 ==================== */

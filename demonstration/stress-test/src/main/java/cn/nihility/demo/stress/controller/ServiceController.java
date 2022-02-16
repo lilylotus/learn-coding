@@ -1,8 +1,9 @@
 package cn.nihility.demo.stress.controller;
 
 import cn.nihility.common.pojo.UnifyResult;
-import cn.nihility.common.util.UnifyResultUtil;
-import cn.nihility.common.util.UuidUtil;
+import cn.nihility.common.util.ThreadUtils;
+import cn.nihility.common.util.UnifyResultUtils;
+import cn.nihility.common.util.UuidUtils;
 import cn.nihility.demo.stress.service.JdbcService;
 import cn.nihility.demo.stress.service.RedisService;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class ServiceController {
         logger.info("进入 redisSetNX");
         boolean result = redisService.setNX("nx", "nx-value", 60);
         logger.info("Set NX Result [{}]", result);
-        return UnifyResultUtil.success(result);
+        return UnifyResultUtils.success(result);
     }
 
     @GetMapping("/redis/del/setnx")
@@ -53,7 +54,7 @@ public class ServiceController {
         logger.info("进入 redisDelSetNX");
         boolean result = redisService.delNX("nx", "nx-value");
         logger.info("DEL NX Result [{}]", result);
-        return UnifyResultUtil.success(result);
+        return UnifyResultUtils.success(result);
     }
 
     @GetMapping("/redis/del2/setnx")
@@ -61,14 +62,14 @@ public class ServiceController {
         logger.info("进入 redisDel2SetNX");
         boolean result = redisService.delNX("nx", "nx-error");
         logger.info("DEL NX redisDel2SetNX [{}]", result);
-        return UnifyResultUtil.success(result);
+        return UnifyResultUtils.success(result);
     }
 
     @PostMapping("/shop/service")
     public UnifyResult<String> service() {
         logger.info("进入 Shopping");
         jdbcService.addServiceLog();
-        return UnifyResultUtil.success("ok");
+        return UnifyResultUtils.success("ok");
     }
 
     private int stringToInt(String num) {
@@ -86,7 +87,7 @@ public class ServiceController {
     public ResponseEntity<UnifyResult<String>> redisSeckill() {
 
         long start = System.currentTimeMillis();
-        String uuid = UuidUtil.jdkUUID(10);
+        String uuid = UuidUtils.jdkUUID(10);
         String val = uuid + "=" + start;
         boolean success = false;
         boolean loopFailure = true;
@@ -97,7 +98,7 @@ public class ServiceController {
             resultMsg = "预判当前商品已抢购完成，没有库存了，请下次再试";
             logger.error(resultMsg);
             jdbcService.recordServiceLog(resultMsg);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success(resultMsg));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success(resultMsg));
         }
         while ((System.currentTimeMillis() - start) < SECKILL_GAP) {
             if (redisService.setNX(SECKILL_LOCK_KEY, val, 5)) {
@@ -117,10 +118,7 @@ public class ServiceController {
                 redisService.delNX(SECKILL_LOCK_KEY, val);
                 break;
             }
-            try {
-                Thread.sleep(10L);
-            } catch (InterruptedException e) {
-            }
+            ThreadUtils.sleep(10L);
         }
 
         if (loopFailure) {
@@ -131,9 +129,9 @@ public class ServiceController {
         jdbcService.recordServiceLog(resultMsg);
 
         if (success) {
-            return ResponseEntity.ok(UnifyResultUtil.success(resultMsg));
+            return ResponseEntity.ok(UnifyResultUtils.success(resultMsg));
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success(resultMsg));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success(resultMsg));
         }
 
     }
@@ -150,13 +148,13 @@ public class ServiceController {
         if (remainCount < 1) {
             logger.warn("库存 [{}] 不足，无法购买", remainCount);
             jdbcService.recordServiceLog("库存 [" + remainCount + "] 不足，无法购买");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("库存不足，无法购买"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success("库存不足，无法购买"));
         } else {
             int remain = stringToInt(ops.get()) - 1;
             ops.set(Integer.toString(remain));
             jdbcService.recordServiceLog("购买 1 件，库存 [" + remainCount + "] 剩余 [" + remain + "]");
             logger.info("购买 1 件，库存 [{}] 剩余 [{}]", remainCount, remain);
-            return ResponseEntity.ok(UnifyResultUtil.success("购买成功"));
+            return ResponseEntity.ok(UnifyResultUtils.success("购买成功"));
         }
     }
 
@@ -210,23 +208,23 @@ public class ServiceController {
                         logger.warn("库存 [{}] 不足，无法购买", remainCount);
                         jdbcService.recordServiceLog("库存 [" + remainCount + "] 不足，无法购买");
                         conn.del("buy:nx_lock_key".getBytes(StandardCharsets.UTF_8));
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("库存不足，无法购买"));
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success("库存不足，无法购买"));
                     } else {
                         int remain = stringToInt(ops.get()) - 1;
                         ops.set(Integer.toString(remain));
                         jdbcService.recordServiceLog("购买 1 件，库存 [" + remainCount + "] 剩余 [" + remain + "]");
                         conn.del("buy:nx_lock_key".getBytes(StandardCharsets.UTF_8));
-                        return ResponseEntity.ok(UnifyResultUtil.success("购买成功"));
+                        return ResponseEntity.ok(UnifyResultUtils.success("购买成功"));
                     }
                 } else {
                     jdbcService.recordServiceLog("没有抢购到购买资格，无法购买。");
                     logger.warn("没有抢购到购买资格，下次再试。");
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("没有抢购到购买资格，下次再试"));
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success("没有抢购到购买资格，下次再试"));
                 }
             }
         }
         jdbcService.recordServiceLog("系统异常");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtil.success("系统异常"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(UnifyResultUtils.success("系统异常"));
     }
 
     @PostMapping("/buy/service/redisNX")

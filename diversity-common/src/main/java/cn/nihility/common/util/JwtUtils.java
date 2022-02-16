@@ -19,9 +19,9 @@ import java.util.UUID;
 /**
  * jwt token 工具类
  */
-public final class JwtUtil {
+public final class JwtUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     private static final long DEFAULT_JWT_EXPIRE_DURATION = 120 * 60 * 1000L;
     private static final Algorithm HMAC256;
@@ -34,7 +34,7 @@ public final class JwtUtil {
         HMAC256 = Algorithm.HMAC256(randomSecretKey);
     }
 
-    private JwtUtil() {
+    private JwtUtils() {
     }
 
     public static String createJwtToken(final String id, long duration, Map<String, String> claims, final Algorithm algorithm) {

@@ -15,12 +15,11 @@ public final class IdleConnectionReaper extends Thread {
 
     private static final Logger log = LoggerFactory.getLogger(IdleConnectionReaper.class);
 
-    private static final int REAP_INTERVAL_MILLISECONDS = 5 * 1000;
-    private static final ArrayList<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
+    private static final int REAP_INTERVAL_MILLISECONDS = 5000;
+    private static final ArrayList<HttpClientConnectionManager> CONNECTION_MANAGERS = new ArrayList<>();
+    private static long idleConnectionTime = 60000L;
 
     private static IdleConnectionReaper instance;
-
-    private static long idleConnectionTime = 60 * 1000L;
 
     private volatile boolean shuttingDown;
 
@@ -35,15 +34,15 @@ public final class IdleConnectionReaper extends Thread {
             instance.start();
         }
         if (null != connectionManager) {
-            connectionManagers.add(connectionManager);
+            CONNECTION_MANAGERS.add(connectionManager);
         }
     }
 
     public static synchronized void removeConnectionManager(HttpClientConnectionManager connectionManager) {
         if (null != connectionManager) {
-            connectionManagers.remove(connectionManager);
+            CONNECTION_MANAGERS.remove(connectionManager);
         }
-        if (connectionManagers.isEmpty()) {
+        if (CONNECTION_MANAGERS.isEmpty()) {
             shutdown();
         }
     }
@@ -56,7 +55,7 @@ public final class IdleConnectionReaper extends Thread {
     public void run() {
         while (true) {
             if (shuttingDown) {
-                log.debug("Shutting down reaper thread.");
+                log.info("Shutting down reaper thread.");
                 break;
             }
 
@@ -68,7 +67,7 @@ public final class IdleConnectionReaper extends Thread {
             }
 
             synchronized (IdleConnectionReaper.class) {
-                final List<HttpClientConnectionManager> copy = new ArrayList<>(connectionManagers);
+                final List<HttpClientConnectionManager> copy = new ArrayList<>(CONNECTION_MANAGERS);
                 for (HttpClientConnectionManager cm : copy) {
                     try {
                         cm.closeExpiredConnections();
@@ -85,16 +84,16 @@ public final class IdleConnectionReaper extends Thread {
         if (instance != null) {
             instance.markShuttingDown();
             instance.interrupt();
-            connectionManagers.clear();
+            CONNECTION_MANAGERS.clear();
             instance = null;
         }
     }
 
     public static synchronized int size() {
-        return connectionManagers.size();
+        return CONNECTION_MANAGERS.size();
     }
 
-    static synchronized void setIdleConnectionTime(long idleTime) {
+    public static synchronized void setIdleConnectionTime(long idleTime) {
         idleConnectionTime = idleTime;
     }
 

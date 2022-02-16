@@ -1,7 +1,7 @@
 package cn.nihility.demo.stress.service;
 
 import cn.nihility.common.util.SnowflakeIdWorker;
-import cn.nihility.common.util.UuidUtil;
+import cn.nihility.common.util.UuidUtils;
 import cn.nihility.demo.stress.mapper.ServiceLogMapper;
 import cn.nihility.demo.stress.pojo.ServiceLog;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class JdbcService {
     }
 
     public void addServiceLog() {
-        Integer result = serviceLogMapper.insertByEntity(buildServiceLog("测试内容 [" + UuidUtil.jdkUUID() + "]"));
+        Integer result = serviceLogMapper.insertByEntity(buildServiceLog("测试内容 [" + UuidUtils.jdkUUID() + "]"));
         logger.info("随机添加一条操作日志，结果 [{}]", result);
     }
 
@@ -33,7 +33,7 @@ public class JdbcService {
 
     private ServiceLog buildServiceLog(String content) {
         ServiceLog log = new ServiceLog();
-        String user = UuidUtil.jdkUUID(10);
+        String user = UuidUtils.jdkUUID(10);
         log.setId(SnowflakeIdWorker.nextSnowId());
         log.setOperation("测试业务");
         log.setContent(content);
