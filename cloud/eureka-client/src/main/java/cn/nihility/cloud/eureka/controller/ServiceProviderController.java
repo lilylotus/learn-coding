@@ -19,7 +19,7 @@ public class ServiceProviderController {
 
     @RequestMapping("/service/echo/{msg}")
     public UnifyResult<String> echo(@PathVariable String msg, HttpServletRequest request) {
-        String feignHeadValue = HttpRequestUtils.obtainHttpRequestHeaderValue("Feign-Attach", request);
+        String feignHeadValue = HttpRequestUtils.obtainHeaderValue("Feign-Attach", request);
         logger.info("Echo [{}], feignHeadValue [{}]", msg, feignHeadValue);
         return UnifyResultUtils.success(msg);
     }

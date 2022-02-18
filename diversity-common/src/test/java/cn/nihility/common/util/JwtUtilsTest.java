@@ -19,8 +19,8 @@ class JwtUtilsTest {
 
         Algorithm al = Algorithm.HMAC256("1234567890");
 
-        String jwt = JwtUtils.createJwtToken("jti-Id", 5000L, cliams);
-        String jwt2 = JwtUtils.createJwtToken("jti-Id", 5000L, cliams, Algorithm.HMAC256("12345678901111"));
+        String jwt = JwtUtils.createJwtToken("jti-Id", 5000L, cliams).getAccessToken();
+        String jwt2 = JwtUtils.createJwtToken("jti-Id", 5000L, cliams, Algorithm.HMAC256("12345678901111")).getAccessToken();
 
         Assertions.assertNotNull(jwt);
 
@@ -45,7 +45,7 @@ class JwtUtilsTest {
 
     @Test
     void jwtTest() {
-        String jwt = JwtUtils.createJwtToken("jwt-id", null);
+        String jwt = JwtUtils.createJwtToken("jwt-id", null).getAccessToken();
         DecodedJWT decodedJWT = JwtUtils.verifyJwtToken(jwt);
         Assertions.assertNotNull(decodedJWT);
     }

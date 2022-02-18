@@ -63,10 +63,16 @@ allprojects {
 subprojects {
 
     configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+
         all*.exclude(group: "org.springframework.boot", module: "spring-boot-starter-logging")
     }
 
     dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
         //implementation("org.apache.commons:commons-lang3:${commonsLang3Version}")
     }
 
@@ -74,6 +80,7 @@ subprojects {
     jar {
         enabled(true)
     }
+
 }
 
 //task cleanAll(type: Delete, dependsOn: [clean]) {

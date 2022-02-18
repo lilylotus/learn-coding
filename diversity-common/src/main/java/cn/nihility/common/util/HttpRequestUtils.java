@@ -1,7 +1,9 @@
 package cn.nihility.common.util;
 
 import cn.nihility.common.constant.Constant;
+import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -25,14 +27,19 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Stream;
 
+/**
+ * @author nihility
+ */
 public class HttpRequestUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestUtils.class);
 
     private static final String COOKIE_JSESSIONID = "JSESSIONID";
-    private static final String URL_SPLIT_AMPERSAND = "&";
-    private static final String URL_PARAM_EQUAL = "=";
+    private static final String SERVLET_FORWARD_REQUEST_URI = "javax.servlet.forward.request_uri";
+    private static final String AMPERSAND = "&";
+    private static final String EQUAL = "=";
 
     private HttpRequestUtils() {
     }
@@ -89,19 +96,32 @@ public class HttpRequestUtils {
         return addUrlParam(url, key, value, false);
     }
 
+    public static String addUrlParams(String url, Map<String, String> params) {
+        int index = url.indexOf("?");
+        String encodeUrl = urlParamsEncode(url);
+        StringJoiner paramJoiner = new StringJoiner("&");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (null != entry.getValue()) {
+                paramJoiner.add(entry.getKey() + "=" + urlEncode(entry.getValue()));
+            }
+        }
+        String encodeParam = paramJoiner.toString();
+        return index > 0 ? encodeUrl + "&" + encodeParam : encodeUrl + "?" + encodeParam;
+    }
+
     public static String addEncodeUrlParam(final String url, String key, String value) {
         return addUrlParam(url, key, value, true);
     }
 
-    public static String splitEncodeUrlParam(String params) {
+    public static String splitEncodeUrlParam(String urlParams) {
 
-        final String pureParams = urlDecodePure(params);
+        final String pureParams = urlDecodePure(urlParams);
 
         StringJoiner joiner = new StringJoiner("&");
-        String[] param = pureParams.split("&");
+        String[] param = pureParams.split(AMPERSAND);
         for (String item : param) {
-            String[] sp = item.split("=");
-            joiner.add(sp[0] + "=" + urlEncode(sp[1]));
+            String[] sp = item.split(EQUAL);
+            joiner.add(sp[0] + EQUAL + urlEncode(sp[1]));
         }
 
         return joiner.toString();
@@ -119,15 +139,15 @@ public class HttpRequestUtils {
             url;
     }
 
-    public static String obtainHttpRequestHeaderValue(String key, HttpServletRequest request) {
+    public static String obtainHeaderValue(String key, HttpServletRequest request) {
         return (StringUtils.isBlank(key) || request == null) ? null : request.getHeader(key);
     }
 
-    public static String obtainHttpRequestParamValue(String key, HttpServletRequest request) {
+    public static String obtainParamValue(String key, HttpServletRequest request) {
         return (StringUtils.isBlank(key) || request == null) ? null : request.getParameter(key);
     }
 
-    public static String obtainHttpRequestCookieValue(String key, HttpServletRequest request) {
+    public static String obtainCookieValue(String key, HttpServletRequest request) {
         if (StringUtils.isBlank(key) || request == null) {
             return null;
         }
@@ -145,10 +165,10 @@ public class HttpRequestUtils {
     }
 
     public static String obtainCookieJsessionid(HttpServletRequest request) {
-        return obtainHttpRequestCookieValue(COOKIE_JSESSIONID, request);
+        return obtainCookieValue(COOKIE_JSESSIONID, request);
     }
 
-    public static String obtainHttpRequestValue(String key, HttpServletRequest request) {
+    public static String obtainRequestValue(String key, HttpServletRequest request) {
 
         if (StringUtils.isBlank(key) || request == null) {
             return null;
@@ -173,12 +193,59 @@ public class HttpRequestUtils {
         return value;
     }
 
+    /**
+     * 获取原请求URI地址
+     */
+    public static String getOriginatingRequestUri(HttpServletRequest request) {
+        return Optional.ofNullable(Objects.toString(request.getAttribute(SERVLET_FORWARD_REQUEST_URI), null))
+            .orElse(request.getRequestURI());
+    }
+
+    /**
+     * 获取原始的请求 URI 地址
+     */
+    public static String getOriginRequestUrl(HttpServletRequest request) {
+        String host = request.getHeader("Host");
+        String scheme = request.getHeader("X-Forwarded-Proto");
+        if (StringUtils.isNotBlank(scheme)) {
+            int index = scheme.indexOf(",");
+            if (index > 0) {
+                scheme = scheme.substring(0, index);
+            }
+        }
+        if (StringUtils.isBlank(scheme)) {
+            scheme = "http";
+        }
+        if (StringUtils.isBlank(host)) {
+            host = request.getServerName();
+        }
+        return scheme + "://" + host;
+    }
+
+    public static String splitBearerTokenValue(String bearerToken) {
+        if (null != bearerToken && bearerToken.startsWith(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX)) {
+            bearerToken = bearerToken.substring(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX.length());
+        }
+        return bearerToken;
+    }
+
     public static Map<String, String> cookiesToMap(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         final Map<String, String> result = new HashMap<>();
         if (null != cookies) {
             for (Cookie cookie : cookies) {
                 result.put(cookie.getName(), cookie.getValue());
+            }
+        }
+        return result;
+    }
+
+    public static Map<String, String> paramsToMap(HttpServletRequest request) {
+        Map<String, String[]> params = request.getParameterMap();
+        Map<String, String> result = new HashMap<>(8);
+        if (null != params && !params.isEmpty()) {
+            for (Map.Entry<String, String[]> entry : params.entrySet()) {
+                result.put(entry.getKey(), entry.getValue()[0]);
             }
         }
         return result;
@@ -274,6 +341,19 @@ public class HttpRequestUtils {
         if (request != null && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
             request.addHeader(name, value);
         }
+    }
+
+    public static String parseRedirectUrl(ResponseHolder<?> response) {
+        return (null == response || response.getStatusCode() != Constant.RESPONSE_REDIRECT_STATUS_VALUE) ? null :
+            response.getHeaders().get(Constant.RESPONSE_HEADER_REDIRECT);
+    }
+
+    public static Map<String, String> headersToMap(Header[] allHeaders) {
+        Map<String, String> headers = new HashMap<>(8);
+        if (null != allHeaders) {
+            Stream.of(allHeaders).forEach(header -> headers.put(header.getName(), header.getValue()));
+        }
+        return headers;
     }
 
     public static StringEntity buildJsonStringEntity(String content) {

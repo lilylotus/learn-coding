@@ -3,6 +3,7 @@ package cn.nihility.common.util;
 import cn.nihility.common.constant.RequestMethodEnum;
 import cn.nihility.common.exception.HttpRequestException;
 import cn.nihility.common.http.CustomHttpClientBuilder;
+import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
@@ -34,7 +35,6 @@ import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -196,7 +196,8 @@ public class HttpClientUtils {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT)
             .setSocketTimeout(DEFAULT_SOCKET_TIMEOUT)
-            .setRedirectsEnabled(true)
+            // 禁用自动重定向
+            .setRedirectsEnabled(false)
             .build();
 
         builder.setConnectionManager(connectionManager)
@@ -286,10 +287,11 @@ public class HttpClientUtils {
     /* ------------------------------ 发送 http 请求 ------------------------------ */
 
     @SuppressWarnings("unchecked")
-    public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
-                                           final HttpUriRequest request,
-                                           final HttpContext httpContext,
-                                           final Class<R> rt) {
+    public static <R> ResponseHolder<R> executeRequestWithResponse(final CloseableHttpClient httpClient,
+                                                                   final HttpUriRequest request,
+                                                                   final HttpContext httpContext,
+                                                                   final Class<R> rt) {
+        ResponseHolder<R> result = new ResponseHolder<>();
         // 注意：HttpClient 池化管理，不需要关闭
         try (CloseableHttpResponse httpResponse = httpClient.execute(request, httpContext)) {
             StatusLine statusLine = httpResponse.getStatusLine();
@@ -298,41 +300,86 @@ public class HttpClientUtils {
                 logger.debug("请求 [{}], 响应状态 [{}], 响应消息 [{}]",
                     request.getURI(), statusLine.getStatusCode(), respStringEntity);
             }
+            result.setHeaders(HttpRequestUtils.headersToMap(httpResponse.getAllHeaders()));
+            result.setStatusCode(statusLine.getStatusCode());
+            R resultObject = null;
             if (StringUtils.isNotBlank(respStringEntity)) {
-                return rt.isAssignableFrom(String.class) ?
+                resultObject = rt.isAssignableFrom(String.class) ?
                     (R) respStringEntity :
                     JacksonUtils.readJsonString(respStringEntity, rt);
             }
+            result.setContent(resultObject);
         } catch (IOException e) {
             logger.error("请求 [{}] 异常", request.getURI());
             throw new HttpRequestException("请求 [" + request.getURI() + "] 异常", e);
         }
-        return null;
+        return result;
+    }
+
+    public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
+                                           final HttpUriRequest request,
+                                           final HttpContext httpContext,
+                                           final Class<R> rt) {
+        return executeRequestWithResponse(httpClient, request, httpContext, rt).getContent();
+    }
+
+    public static <R> ResponseHolder<R> executeRequestWithResponse(final CloseableHttpClient httpClient,
+                                                                   final HttpUriRequest request,
+                                                                   final Class<R> rt) {
+        return executeRequestWithResponse(httpClient, request, null, rt);
     }
 
     public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
                                            final HttpUriRequest request,
                                            final Class<R> rt) {
-        return executeHttpRequest(httpClient, request, null, rt);
+        return executeRequestWithResponse(httpClient, request, null, rt).getContent();
+    }
+
+    public static <R> ResponseHolder<R> executeRequestWithResponse(HttpUriRequest request, Class<R> rt) {
+        // 注意：HttpClient 池化管理，不需要关闭
+        return executeRequestWithResponse(createDefaultHttpClient(), request, rt);
     }
 
     public static <R> R executeHttpRequest(HttpUriRequest request, Class<R> rt) {
-        // 注意：HttpClient 池化管理，不需要关闭
-        return executeHttpRequest(createDefaultHttpClient(), request, rt);
+        return executeRequestWithResponse(request, rt).getContent();
     }
 
-    public static <R> R executeJsonRequest(String url, RequestMethodEnum method, Map<String, String> bodyParams, Class<R> rt) {
+    public static <R> ResponseHolder<R> executeJsonRequestWithResponse(String url, RequestMethodEnum method,
+                                                                       Map<String, String> bodyParams, Class<R> rt) {
         HttpUriRequest request = buildJsonHttpRequest(url, method, bodyParams);
-        return executeHttpRequest(request, rt);
+        return executeRequestWithResponse(request, rt);
+    }
+
+    public static <R> R executeJsonRequest(String url, RequestMethodEnum method,
+                                           Map<String, String> bodyParams, Class<R> rt) {
+        return executeJsonRequestWithResponse(url, method, bodyParams, rt).getContent();
+    }
+
+    public static <R> ResponseHolder<R> executePostJsonRequestWithResponse(String url,
+                                                                           Map<String, String> bodyParams,
+                                                                           Class<R> rt) {
+        return executeJsonRequestWithResponse(url, RequestMethodEnum.POST, bodyParams, rt);
     }
 
     public static <R> R executePostJsonRequest(String url, Map<String, String> bodyParams, Class<R> rt) {
         return executeJsonRequest(url, RequestMethodEnum.POST, bodyParams, rt);
     }
 
-    public static <R> R executeFormRequest(String url, RequestMethodEnum method, Map<String, String> bodyParams, Class<R> rt) {
+    public static <R> ResponseHolder<R> executeFormRequestWithResponse(String url, RequestMethodEnum method,
+                                                                       Map<String, String> bodyParams, Class<R> rt) {
         HttpUriRequest request = buildFormHttpRequest(url, method, bodyParams);
-        return executeHttpRequest(request, rt);
+        return executeRequestWithResponse(request, rt);
+    }
+
+    public static <R> R executeFormRequest(String url, RequestMethodEnum method,
+                                           Map<String, String> bodyParams, Class<R> rt) {
+        return executeFormRequestWithResponse(url, method, bodyParams, rt).getContent();
+    }
+
+    public static <R> ResponseHolder<R> executePostFormRequestWithResponse(String url,
+                                                                           Map<String, String> bodyParams,
+                                                                           Class<R> rt) {
+        return executeFormRequestWithResponse(url, RequestMethodEnum.POST, bodyParams, rt);
     }
 
     public static <R> R executePostFormRequest(String url, Map<String, String> bodyParams, Class<R> rt) {

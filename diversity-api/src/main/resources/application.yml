@@ -6,6 +6,8 @@ api:
     exception:
       debugStackTrace: false
 
+auth:
+  authLoginPrefix: /auth/login
 
 spring:
 #  jackson:

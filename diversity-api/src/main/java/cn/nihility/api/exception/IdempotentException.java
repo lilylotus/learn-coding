@@ -1,28 +1,16 @@
 package cn.nihility.api.exception;
 
+import cn.nihility.common.exception.BusinessException;
+
 /**
  * 幂等操作异常类
+ * @author nihility
  */
-public class IdempotentException extends RuntimeException {
+public class IdempotentException extends BusinessException {
     private static final long serialVersionUID = -4731355152210869526L;
-
-    public IdempotentException() {
-    }
 
     public IdempotentException(String message) {
         super(message);
-    }
-
-    public IdempotentException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public IdempotentException(Throwable cause) {
-        super(cause);
-    }
-
-    public IdempotentException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
 }

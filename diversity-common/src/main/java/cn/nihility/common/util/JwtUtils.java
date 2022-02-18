@@ -7,10 +7,13 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.*;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +26,7 @@ public final class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private static final long DEFAULT_JWT_EXPIRE_DURATION = 120 * 60 * 1000L;
+    private static final long DEFAULT_JWT_EXPIRE_DURATION = 120 * 60000L;
     private static final Algorithm HMAC256;
 
     static {
@@ -37,30 +40,38 @@ public final class JwtUtils {
     private JwtUtils() {
     }
 
-    public static String createJwtToken(final String id, long duration, Map<String, String> claims, final Algorithm algorithm) {
+    public static JwtHolder createJwtToken(final String id, long duration, Map<String, String> claims, final Algorithm algorithm) {
         JWTCreator.Builder builder = JWT.create();
 
-        builder.withJWTId(id); // 设置jti(JWT ID)：是 JWT 的唯一标识
-        builder.withIssuer("api");  // 发布者
-        //builder.withAudience("app", "web"); // 接收者
-        //builder.withNotBefore(new Date()); // 生效时间
-        builder.withIssuedAt(new Date()); // 生成签名的时间
+        // 设置jti(JWT ID)：是 JWT 的唯一标识
+        builder.withJWTId(id);
+        // 发布者
+        builder.withIssuer("api");
+        // 接收者
+        //builder.withAudience("app", "web");
+        // 生效时间
+        //builder.withNotBefore(new Date());
+        // 生成签名的时间
+        builder.withIssuedAt(new Date());
         final long expireSeconds = (duration <= 0L ? DEFAULT_JWT_EXPIRE_DURATION : Math.min(duration, DEFAULT_JWT_EXPIRE_DURATION));
-        builder.withExpiresAt(new Date(System.currentTimeMillis() + expireSeconds)); // token 有效时间
+        // token 有效时间
+        builder.withExpiresAt(new Date(System.currentTimeMillis() + expireSeconds));
 
         // payload
         if (null != claims && !claims.isEmpty()) {
             claims.forEach(builder::withClaim);
         }
 
-        return builder.sign(algorithm);
+        String jwtToken = builder.sign(algorithm);
+
+        return new JwtHolder(jwtToken, expireSeconds);
     }
 
-    public static String createJwtToken(final String id, long duration, Map<String, String> claims) {
+    public static JwtHolder createJwtToken(final String id, long duration, Map<String, String> claims) {
         return createJwtToken(id, duration, claims, HMAC256);
     }
 
-    public static String createJwtToken(String id, Map<String, String> claims) {
+    public static JwtHolder createJwtToken(String id, Map<String, String> claims) {
         return createJwtToken(id, 0L, claims);
     }
 
@@ -110,6 +121,60 @@ public final class JwtUtils {
             logger.error("Jwt [{}] 格式有误，解码异常", jwt);
             throw new JwtParseException("Jwt 格式有误，解码失败", ex);
         }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class JwtHolder implements Serializable {
+
+        private static final long serialVersionUID = -7847570899699347130L;
+
+        @JsonProperty("access_token")
+        private String accessToken;
+
+        @JsonProperty("expires_in")
+        private long expiresIn;
+
+        @JsonProperty("token_type")
+        private String tokenType = "Bearer";
+
+        public JwtHolder(String accessToken, long expiresIn) {
+            this.accessToken = accessToken;
+            this.expiresIn = expiresIn;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        public long getExpiresIn() {
+            return expiresIn;
+        }
+
+        public void setExpiresIn(long expiresIn) {
+            this.expiresIn = expiresIn;
+        }
+
+        public String getTokenType() {
+            return tokenType;
+        }
+
+        public void setTokenType(String tokenType) {
+            this.tokenType = tokenType;
+        }
+
+        @Override
+        public String toString() {
+            return "JwtHolder{" +
+                "accessToken='" + accessToken + '\'' +
+                ", expiresIn=" + expiresIn +
+                ", tokenType='" + tokenType + '\'' +
+                '}';
+        }
+
     }
 
 }

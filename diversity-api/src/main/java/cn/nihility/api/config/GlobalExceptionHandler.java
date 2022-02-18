@@ -1,6 +1,7 @@
 package cn.nihility.api.config;
 
 import cn.nihility.api.exception.HttpRequestException;
+import cn.nihility.common.exception.BusinessException;
 import cn.nihility.common.pojo.UnifyBaseResult;
 import cn.nihility.common.util.UnifyResultUtils;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.WebUtils;
 
 import java.util.Collections;
@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author nihility
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -31,17 +34,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<UnifyBaseResult> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex,
-                                                                                  WebRequest request) {
+    public ResponseEntity<UnifyBaseResult> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex) {
         return handleExceptionInternal(ex, UnifyResultUtils.failure(ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    private UnifyBaseResult buildExceptionBody(RuntimeException ex, UnifyBaseResult body) {
+        return null == body ? UnifyResultUtils.failure(ex.getMessage()) : body;
+    }
+
     @ExceptionHandler(HttpRequestException.class)
-    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(HttpRequestException ex, WebRequest request) {
-        UnifyBaseResult body = ex.getBody();
-        if (null == body) {
-            body = UnifyResultUtils.failure(ex.getMessage());
-        }
+    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(HttpRequestException ex) {
+        UnifyBaseResult body = buildExceptionBody(ex, ex.getBody());
         HttpStatus httpStatus = ex.getHttpStatus();
         if (null == httpStatus) {
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -49,20 +52,29 @@ public class GlobalExceptionHandler {
         return handleExceptionInternal(ex, body, httpStatus);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<UnifyBaseResult> businessExceptionHandler(BusinessException ex) {
+        UnifyBaseResult body = buildExceptionBody(ex, ex.getBody());
+        HttpStatus httpStatus = HttpStatus.resolve(ex.getStatusCode());
+        if (null == httpStatus) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return handleExceptionInternal(ex, body, httpStatus);
+    }
+
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(NullPointerException ex, WebRequest request) {
+    public ResponseEntity<UnifyBaseResult> httpRequestExceptionHandler(NullPointerException ex) {
         return handleExceptionInternal(ex, UnifyResultUtils.failure("空指针异常"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
      * 针对全局异常处理
      *
-     * @param ex      异常
-     * @param request 请求
+     * @param ex 异常
      * @return 统一异常返回数据
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<UnifyBaseResult> exceptionHandler(Exception ex, WebRequest request) {
+    public ResponseEntity<UnifyBaseResult> exceptionHandler(Exception ex) {
         return handleExceptionInternal(ex, UnifyResultUtils.failure(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

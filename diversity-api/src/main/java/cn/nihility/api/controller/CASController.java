@@ -104,7 +104,7 @@ public class CASController {
 
         logRequestCookies(request);
 
-        final String tgt = HttpRequestUtils.obtainHttpRequestCookieValue(CAS_TGC, request);
+        final String tgt = HttpRequestUtils.obtainCookieValue(CAS_TGC, request);
         String jsessionid = HttpRequestUtils.obtainCookieJsessionid(request);
         logger.info("CAS Auth Service [{}] TGT [{}] JSESSIONID [{}]", service, tgt, jsessionid);
         if (null != jsessionid) {

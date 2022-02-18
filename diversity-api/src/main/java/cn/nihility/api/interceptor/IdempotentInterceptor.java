@@ -1,7 +1,7 @@
 package cn.nihility.api.interceptor;
 
 import cn.nihility.api.annotation.ApiIdempotent;
-import cn.nihility.api.constant.Constant;
+import cn.nihility.common.constant.Constant;
 import cn.nihility.api.exception.IdempotentException;
 import cn.nihility.api.service.IdempotentService;
 import org.slf4j.Logger;
@@ -36,8 +36,9 @@ public final class IdempotentInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         ApiIdempotent apiIdempotent = handlerMethod.getMethod().getAnnotation(ApiIdempotent.class);
         ApiIdempotent clazzIdempotent = handlerMethod.getBeanType().getAnnotation(ApiIdempotent.class);
-        if ((null != apiIdempotent && apiIdempotent.value()) ||
-            (null != clazzIdempotent && clazzIdempotent.value())) {
+        boolean verify = (null != apiIdempotent && apiIdempotent.value()) ||
+            (null != clazzIdempotent && clazzIdempotent.value());
+        if (verify) {
             idempotentService.verify(acquireIdempotentKey(request));
         }
 

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 /**
  * HTTP 请求处理异常，会修改指定的 http header 状态码
+ * @author nihility
  */
 public class HttpRequestException extends RuntimeException {
 

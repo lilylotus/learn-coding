@@ -1,6 +1,6 @@
 package cn.nihility.api.controller;
 
-import cn.nihility.api.constant.Constant;
+import cn.nihility.common.constant.Constant;
 import cn.nihility.api.exception.HttpRequestException;
 import cn.nihility.common.constant.RequestMethodEnum;
 import cn.nihility.common.pojo.UnifyResult;
@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * OAuth 2.0 说明文档 [https://datatracker.ietf.org/doc/html/rfc6749#section-1]
+ * <p>
  * 应用服务请求 OAuth2.0 服务认证：
  * https://github.com/login/oauth/authorize?client_id=eb641b716603c1116dfa&redirect_uri=http://localhost:50060/auth/github/callback
  * <p>
@@ -49,22 +51,40 @@ public class OAuth2Controller {
     private static final String OAUTH2_RESPONSE_TOKEN_TYPE = "Bearer";
     private static final String OAUTH2_RESPONSE_ACCESS_TOKEN_TAG = "access_token";
 
+    private static final String CODE_GRANT_AUTHORIZATION_CODE = "authorization_code";
+    private static final String CODE_GRANT_REFRESH_TOKEN = "refresh_token";
+
+    private static final String USER_INFO_URL = "http://127.0.0.1:30010/login/oauth2/user-info";
+
     /**
      * http://127.0.0.1:30010/login/oauth/authorize?client_id=id1234567890&redirect_uri=http://127.0.0.1:30010/login/auth/callback?ch=中文
      * http://127.0.0.1:30010/login/oauth/authorize?client_id=id1234567890&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Flogin%2Fauth%2Fcallback%3Fch%3D%E4%B8%AD%E6%96%87
-     *
+     * <p>
      * response_type=code 要求返回授权码（code）/ 隐式授权模式 (token)
      * client_id=CLIENT_ID 让 OAUTH2.0 知道是谁在请求
      * redirect_uri=CALLBACK_URL 接受或拒绝请求后的跳转网址
      * scope=read 要求的授权范围（这里是只读）
      * https://auth.com/oauth/authorize?response_type=code&client_id=CLIENT_ID&scope=read&redirect_uri=CALLBACK_URL
-     *
+     * <p>
+     * application/x-www-form-urlencoded - format
+     * code: GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+     * Host: server.example.com
+     * code response:
+     * HTTP/1.1 302 Found
+     * Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
+     * <p>
+     * implicit:
+     * GET /authorize?response_type=token&client_id=s6BhdRkqt3&state=xyz&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+     * Host: server.example.com
+     * <p>
+     * HTTP/1.1 302 Found
+     * Location: http://example.com/cb#access_token=2YotnFZFEjr1zCsicMWpAA&state=xyz&token_type=example&expires_in=3600
+     * <p>
      * 授权码模式
      * http://127.0.0.1:30010/login/oauth2/authorize?response_type=code&client_id=ClientId1234567890&scope=all&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Flogin%2Foauth2%2Fcallback%2Fcode%3FRedirectParam%3D%E4%B8%AD%E6%96%87
      * 隐式模式
      * http://127.0.0.1:30010/login/oauth2/authorize?response_type=token&client_id=ClientId1234567890&scope=all&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Flogin%2Foauth2%2Fcallback%2Ftoken
-     *
-     * */
+     */
     @GetMapping("/login/oauth2/authorize")
     public String loginOauth(@RequestParam("response_type") String responseType,
                              @RequestParam("client_id") String clientId,
@@ -98,19 +118,32 @@ public class OAuth2Controller {
     }
 
     /**
-     * grant_type ：授权类型，授权码固定的值为 authorization_code ， 更新令牌 refresh_token
+     * grant_type ：授权类型，授权码固定的值为 authorization_code ， 更新令牌 refresh_token ,implicit 隐式认证
      * code：这个就是上一步获取的授权码
      * <p>
-     * /oauth/token?client_id=&client_secret=&grant_type=authorization_code&redirect_uri=&code=NMoj5y
+     * POST /token HTTP/1.1
+     * Host: server.example.com
+     * Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
+     * Content-Type: application/x-www-form-urlencoded
+     * <p>
+     * /token?grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb
      * <p>
      * {
-     * "access_token":"ACCESS_TOKEN",
-     * "token_type":"bearer",
-     * "expires_in":2592000,
-     * "refresh_token":"REFRESH_TOKEN",
+     * "access_token":"2YotnFZFEjr1zCsicMWpAA",
+     * "token_type":"Bearer",
+     * "expires_in":3600,
+     * "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA",
      * "scope":"read",
-     * "uid":100101
+     * "example_parameter":"example_value"
      * }
+     * <p>
+     * Refresh Token:
+     * POST /token HTTP/1.1
+     * Host: server.example.com
+     * Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
+     * Content-Type: application/x-www-form-urlencoded
+     * <p>
+     * grant_type=refresh_token&refresh_token=tGzv3JOkF0XG5Qx2TlKWIA
      */
     @PostMapping("/login/oauth2/token")
     @ResponseBody
@@ -124,8 +157,13 @@ public class OAuth2Controller {
 
         Map<String, Object> result = new HashMap<>(8);
         result.put(OAUTH2_RESPONSE_ACCESS_TOKEN_TAG, UuidUtils.jdkUUID());
-        result.put("refresh_token", UuidUtils.jdkUUID());
-        result.put("token_type", "bearer");
+
+        if (CODE_GRANT_AUTHORIZATION_CODE.equals(grantType)) {
+            result.put(CODE_GRANT_REFRESH_TOKEN, UuidUtils.jdkUUID());
+        }
+
+        // Bearer
+        result.put("token_type", OAUTH2_RESPONSE_TOKEN_TYPE);
         // 1 小时
         result.put("expires_in", 3600);
         result.put("scope", "read");
@@ -143,8 +181,7 @@ public class OAuth2Controller {
             accessToken, expireIn, tokenType);
 
         // 依据 access token 获取用户信息
-        String userUrl = "http://127.0.0.1:30010/login/oauth2/user";
-        HttpGet get = new HttpGet(userUrl);
+        HttpGet get = new HttpGet(USER_INFO_URL);
         HttpRequestUtils.addHeader(get, Constant.AUTHENTICATION_TOKEN_KEY,
             Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX + accessToken);
         @SuppressWarnings("unchecked")
@@ -168,7 +205,7 @@ public class OAuth2Controller {
         params.put("client_id", "OAuth2.0 Client Id");
         params.put("client_secret", "OAuth2.0 Client Secret");
         params.put("redirect_uri", "http://127.0.0.1:30010/login/oauth2/callback?RedirectParam=中文");
-        params.put("grant_type", "authorization_code");
+        params.put("grant_type", CODE_GRANT_AUTHORIZATION_CODE);
         params.put("code", code);
 
         @SuppressWarnings("unchecked")
@@ -185,8 +222,7 @@ public class OAuth2Controller {
         }
 
         // 依据 access token 获取用户信息
-        String userUrl = "http://127.0.0.1:30010/login/oauth2/user";
-        HttpGet get = new HttpGet(userUrl);
+        HttpGet get = new HttpGet(USER_INFO_URL);
         HttpRequestUtils.addHeader(get, Constant.AUTHENTICATION_TOKEN_KEY,
             Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX + accessToken);
         @SuppressWarnings("unchecked")
@@ -197,7 +233,7 @@ public class OAuth2Controller {
         return UnifyResultUtils.success(userInfoResult);
     }
 
-    @GetMapping("/login/oauth2/user")
+    @GetMapping("/login/oauth2/user-info")
     @ResponseBody
     public Map<String, String> user(HttpServletRequest request) {
 
@@ -206,7 +242,7 @@ public class OAuth2Controller {
             token = request.getParameter(Constant.AUTHENTICATION_TOKEN_KEY);
         }
         if (StringUtils.isBlank(token)) {
-            token = HttpRequestUtils.obtainHttpRequestCookieValue(Constant.AUTHENTICATION_TOKEN_KEY, request);
+            token = HttpRequestUtils.obtainCookieValue(Constant.AUTHENTICATION_TOKEN_KEY, request);
         }
         log.info("Authorization [{}]", token);
 
@@ -221,6 +257,5 @@ public class OAuth2Controller {
 
         return info;
     }
-
 
 }

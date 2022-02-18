@@ -11,10 +11,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-@WebFilter(urlPatterns = "/*", filterName = "GlobalLogTraceIdFilter")
-public class GlobalLogTraceIdFilter implements Filter {
+@WebFilter(urlPatterns = "/*", filterName = "LogTraceIdFilter")
+public class LogTraceIdFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalLogTraceIdFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogTraceIdFilter.class);
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
