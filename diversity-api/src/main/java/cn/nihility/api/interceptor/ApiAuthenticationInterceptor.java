@@ -35,7 +35,7 @@ public class ApiAuthenticationInterceptor implements HandlerInterceptor {
         boolean check = (null != methodCheck && methodCheck.value()) || (null != clazzCheck && clazzCheck.value());
         if (check) {
             try {
-                String token = HttpRequestUtils.splitBearerTokenValue(HttpRequestUtils.obtainRequestValue(
+                String token = HttpRequestUtils.bearerTokenValue(HttpRequestUtils.obtainRequestValue(
                     Constant.AUTHENTICATION_TOKEN_KEY, request));
                 JwtUtils.verifyJwtToken(token);
             } catch (JwtParseException ex) {

@@ -1,5 +1,6 @@
 package cn.nihility.common.util;
 
+import cn.nihility.common.constant.AuthConstant;
 import cn.nihility.common.constant.Oauth2Constant;
 import cn.nihility.common.entity.AuthenticationToken;
 
@@ -19,7 +20,7 @@ public class AuthenticationUtils {
         token.setProtocol(protocol);
         token.setType(type);
         token.setTokenId(tokenId);
-        token.setTtl(Oauth2Constant.TOKEN_TTL);
+        token.setTtl(AuthConstant.TOKEN_TTL);
         token.setCreateTime(System.currentTimeMillis());
         token.setUpdateTime(System.currentTimeMillis());
         return token;

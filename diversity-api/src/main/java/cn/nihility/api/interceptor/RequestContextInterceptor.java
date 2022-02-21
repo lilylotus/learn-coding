@@ -1,5 +1,7 @@
 package cn.nihility.api.interceptor;
 
+import cn.nihility.api.service.ISessionService;
+import cn.nihility.common.entity.AuthenticateSession;
 import cn.nihility.common.http.RequestContext;
 import cn.nihility.common.http.RequestContextHolder;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -15,16 +17,27 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RequestContextInterceptor implements HandlerInterceptor {
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    private ISessionService sessionService;
 
-        RequestContextHolder.assembleContext(request);
+    public RequestContextInterceptor(ISessionService sessionService) {
+        this.sessionService = sessionService;
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+
+        RequestContext context = RequestContextHolder.getContext();
+        RequestContextHolder.assembleContext(request, context);
+        if (sessionService != null) {
+            AuthenticateSession session = sessionService.getSessionFromCookie(request, response);
+            context.setAuthSession(session);
+        }
 
         return true;
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
         long endMillis = System.currentTimeMillis();
         RequestContext context = RequestContextHolder.getContext();

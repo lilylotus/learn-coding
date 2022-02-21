@@ -16,4 +16,8 @@ public interface ISessionService {
      */
     AuthenticateSession getSessionFromCookie(HttpServletRequest request, HttpServletResponse response);
 
+    AuthenticateSession getSessionById(String id, HttpServletResponse response);
+
+    void createSession(AuthenticateSession session);
+
 }

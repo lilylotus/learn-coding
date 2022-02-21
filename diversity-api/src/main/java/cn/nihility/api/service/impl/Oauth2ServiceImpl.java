@@ -1,9 +1,11 @@
 package cn.nihility.api.service.impl;
 
+import cn.nihility.api.dto.Oauth2Response;
 import cn.nihility.api.properties.AuthenticationProperties;
 import cn.nihility.api.service.IOauth2Service;
 import cn.nihility.api.service.ISessionService;
 import cn.nihility.api.service.ITokenService;
+import cn.nihility.common.constant.AuthConstant;
 import cn.nihility.common.constant.Oauth2Constant;
 import cn.nihility.common.constant.Oauth2ErrorEnum;
 import cn.nihility.common.entity.AuthenticateSession;
@@ -13,6 +15,7 @@ import cn.nihility.common.http.RequestContextHolder;
 import cn.nihility.common.util.AuthenticationUtils;
 import cn.nihility.common.util.HttpRequestUtils;
 import cn.nihility.common.util.Oauth2Utils;
+import cn.nihility.common.util.UuidUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,48 +84,88 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         }
 
         AuthenticateSession authSession = RequestContextHolder.getContext().getAuthSession();
-        if (null == authSession) {
-            authSession = sessionService.getSessionFromCookie(request, response);
-        }
-
         if (authSession != null) {
             return authenticateOkRedirect(request, authSession);
         }
 
-        return null;
+        return frontRedirectUrl;
+
     }
 
-    private String authenticateOkRedirect(HttpServletRequest request, AuthenticateSession authSession) {
+    @Override
+    public Oauth2Response createCodeGrantToken(HttpServletRequest request, HttpServletResponse response) {
+        String code = request.getParameter(Oauth2Constant.RESPONSE_TYPE_CODE_VALUE);
+        String grantType = request.getParameter(Oauth2Constant.GRANT_TYPE);
+        String redirectUri = request.getParameter(Oauth2Constant.REDIRECT_URI);
+
+        log.info("code grant code [{}], grant_type [{}], redirect_uri [{}]", code, grantType, redirectUri);
+
+        AuthenticationToken aToken = tokenService.getTokenById(code);
+        if (StringUtils.isBlank(code) || null == aToken) {
+            log.error("请求 token 为空");
+            throw new AuthenticationException("请求 token 不可为空");
+        }
+        AuthenticateSession authSession = sessionService.getSessionById(aToken.getSessionId(), response);
+
+        Oauth2Response oResponse = new Oauth2Response();
+        AuthenticationToken accessToken = AuthenticationUtils.createToken(authSession.getSessionId(), Oauth2Constant.PROTOCOL,
+            Oauth2Constant.ACCESS_TOKEN, AuthenticationUtils.tokenId(Oauth2Constant.ACCESS_TOKEN_PREFIX));
+        AuthenticationToken refreshToken = AuthenticationUtils.createToken(authSession.getSessionId(), Oauth2Constant.PROTOCOL,
+            Oauth2Constant.REFRESH_TOKEN, AuthenticationUtils.tokenId(Oauth2Constant.REFRESH_TOKEN_PREFIX));
+
+        refreshToken.setRefTokenId(accessToken.getTokenId());
+
+        if (Oauth2Constant.GRANT_AUTHORIZATION_CODE_TYPE.equals(grantType)) {
+            // 创建新的，删除 code
+            tokenService.deleteToken(code);
+        } else if (Oauth2Constant.GRANT_REFRESH_TOKEN_GRANT_TYPE.equals(grantType)) {
+            // 生成新的，删除老的
+            AuthenticationToken oldRefreshToken = tokenService.getTokenById(code);
+            if (oldRefreshToken == null) {
+                throw new AuthenticationException("refresh_token 不存在/已失效");
+            }
+
+            tokenService.deleteToken(oldRefreshToken.getRefTokenId());
+            tokenService.deleteToken(oldRefreshToken.getTokenId());
+        }
+
+        tokenService.createToken(accessToken);
+        tokenService.createToken(refreshToken);
+
+        oResponse.setRefreshToken(refreshToken.getTokenId());
+        oResponse.setAccessToken(accessToken.getTokenId());
+        oResponse.setExpiresIn(accessToken.getTtl());
+        oResponse.setTokenType(Oauth2Constant.TOKEN_TYPE_VALUE);
+
+        return oResponse;
+    }
+
+    private String authenticateOkRedirect(HttpServletRequest request, AuthenticateSession session) {
 
         String responseType = Oauth2Utils.codeGrantResponseType(request);
         String redirectUri = Oauth2Utils.redirectUri(request);
 
+        Map<String, String> params = new HashMap<>(8);
+        String tokenId;
+        AuthenticationToken aToken;
         // 隐式授权模式
         if (Oauth2Constant.RESPONSE_TYPE_IMPLICIT_VALUE.equals(responseType)) {
-            return buildImplicitGrant(request, authSession);
+            tokenId = AuthenticationUtils.tokenId(Oauth2Constant.ACCESS_TOKEN_PREFIX);
+            params.put(Oauth2Constant.ACCESS_TOKEN, tokenId);
+            params.put(Oauth2Constant.IMPLICIT_EXPIRES_IN, Long.toString(AuthConstant.TOKEN_TTL));
+            params.put(Oauth2Constant.STATE, Oauth2Utils.state(request));
+            params.put(Oauth2Constant.TOKEN_TYPE, Oauth2Constant.TOKEN_TYPE_VALUE);
+
+            aToken = AuthenticationUtils.createToken(session.getSessionId(), Oauth2Constant.PROTOCOL,
+                Oauth2Constant.ACCESS_TOKEN, tokenId);
+        } else {
+            tokenId = UuidUtils.jdkUUID();
+            aToken = AuthenticationUtils.createToken(session.getSessionId(), Oauth2Constant.PROTOCOL,
+                Oauth2Constant.RESPONSE_TYPE_CODE_VALUE, tokenId);
         }
 
-        /*AuthenticationToken refreshToken = AuthenticationUtils.createToken(session.getSessionId(),
-            Oauth2Constant.PROTOCOL, Oauth2Constant.REFRESH_TOKEN,
-            AuthenticationUtils.tokenId(Oauth2Constant.REFRESH_TOKEN_PREFIX));*/
-
-        return null;
-    }
-
-    private String buildImplicitGrant(HttpServletRequest request, AuthenticateSession session) {
-        String redirectUri = Oauth2Utils.redirectUri(request);
-
-        AuthenticationToken accessToken = AuthenticationUtils.createToken(session.getSessionId(),
-            Oauth2Constant.PROTOCOL, Oauth2Constant.ACCESS_TOKEN,
-            AuthenticationUtils.tokenId(Oauth2Constant.ACCESS_TOKEN_PREFIX));
-        tokenService.createToken(accessToken);
-
-        String tokenId = accessToken.getTokenId();
-        Map<String, String> params = new HashMap<>(8);
-        params.put(Oauth2Constant.ACCESS_TOKEN, tokenId);
-        params.put(Oauth2Constant.IMPLICIT_EXPIRES_IN, Long.toString(accessToken.getTtl()));
-        params.put(Oauth2Constant.STATE, Oauth2Utils.state(request));
-        params.put(Oauth2Constant.TOKEN_TYPE, Oauth2Constant.TOKEN_TYPE_VALUE);
+        params.put(Oauth2Constant.RESPONSE_TYPE_CODE_VALUE, tokenId);
+        tokenService.createToken(aToken);
 
         return HttpRequestUtils.addUrlParams(redirectUri, params);
 

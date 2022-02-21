@@ -50,6 +50,14 @@ public class CookieUtils {
         setCookie(key, value, domain, path, maxAgeSeconds, true, false, response);
     }
 
+    public static void setCookie(String key, String value, long ttl, HttpServletResponse response) {
+        setCookie(key, value, null, null, ttl, true, false, response);
+    }
+
+    public static void setCookie(String key, String value, HttpServletResponse response) {
+        setCookie(key, value, null, null, -1, true, false, response);
+    }
+
     public static void setCookie(String key, HttpServletResponse response) {
         setCookie(key, "", null, null, 0, true, false, response);
     }

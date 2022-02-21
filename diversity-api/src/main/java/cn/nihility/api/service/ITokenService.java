@@ -14,4 +14,6 @@ public interface ITokenService {
 
     AuthenticationToken getTokenById(String id);
 
+    boolean deleteToken(String code);
+
 }

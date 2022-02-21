@@ -222,7 +222,7 @@ public class HttpRequestUtils {
         return scheme + "://" + host;
     }
 
-    public static String splitBearerTokenValue(String bearerToken) {
+    public static String bearerTokenValue(String bearerToken) {
         if (null != bearerToken && bearerToken.startsWith(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX)) {
             bearerToken = bearerToken.substring(Constant.AUTHENTICATION_BEARER_TOKEN_PREFIX.length());
         }

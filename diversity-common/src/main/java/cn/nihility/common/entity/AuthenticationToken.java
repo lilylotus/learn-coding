@@ -21,6 +21,8 @@ public class AuthenticationToken implements Serializable {
 
     private String tokenId;
 
+    private String refTokenId;
+
     private String protocol;
 
     private String type;

@@ -9,6 +9,9 @@ package cn.nihility.common.constant;
  */
 public class Oauth2Constant {
 
+    private Oauth2Constant() {
+    }
+
     /**
      * 协议类型
      */
@@ -50,15 +53,22 @@ public class Oauth2Constant {
      * REFRESH_TOKEN
      */
     public static final String REFRESH_TOKEN = "refresh_token";
-    public static final String REFRESH_TOKEN_PREFIX = "RT";
-    public static final String ACCESS_TOKEN_PREFIX = "AT";
 
-    public static final long TOKEN_TTL = 7200L;
+    public static final String REFRESH_TOKEN_PREFIX = "RT";
+
+    public static final String ACCESS_TOKEN_PREFIX = "AT";
 
     public static final String IMPLICIT_EXPIRES_IN = "expires_in";
 
     public static final String TOKEN_TYPE = "token_type";
 
     public static final String TOKEN_TYPE_VALUE = "Bearer";
+
+    public static final String GRANT_TYPE = "grant_type";
+
+    public static final String GRANT_AUTHORIZATION_CODE_TYPE = "authorization_code";
+
+    public static final String GRANT_REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+
 
 }

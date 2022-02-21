@@ -28,4 +28,6 @@ public class AuthenticateSession implements Serializable {
 
     private Long updateTime;
 
+    private Long ttl;
+
 }

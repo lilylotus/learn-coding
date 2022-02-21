@@ -1,5 +1,6 @@
 package cn.nihility.api.service;
 
+import cn.nihility.api.dto.Oauth2Response;
 import cn.nihility.common.exception.AuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,5 +20,7 @@ public interface IOauth2Service {
      * @return 重定向地址
      */
     String authorize(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException;
+
+    Oauth2Response createCodeGrantToken(HttpServletRequest request, HttpServletResponse response);
 
 }
