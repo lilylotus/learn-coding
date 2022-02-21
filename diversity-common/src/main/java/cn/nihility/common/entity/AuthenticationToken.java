@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author nihility
@@ -32,5 +33,25 @@ public class AuthenticationToken implements Serializable {
     private long updateTime;
 
     private long ttl;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AuthenticationToken that = (AuthenticationToken) o;
+        return sessionId.equals(that.sessionId) &&
+            tokenId.equals(that.tokenId) &&
+            protocol.equals(that.protocol) &&
+            type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, tokenId, protocol, type);
+    }
 
 }

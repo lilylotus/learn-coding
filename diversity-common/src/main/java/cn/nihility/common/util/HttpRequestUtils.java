@@ -93,7 +93,7 @@ public class HttpRequestUtils {
     }
 
     public static String addUrlParam(final String url, String key, String value) {
-        return addUrlParam(url, key, value, false);
+        return addUrlParam(url, key, value, true);
     }
 
     public static String addUrlParams(String url, Map<String, String> params) {

@@ -1,8 +1,8 @@
 package cn.nihility.api.service.impl;
 
-import cn.nihility.common.entity.AuthenticateSession;
 import cn.nihility.api.service.ISessionService;
 import cn.nihility.api.util.CookieUtils;
+import cn.nihility.common.entity.AuthenticateSession;
 import cn.nihility.common.http.RequestContext;
 import cn.nihility.common.http.RequestContextHolder;
 import cn.nihility.common.util.HttpRequestUtils;
@@ -71,8 +71,14 @@ public class SessionServiceImpl implements ISessionService {
 
     @Override
     public void createSession(AuthenticateSession session) {
-        String sessionId = session.getSessionId();
-        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + sessionId);
+        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + session.getSessionId());
         bucket.set(session, session.getTtl(), TimeUnit.SECONDS);
     }
+
+    @Override
+    public void updateSession(AuthenticateSession session) {
+        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + session.getSessionId());
+        bucket.setIfExists(session, session.getTtl(), TimeUnit.SECONDS);
+    }
+
 }

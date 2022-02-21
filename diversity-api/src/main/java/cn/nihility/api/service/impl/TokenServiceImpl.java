@@ -6,8 +6,6 @@ import cn.nihility.common.entity.AuthenticationToken;
 import cn.nihility.plugin.redis.service.RedissonOperateService;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -37,7 +35,7 @@ public class TokenServiceImpl implements ITokenService {
         String tokenKey = buildKey(token.getTokenId());
         token.setTtl(authenticationProperties.getInactiveInterval());
         RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(tokenKey);
-        bucket.set(token, authenticationProperties.getInactiveInterval(), TimeUnit.SECONDS);
+        bucket.set(token, token.getTtl(), TimeUnit.SECONDS);
     }
 
     @Override

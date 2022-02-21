@@ -2,6 +2,7 @@ package cn.nihility.api.service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author nihility
@@ -16,4 +17,5 @@ public interface IAuthenticationService {
      */
     String auth(HttpServletRequest request, HttpServletResponse response);
 
+    Map<String, Object> userInfo(HttpServletRequest request, HttpServletResponse response);
 }

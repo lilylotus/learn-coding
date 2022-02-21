@@ -20,4 +20,6 @@ public interface ISessionService {
 
     void createSession(AuthenticateSession session);
 
+    void updateSession(AuthenticateSession session);
+
 }

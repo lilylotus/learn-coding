@@ -34,4 +34,14 @@ public class Oauth2Response {
     @JsonProperty("expires_in")
     private Long expiresIn;
 
+    @Override
+    public String toString() {
+        return "Oauth2Response{" +
+            "accessToken='" + accessToken + '\'' +
+            ", refreshToken='" + refreshToken + '\'' +
+            ", tokenType='" + tokenType + '\'' +
+            ", expiresIn=" + expiresIn +
+            '}';
+    }
+    
 }

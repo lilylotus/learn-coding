@@ -58,6 +58,8 @@ public class Oauth2Constant {
 
     public static final String ACCESS_TOKEN_PREFIX = "AT";
 
+    public static final String CODE_TOKEN_PREFIX = "CT";
+
     public static final String IMPLICIT_EXPIRES_IN = "expires_in";
 
     public static final String TOKEN_TYPE = "token_type";

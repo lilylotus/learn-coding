@@ -22,4 +22,6 @@ public class AuthenticationProperties {
      */
     private long inactiveInterval = 7200;
 
+    private String ssoHost;
+
 }

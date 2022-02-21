@@ -8,6 +8,7 @@ api:
 
 auth:
   authLoginPrefix: /auth/login
+  ssoHost: http://10.0.41.80:30010
 
 spring:
 #  jackson:
@@ -34,6 +35,6 @@ spring:
 
 logging:
   level:
+    org.redisson.command: info
     org.apache.http.impl.conn.PoolingHttpClientConnectionManager: info
     org.thymeleaf.TemplateEngine.CONFIG: info
-

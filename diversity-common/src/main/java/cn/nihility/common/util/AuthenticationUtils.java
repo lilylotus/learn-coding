@@ -1,7 +1,6 @@
 package cn.nihility.common.util;
 
 import cn.nihility.common.constant.AuthConstant;
-import cn.nihility.common.constant.Oauth2Constant;
 import cn.nihility.common.entity.AuthenticationToken;
 
 /**
@@ -14,12 +13,12 @@ public class AuthenticationUtils {
     }
 
     public static AuthenticationToken createToken(String sessionId, String protocol,
-                                                  String type, String tokenId) {
+                                                  String type, String prefix) {
         AuthenticationToken token = new AuthenticationToken();
         token.setSessionId(sessionId);
         token.setProtocol(protocol);
         token.setType(type);
-        token.setTokenId(tokenId);
+        token.setTokenId(tokenId(prefix));
         token.setTtl(AuthConstant.TOKEN_TTL);
         token.setCreateTime(System.currentTimeMillis());
         token.setUpdateTime(System.currentTimeMillis());
