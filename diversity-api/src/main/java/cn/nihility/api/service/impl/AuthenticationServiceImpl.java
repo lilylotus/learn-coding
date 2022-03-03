@@ -79,7 +79,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
 
         sessionService.createSession(authSession);
-        CookieUtils.setCookie(SessionServiceImpl.AUTH_SESSION_COOKIE_KEY, sessionId, 3600L, response);
+        CookieUtils.setCookie(SessionServiceImpl.AUTH_SESSION_COOKIE_KEY, sessionId, AuthConstant.SESSION_TTL, response);
 
         return redirect;
     }

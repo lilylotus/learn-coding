@@ -89,7 +89,7 @@ public class ProxyAutoScanConfigurationImpl implements ImportBeanDefinitionRegis
 
             AbstractBeanDefinition beanDefinition;
             BeanDefinitionRegistry registry = getRegistry();
-            Assert.notNull(registry, "BeanDefinitionRegistry can not be null");
+            Assert.notNull(registry, "BeanDefinitionRegistry cannot be null");
 
             for (BeanDefinitionHolder holder : beanDefinitionHolders) {
 
@@ -104,7 +104,7 @@ public class ProxyAutoScanConfigurationImpl implements ImportBeanDefinitionRegis
                 }
 
                 String beanClassName = beanDefinition.getBeanClassName();
-                LOGGER.info("Creating ProxyFactoryBean with name [{}] and [{}] interface",
+                LOGGER.info("Creating ProxyFactoryBean with the name [{}] and [{}] interface",
                     holder.getBeanName(), beanClassName);
 
                 // the mapper interface is the original class of the bean

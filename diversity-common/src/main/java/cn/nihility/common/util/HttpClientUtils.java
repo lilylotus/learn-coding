@@ -5,6 +5,7 @@ import cn.nihility.common.exception.HttpRequestException;
 import cn.nihility.common.http.CustomHttpClientBuilder;
 import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
@@ -294,21 +295,24 @@ public class HttpClientUtils {
         ResponseHolder<R> result = new ResponseHolder<>();
         // 注意：HttpClient 池化管理，不需要关闭
         try (CloseableHttpResponse httpResponse = httpClient.execute(request, httpContext)) {
-            StatusLine statusLine = httpResponse.getStatusLine();
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
             String respStringEntity = EntityUtils.toString(httpResponse.getEntity());
             if (logger.isDebugEnabled()) {
                 logger.debug("请求 [{}], 响应状态 [{}], 响应消息 [{}]",
-                    request.getURI(), statusLine.getStatusCode(), respStringEntity);
+                    request.getURI(), statusCode, respStringEntity);
             }
             result.setHeaders(HttpRequestUtils.headersToMap(httpResponse.getAllHeaders()));
-            result.setStatusCode(statusLine.getStatusCode());
-            R resultObject = null;
-            if (StringUtils.isNotBlank(respStringEntity)) {
-                resultObject = rt.isAssignableFrom(String.class) ?
-                    (R) respStringEntity :
-                    JacksonUtils.readJsonString(respStringEntity, rt);
+            result.setStatusCode(statusCode);
+            if (HttpStatus.SC_OK == statusCode) {
+                if (StringUtils.isNotBlank(respStringEntity)) {
+                    R resultObject = rt.isAssignableFrom(String.class) ?
+                        (R) respStringEntity :
+                        JacksonUtils.readJsonString(respStringEntity, rt);
+                    result.setContent(resultObject);
+                }
+            } else {
+                result.setErrorContent(respStringEntity);
             }
-            result.setContent(resultObject);
         } catch (IOException e) {
             logger.error("请求 [{}] 异常", request.getURI());
             throw new HttpRequestException("请求 [" + request.getURI() + "] 异常", e);

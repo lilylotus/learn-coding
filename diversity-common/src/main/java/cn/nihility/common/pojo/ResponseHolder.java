@@ -1,5 +1,7 @@
 package cn.nihility.common.pojo;
 
+import org.apache.http.HttpStatus;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -21,6 +23,14 @@ public class ResponseHolder<T> {
      * http 请求响应的 header 参数
      */
     private Map<String, String> headers;
+    /**
+     * 请求异常内容
+     */
+    private String errorContent;
+
+    public boolean ok() {
+        return HttpStatus.SC_OK == statusCode;
+    }
 
     public T getContent() {
         return content;
@@ -46,10 +56,22 @@ public class ResponseHolder<T> {
         this.headers = headers;
     }
 
+    public String getErrorContent() {
+        return errorContent;
+    }
+
+    public void setErrorContent(String errorContent) {
+        this.errorContent = errorContent;
+    }
+
     @Override
     public String toString() {
         return "ResponseHolder{" +
             "content=" + content +
+            ", statusCode=" + statusCode +
+            ", headers=" + headers +
+            ", errorContent=" + errorContent +
             '}';
     }
+
 }

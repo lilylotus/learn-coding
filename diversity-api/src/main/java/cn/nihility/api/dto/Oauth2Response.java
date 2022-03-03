@@ -43,5 +43,5 @@ public class Oauth2Response {
             ", expiresIn=" + expiresIn +
             '}';
     }
-    
+
 }
