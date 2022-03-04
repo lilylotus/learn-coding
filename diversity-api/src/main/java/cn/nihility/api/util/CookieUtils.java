@@ -58,7 +58,7 @@ public class CookieUtils {
         setCookie(key, value, null, null, -1, true, false, response);
     }
 
-    public static void setCookie(String key, HttpServletResponse response) {
+    public static void delCookie(String key, HttpServletResponse response) {
         setCookie(key, "", null, null, 0, true, false, response);
     }
 

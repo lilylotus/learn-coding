@@ -43,14 +43,20 @@ public enum UnifyCodeMapping {
     PARAM_TYPE_BIND_ERROR(60003, "参数类型错误"),
     PARAM_NOT_COMPLETE(60004, "参数缺失"),
     PARAM_VALUE_EXPIRE_OR_NOT_EXIST(60005, "值过期或不存在"),
+    PARAM_VALIDATE_FAILED(60006, "请求参数校验失败"),
+    PARAM_BIND_FAILED(60007, "请求参数绑定失败"),
 
     /* 61001 - 62000 : operation exception */
     TEST_UNIFY_EXCEPTION(61001, "测试统一异常处理"),
     REPETITIVE_OPERATION(61002, "重复操作");
 
-    /* 自定义的状态码 */
+    /**
+     * 自定义的状态码
+     */
     private Integer code;
-    /* 提示信息 */
+    /**
+     * 提示信息
+     */
     private String message;
 
     UnifyCodeMapping(Integer code, String message) {

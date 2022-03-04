@@ -6,7 +6,6 @@ import cn.nihility.common.http.CustomHttpClientBuilder;
 import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -125,9 +124,6 @@ public class HttpClientUtils {
 
         connectionManager.setMaxTotal(DEFAULT_MAX_CONNECTIONS);
         connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
-
-        //connectionManager.setValidateAfterInactivity(DEFAULT_VALIDATE_AFTER_INACTIVITY);
-        //connectionManager.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(DEFAULT_SOCKET_TIMEOUT).setTcpNoDelay(true).build());
 
         return connectionManager;
     }

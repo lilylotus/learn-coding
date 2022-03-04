@@ -30,7 +30,6 @@ public class CASController {
 
     private static final Logger logger = LoggerFactory.getLogger(CASController.class);
 
-    //private static final String TGT = "TGT";
     private static final String CAS_TGC = "CASTGC";
     private static final String TICKET = "ticket";
     private static final String ST_PREFIX = "ST-";

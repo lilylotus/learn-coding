@@ -8,12 +8,14 @@ import cn.nihility.common.exception.JwtParseException;
 import cn.nihility.common.util.HttpRequestUtils;
 import cn.nihility.common.util.JwtUtils;
 import cn.nihility.common.util.UnifyResultUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.annotation.Annotation;
 
 /**
  * 接口身份认证校验拦截器
@@ -29,11 +31,9 @@ public class ApiAuthenticationInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
-        ApiAuthenticationCheck methodCheck = handlerMethod.getMethod().getAnnotation(ApiAuthenticationCheck.class);
-        ApiAuthenticationCheck clazzCheck = handlerMethod.getBeanType().getAnnotation(ApiAuthenticationCheck.class);
-        boolean check = (null != methodCheck && methodCheck.value()) || (null != clazzCheck && clazzCheck.value());
-        if (check) {
+        ApiAuthenticationCheck check = findAnnotation((HandlerMethod) handler, ApiAuthenticationCheck.class);
+
+        if (null != check && check.value()) {
             try {
                 String token = HttpRequestUtils.bearerTokenValue(HttpRequestUtils.obtainRequestValue(
                     Constant.AUTHENTICATION_TOKEN_KEY, request));
@@ -45,6 +45,14 @@ public class ApiAuthenticationInterceptor implements HandlerInterceptor {
         }
 
         return true;
+    }
+
+    public static <A extends Annotation> A findAnnotation(HandlerMethod handlerMethod, Class<A> annotationType) {
+        A method =
+            AnnotationUtils.findAnnotation(handlerMethod.getMethod(), annotationType);
+        A clazz =
+            AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), annotationType);
+        return clazz == null ? method : clazz;
     }
 
 }

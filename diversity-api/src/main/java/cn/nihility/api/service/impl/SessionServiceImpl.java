@@ -26,7 +26,7 @@ public class SessionServiceImpl implements ISessionService {
 
     private static final Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 
-    public static final String AUTH_SESSION_COOKIE_KEY = "auth_session";
+    public static final String AUTH_SESSION_COOKIE_KEY = "request_session";
 
     private RedissonOperateService redissonOp;
 
@@ -41,8 +41,8 @@ public class SessionServiceImpl implements ISessionService {
             RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + sessionId);
             AuthenticateSession session = bucket.get();
             if (session == null) {
-                log.info("认证会话实例不存在，删除对应 cookies");
-                CookieUtils.setCookie(AUTH_SESSION_COOKIE_KEY, response);
+                log.info("请求话实例不存在，删除对应 cookies");
+                CookieUtils.delCookie(AUTH_SESSION_COOKIE_KEY, response);
             } else {
                 RequestContext context = RequestContextHolder.getContext();
                 context.setLoginBefore(true);
@@ -60,7 +60,7 @@ public class SessionServiceImpl implements ISessionService {
             AuthenticateSession session = bucket.get();
             if (session == null) {
                 log.info("认证会话实例不存在，删除对应 cookies");
-                CookieUtils.setCookie(AUTH_SESSION_COOKIE_KEY, response);
+                CookieUtils.delCookie(AUTH_SESSION_COOKIE_KEY, response);
             } else {
                 RequestContextHolder.getContext().setLoginBefore(true);
                 return session;

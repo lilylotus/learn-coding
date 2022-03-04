@@ -1,7 +1,5 @@
 package cn.nihility.api.properties;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +7,6 @@ import org.springframework.stereotype.Component;
  * @author nihility
  * @date 2022/02/18 13:38
  */
-@Getter
-@Setter
 @ConfigurationProperties(prefix = "auth")
 @Component
 public class AuthenticationProperties {
@@ -24,4 +20,30 @@ public class AuthenticationProperties {
 
     private String ssoHost;
 
+    /* ============================== getter/setter ============================== */
+
+    public String getAuthLoginPrefix() {
+        return authLoginPrefix;
+    }
+
+    public void setAuthLoginPrefix(String authLoginPrefix) {
+        this.authLoginPrefix = authLoginPrefix;
+    }
+
+    public long getInactiveInterval() {
+        return inactiveInterval;
+    }
+
+    public void setInactiveInterval(long inactiveInterval) {
+        this.inactiveInterval = inactiveInterval;
+    }
+
+    public String getSsoHost() {
+        return ssoHost;
+    }
+
+    public void setSsoHost(String ssoHost) {
+        this.ssoHost = ssoHost;
+    }
+    
 }
