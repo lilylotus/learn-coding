@@ -158,3 +158,53 @@ spring:
 ```
 
 > 注意： The reason we have introduced this restriction is so that `on-profile` conditions are only evaluated once
+
+# Spring boot 参数校验
+
+## `@Validated` 和 `@Valid` 区别
+
+Spring Validation 验证框架对参数的验证机制提供了 `@Validated`（Spring's JSR-303规范，是标准 JSR-303 的一个变种），
+javax 提供了`@Valid`（标准JSR-303规范），配合 BindingResult 可以直接提供参数验证结果。
+
+在检验 Controller 的入参是否符合规范时，使用 `@Validated` 或者 `@Valid` 在基本验证功能上没有太多区别。
+
+但是在分组、注解地方、嵌套验证等功能上两个有所不同：
+
+1. 分组
+    - `@Validated`：提供了一个分组功能，可以在入参验证时，根据不同的分组采用不同的验证机制。
+    - `@Valid`：作为标准 JSR-303 规范，还没有吸收分组的功能。
+
+2. 注解地方
+    - `@Validated`：可以用在类型、方法和方法参数上。但是不能用在成员属性（字段）上
+    - `@Valid`：可以用在方法、构造函数、方法参数和成员属性（字段）上
+
+注意：两者是否能用于成员属性（字段）上直接影响能否提供嵌套验证的功能。
+`@Validated` 不能用在成员属性（字段）上，但是 `@Valid` 能加在成员属性（字段）上，而且 `@Valid` 类注解上也说明了它支持嵌套验证功能
+
+- `@Validated` 和 `@Valid` 加在方法参数前，都不会自动对参数进行嵌套验证
+- `@Valid` 在方法参数时并不能够自动进行嵌套验证，而是用在需要嵌套验证类的相应字段上在配合方法参数上 `@Validated` 或 `@Valid` 来进行嵌套验证。
+
+```java
+public class ValidateEntity {
+
+    @NotNull(message = "id不能为空")
+    @Min(value = 1, message = "id必须为正整数")
+    private Long id;
+
+    @Valid // 嵌套验证必须用 `@Valid`
+    @NotNull(message = "props不能为空")
+    @Size(min = 1, message = "props至少要有一个自定义属性")
+    private List<Prop> props;
+}
+
+// 在 Controller 接口中检验参数
+public class ValidateController {
+    /** 参数上用 `@Validated` 或 `@Valid` 进行参数校验，
+    若参数内部属性字段需要嵌套检验，在该字段上添加 `@Valid` 注解  */
+    public void validateGet(@Valid ValidateEntity entity) {}
+}
+```
+
+总结一下 `@Validated` 和 `@Valid` 在嵌套验证功能上的区别：
+- `@Validated`：用在方法入参上无法单独提供嵌套验证功能。不能用在成员属性（字段）上，也无法提示框架进行嵌套验证。能配合嵌套验证注解 `@Valid` 进行嵌套验证。
+- `@Valid`：用在方法入参上无法单独提供嵌套验证功能。能够用在成员属性（字段）上，提示验证框架进行嵌套验证。能配合嵌套验证注解 `@Valid` 进行嵌套验证。

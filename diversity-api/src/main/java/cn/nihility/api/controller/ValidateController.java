@@ -1,6 +1,8 @@
 package cn.nihility.api.controller;
 
 import cn.nihility.api.dto.ValidateDto;
+import cn.nihility.api.validate.ValidateAddGroup;
+import cn.nihility.api.validate.ValidateEditGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
@@ -19,13 +21,13 @@ public class ValidateController {
     private static final Logger log = LoggerFactory.getLogger(ValidateController.class);
 
     @PostMapping("/validate")
-    public ValidateDto validatePost(@RequestBody @Validated ValidateDto dto) {
+    public ValidateDto validatePost(@RequestBody @Validated(ValidateAddGroup.class) ValidateDto dto) {
         log.info("validate Post dto [{}]", dto);
         return dto;
     }
 
     @GetMapping("/validate")
-    public ValidateDto validateGet(@Validated ValidateDto dto) {
+    public ValidateDto validateGet(@Validated(ValidateEditGroup.class) ValidateDto dto) {
         log.info("validate Get dto [{}]", dto);
         return dto;
     }

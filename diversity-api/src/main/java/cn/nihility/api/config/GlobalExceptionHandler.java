@@ -8,21 +8,20 @@ import cn.nihility.common.util.UnifyResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.util.WebUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +39,20 @@ public class GlobalExceptionHandler {
         this.debugStackTrace = debugStackTrace;
     }
 
+    private String parseBindFieldErrorsMessage(BindingResult bindingResult) {
+        StringJoiner joiner = new StringJoiner("; ");
+        List<FieldError> errors = Optional.of(bindingResult.getFieldErrors()).orElse(new ArrayList<>(0));
+        errors.forEach(e -> joiner.add(e.getField() + ":" + e.getDefaultMessage()));
+        return joiner.toString();
+    }
+
+    private String parseBindAllErrorsMessage(BindingResult bindingResult) {
+        StringJoiner joiner = new StringJoiner("; ");
+        List<ObjectError> errors = Optional.of(bindingResult.getAllErrors()).orElse(new ArrayList<>(0));
+        errors.forEach(e -> joiner.add(e.getDefaultMessage()));
+        return joiner.toString();
+    }
+
     /**
      * 拦截表单参数校验
      *
@@ -49,10 +62,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({BindException.class})
     public UnifyBaseResult bindException(BindException ex) {
         BindingResult bindingResult = ex.getBindingResult();
-        String bindFailMsg = Optional.ofNullable(bindingResult.getFieldError())
-            .map(r -> "参数绑定失败:" + r.getDefaultMessage())
-            .orElse("请求参数绑定失败");
-        logger.error("请求参数绑定异常：[{}]", bindFailMsg, ex);
+
+        String bindFailMsg = "参数绑定失败:" + parseBindAllErrorsMessage(bindingResult);
+
+        //logger.error("请求参数绑定异常：[{}]", bindFailMsg, ex);
         return UnifyResultUtils.failure(UnifyCodeMapping.PARAM_BIND_FAILED.getCode(), bindFailMsg);
     }
 
@@ -65,9 +78,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public UnifyBaseResult bindException(MethodArgumentNotValidException ex) {
         BindingResult bindingResult = ex.getBindingResult();
-        String validateFailMsg = Optional.ofNullable(bindingResult.getFieldError())
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .orElse("请求参数校验失败");
+
+        String validateFailMsg = parseBindFieldErrorsMessage(bindingResult);
+
         //logger.error("请求参数校验异常：[{}]", validateFailMsg, ex);
         return UnifyResultUtils.failure(UnifyCodeMapping.PARAM_VALIDATE_FAILED.getCode(), validateFailMsg);
     }

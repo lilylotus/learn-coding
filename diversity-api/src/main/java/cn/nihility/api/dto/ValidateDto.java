@@ -1,5 +1,8 @@
 package cn.nihility.api.dto;
 
+import cn.nihility.api.validate.CustomerFieldLength;
+import cn.nihility.api.validate.ValidateAddGroup;
+import cn.nihility.api.validate.ValidateEditGroup;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
@@ -13,24 +16,29 @@ import javax.validation.constraints.NotEmpty;
  */
 public class ValidateDto {
 
-    @NotEmpty(message = "校验名称不可为空")
-    @Length(max = 6, message = "名称长度不可超过 6 个字符")
+    @NotEmpty(message = "姓名不可为空", groups = {ValidateAddGroup.class, ValidateEditGroup.class})
+    @Length(max = 6, message = "姓名不可超过 6 个字符")
     private String name;
 
-    @Min(value = 0, message = "校验年龄不可小于 0")
-    @Max(value = 100, message = "校验年龄不可大于 100")
+    @Min(value = 0, message = "年龄不可小于 0")
+    @Max(value = 100, message = "年龄不可大于 100")
     private Integer age;
 
-    @Email
+    @Email(message = "邮件格式不正确")
     @NotEmpty(message = "邮件不可为空")
     private String email;
+
+    @CustomerFieldLength(groups = {ValidateAddGroup.class},
+        message = "自定义字段不可为空且长度不超过 10 个字符", value = 10)
+    private String customer;
 
     @Override
     public String toString() {
         return "ValidateDto{" +
             "name='" + name + '\'' +
-            ", age=" + age +
-            ", email=" + email +
+            ", age=" + age + '\'' +
+            ", email=" + email + '\'' +
+            ", customer=" + customer + '\'' +
             '}';
     }
 
@@ -58,4 +66,11 @@ public class ValidateDto {
         this.email = email;
     }
 
+    public String getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
 }
