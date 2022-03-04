@@ -41,6 +41,8 @@ class RedissonOperateServiceImplTest {
         RList<String> rList = redissonOperateService.getList("redisson:list");
         rList.add(firstValue);
         rList.add("two");
+        rList.expire(60, TimeUnit.SECONDS);
+
         List<String> resultList = rList.readAll();
         Assertions.assertNotNull(resultList);
         Assertions.assertEquals(firstValue, resultList.get(0));
@@ -53,6 +55,7 @@ class RedissonOperateServiceImplTest {
         RMap<String, String> rMap = redissonOperateService.getMap("redisson:map");
         rMap.put("one", "oneValue");
         rMap.put("second", "secondValue");
+        rMap.expire(60, TimeUnit.SECONDS);
 
         String result = rMap.get("one");
         Assertions.assertEquals("oneValue", result);

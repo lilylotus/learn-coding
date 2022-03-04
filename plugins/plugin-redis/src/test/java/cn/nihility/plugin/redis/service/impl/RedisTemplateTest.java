@@ -35,7 +35,7 @@ class RedisTemplateTest {
         List<String> list = new ArrayList<>();
         list.add("one");
         list.add("two");
-        redisTemplate.boundValueOps("redis:serialize:list").set(list);
+        redisTemplate.boundValueOps("redis:serialize:list").set(list, 60, TimeUnit.SECONDS);
     }
 
     @Test

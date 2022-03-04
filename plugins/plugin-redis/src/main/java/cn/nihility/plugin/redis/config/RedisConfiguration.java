@@ -14,21 +14,36 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
+import java.io.IOException;
 
 /**
  * @author nihility
  */
-public class RedisConfiguration {
+public class RedisConfiguration implements ResourceLoaderAware, EnvironmentAware {
 
-    private static final String REDIS_PROTOCOL_PREFIX = "redis://";
+    private ResourceLoader resourceLoader;
+    private Environment environment;
+
+    @Override
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -40,7 +55,8 @@ public class RedisConfiguration {
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 指定序列化输入的类型，类必须是非 final 修饰的，final 修饰的类，比如 String,Integer 等会抛出异常
         // 这一句非常的重要，作用是序列化时将对象全类名一起保存下来
-        om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
+            ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
 
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         jackson2JsonRedisSerializer.setObjectMapper(om);
@@ -63,20 +79,12 @@ public class RedisConfiguration {
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean(RedissonClient.class)
-    public RedissonClient redissonClient(RedisProperties redisProperties) {
-        Config config = new Config();
+    public RedissonClient redissonClient() throws IOException {
+        String configLocation = environment.getProperty("redisson.config.location",
+            "classpath:redisson/SingleServerConfig.yml");
+        Resource resource = resourceLoader.getResource(configLocation);
 
-        Duration timeoutDuration = redisProperties.getTimeout();
-        int timeout = 10000;
-        if (timeoutDuration != null) {
-            timeout = (int) timeoutDuration.toMillis();
-        }
-
-        config.useSingleServer()
-            .setAddress(REDIS_PROTOCOL_PREFIX + redisProperties.getHost() + ":" + redisProperties.getPort())
-            .setConnectTimeout(timeout)
-            .setDatabase(redisProperties.getDatabase())
-            .setPassword(redisProperties.getPassword());
+        Config config = Config.fromYAML(resource.getInputStream());
 
         return Redisson.create(config);
     }
