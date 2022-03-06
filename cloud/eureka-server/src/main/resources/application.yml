@@ -10,3 +10,7 @@ management:
     web:
       exposure:
         include: ["info", "health", "eureka"]
+
+logging:
+  level:
+    com.netflix.eureka.registry: info

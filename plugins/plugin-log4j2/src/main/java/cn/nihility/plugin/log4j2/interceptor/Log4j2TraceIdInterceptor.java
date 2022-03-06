@@ -16,10 +16,8 @@ public class Log4j2TraceIdInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 如果有上层使用就沿用上层传递的 Trace ID
-        final String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
-        String traceId;
-        MDC.put(Constant.TRACE_ID,
-            ((traceId = request.getHeader(Constant.TRACE_ID)) == null ? uuid : traceId));
+        String traceId = request.getHeader(Constant.TRACE_ID);
+        MDC.put(Constant.TRACE_ID, (traceId == null ? UUID.randomUUID().toString().replace("-", "") : traceId));
         return true;
     }
 

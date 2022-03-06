@@ -5,10 +5,8 @@ import cn.nihility.api.validate.ValidateAddGroup;
 import cn.nihility.api.validate.ValidateEditGroup;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 
 /**
  * @author nihility
@@ -32,6 +30,10 @@ public class ValidateDto {
         message = "自定义字段不可为空且长度不超过 10 个字符", value = 10)
     private String customer;
 
+    @Valid
+    @NotNull(message = "内置校验字段不可为空")
+    private ValidateInnerDTO validateInner;
+
     @Override
     public String toString() {
         return "ValidateDto{" +
@@ -39,6 +41,7 @@ public class ValidateDto {
             ", age=" + age + '\'' +
             ", email=" + email + '\'' +
             ", customer=" + customer + '\'' +
+            ", validateInner=" + validateInner + '\'' +
             '}';
     }
 
@@ -73,4 +76,13 @@ public class ValidateDto {
     public void setCustomer(String customer) {
         this.customer = customer;
     }
+
+    public ValidateInnerDTO getValidateInner() {
+        return validateInner;
+    }
+
+    public void setValidateInner(ValidateInnerDTO validateInner) {
+        this.validateInner = validateInner;
+    }
+
 }

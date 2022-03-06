@@ -1,0 +1,37 @@
+server:
+  port: 31060
+
+spring:
+  application:
+    name: CloudGateway
+  cloud:
+    gateway:
+      loadbalancer:
+        use404: true
+      routes:
+        - id: eureka_client
+          uri: lb://CloudEurekaClient
+          predicates:
+          - Path=/eureka-client/**
+          filters:
+          - RewritePath=/eureka-client(?<segment>/?.*), $\{segment}
+
+eureka:
+  instance:
+    hostname: localhost
+    preferIpAddress: false
+  client:
+    enabled: true
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+    # 需要 actuator 依赖支持，EurekaDiscoveryClientConfiguration
+    healthcheck:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["info", "health"]

@@ -356,6 +356,20 @@ public class HttpRequestUtils {
         return headers;
     }
 
+    public static Map<String, String> requestHeadersToMap(HttpServletRequest request) {
+        if (null == request) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> headers = new HashMap<>(8);
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String key = headerNames.nextElement();
+            String value = request.getHeader(key);
+            headers.put(key, value);
+        }
+        return headers;
+    }
+
     public static StringEntity buildJsonStringEntity(String content) {
         if (StringUtils.isBlank(content)) {
             return null;

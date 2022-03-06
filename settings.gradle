@@ -52,3 +52,6 @@ findProject(':plugins').children.each {
 findProject(':demonstration').children.each {
     project -> println "demonstration [" + project.name + "]"
 }
+include 'cloud:cloud-gateway'
+findProject(':cloud:cloud-gateway')?.name = 'cloud-gateway'
+

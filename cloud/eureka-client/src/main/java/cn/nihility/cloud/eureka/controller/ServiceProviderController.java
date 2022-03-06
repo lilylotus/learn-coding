@@ -2,14 +2,18 @@ package cn.nihility.cloud.eureka.controller;
 
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.HttpRequestUtils;
+import cn.nihility.common.util.JacksonUtils;
 import cn.nihility.common.util.UnifyResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -35,6 +39,22 @@ public class ServiceProviderController {
             e.printStackTrace();
         }
         return UnifyResultUtils.success("randomTimeOut [" + duration + "]");
+    }
+
+    @GetMapping("/service/all-info")
+    public UnifyResult<Map<String, Object>> allRequestInfo(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>(8);
+        Map<String, String> headers = HttpRequestUtils.requestHeadersToMap(request);
+        Map<String, String> cookies = HttpRequestUtils.cookiesToMap(request);
+        Map<String, String> params = HttpRequestUtils.paramsToMap(request);
+
+        result.put("headers", headers);
+        result.put("cookies", cookies);
+        result.put("params", params);
+
+        logger.info("Request all info [{}]", JacksonUtils.toJsonString(result));
+
+        return UnifyResultUtils.success(result);
     }
 
 }

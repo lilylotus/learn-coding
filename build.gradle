@@ -38,6 +38,9 @@ allprojects {
 
     dependencies {
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+        testImplementation("org.junit.jupiter:junit-jupiter-api")
+        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 
@@ -83,10 +86,10 @@ subprojects {
 
 }
 
-task cleanAll(type: Delete, dependsOn: [clean]) {
-    subprojects.forEach({
-        /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/
-        println "clean [$it.projectDir\\out]"
-        delete "$it.projectDir\\out"
-    })
-}
+//task cleanAll(type: Delete, dependsOn: [clean]) {
+//    subprojects.forEach({
+//        /*println "[$it.name] : [$it.projectDir] : [$it.buildDir]"*/
+//        println "clean [$it.projectDir\\out]"
+//        delete "$it.projectDir\\out"
+//    })
+//}
