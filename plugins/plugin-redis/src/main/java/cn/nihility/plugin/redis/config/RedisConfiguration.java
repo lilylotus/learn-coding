@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -30,6 +31,7 @@ import java.io.IOException;
 /**
  * @author nihility
  */
+@Configuration
 public class RedisConfiguration implements ResourceLoaderAware, EnvironmentAware {
 
     private ResourceLoader resourceLoader;

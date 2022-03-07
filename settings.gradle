@@ -8,12 +8,14 @@ include 'cloud:resilience4j'
 include 'cloud:eureka-server'
 include 'cloud:eureka-client'
 include 'cloud:nacos-client'
+include 'cloud:cloud-gateway'
 
 include 'plugins:plugin-log4j2'
 include 'plugins:plugin-jdbc'
 include 'plugins:plugin-redis'
 include 'plugins:plugin-mybatis'
 include 'plugins:plugin-rabbitmq'
+include 'plugins:plugin-servlet'
 
 include 'demonstration:demo'
 include 'demonstration:websocket'
@@ -29,12 +31,14 @@ findProject(':cloud:resilience4j')?.name = 'resilience4j'
 findProject(':cloud:eureka-server')?.name = 'eureka-server'
 findProject(':cloud:eureka-client')?.name = 'eureka-client'
 findProject(':cloud:nacos-client')?.name = 'nacos-client'
+findProject(':cloud:cloud-gateway')?.name = 'cloud-gateway'
 
 findProject(':plugins:plugin-log4j2')?.name = 'plugin-log4j2'
 findProject(':plugins:plugin-jdbc')?.name = 'plugin-jdbc'
 findProject(':plugins:plugin-redis')?.name = 'plugin-redis'
 findProject(':plugins:plugin-mybatis')?.name = 'plugin-mybatis'
 findProject(':plugins:plugin-rabbitmq')?.name = 'plugin-rabbitmq'
+findProject(':plugins:plugin-servlet')?.name = 'plugin-servlet'
 
 findProject(':demonstration:demo')?.name = 'demo'
 findProject(':demonstration:websocket')?.name = 'websocket'
@@ -52,6 +56,3 @@ findProject(':plugins').children.each {
 findProject(':demonstration').children.each {
     project -> println "demonstration [" + project.name + "]"
 }
-include 'cloud:cloud-gateway'
-findProject(':cloud:cloud-gateway')?.name = 'cloud-gateway'
-

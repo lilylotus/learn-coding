@@ -1,7 +1,7 @@
 package cn.nihility.common.util;
 
 import cn.nihility.common.constant.RequestMethodEnum;
-import cn.nihility.common.exception.HttpRequestException;
+import cn.nihility.common.exception.HttpClientException;
 import cn.nihility.common.http.CustomHttpClientBuilder;
 import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -311,7 +311,7 @@ public class HttpClientUtils {
             }
         } catch (IOException e) {
             logger.error("请求 [{}] 异常", request.getURI());
-            throw new HttpRequestException("请求 [" + request.getURI() + "] 异常", e);
+            throw new HttpClientException("请求 [" + request.getURI() + "] 异常", e);
         }
         return result;
     }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
@@ -46,6 +47,9 @@ public class ProxyAutoScanConfigurationImpl implements ImportBeanDefinitionRegis
 
     }
 
+    /**
+     * @see ClassPathScanningCandidateComponentProvider
+     */
     static class ProxyAutoClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(ProxyAutoClassPathBeanDefinitionScanner.class);

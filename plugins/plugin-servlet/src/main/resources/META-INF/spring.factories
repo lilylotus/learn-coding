@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+cn.nihility.plugin.servlet.config.WebServletConfiguration,\
+cn.nihility.plugin.servlet.config.WebMessageConverterConfiguration

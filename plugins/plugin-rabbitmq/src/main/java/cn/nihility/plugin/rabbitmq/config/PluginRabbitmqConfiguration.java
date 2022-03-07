@@ -12,6 +12,7 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * 发送消息确认：
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Bean;
  *  消费者会立刻消费这条消息，业务处理再抛出异常，消息再重新入队，如此反复进行。导致消息队列处理出现阻塞，导致正常消息也无法运行。
  *
  */
+@Configuration
 public class PluginRabbitmqConfiguration {
 
     @Bean

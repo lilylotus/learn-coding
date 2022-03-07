@@ -5,10 +5,10 @@ configurations {
 }
 
 dependencies {
-    implementation project(":plugins:plugin-log4j2")
+    implementation project(":plugins:plugin-servlet")
     implementation project(":plugins:plugin-jdbc")
     implementation project(":plugins:plugin-redis")
 
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    /*implementation("org.springframework.boot:spring-boot-starter-web")*/
 
 }
