@@ -1,11 +1,12 @@
 package cn.nihility.common.util;
 
+import cn.nihility.common.constant.Constant;
 import cn.nihility.common.constant.RequestMethodEnum;
 import cn.nihility.common.exception.HttpClientException;
 import cn.nihility.common.http.CustomHttpClientBuilder;
 import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -26,6 +27,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -37,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class HttpClientUtils {
@@ -70,6 +73,10 @@ public class HttpClientUtils {
      * Default value for max number od connections per route.
      */
     public static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 50;
+    /**
+     * Default value for following redirects.
+     */
+    public static final boolean DEFAULT_FOLLOW_REDIRECTS = true;
     /**
      * Default value for time to live.
      */
@@ -186,15 +193,15 @@ public class HttpClientUtils {
                                                        boolean disableCookieManagement) {
         final CustomHttpClientBuilder builder = new CustomHttpClientBuilder();
         builder.closeRemoveConnectionManager(connectionManager);
+        builder.addInterceptorFirst(new HttpRequestTraceInterceptor());
+        builder.addInterceptorLast(new HttpResponseTraceInterceptor());
 
         IdleConnectionReaper.setIdleConnectionTime(DEFAULT_IDLE_CONNECTION_TIME);
         IdleConnectionReaper.registerConnectionManager(connectionManager);
 
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT)
-            .setSocketTimeout(DEFAULT_SOCKET_TIMEOUT)
-            // 禁用自动重定向
-            .setRedirectsEnabled(false)
+            .setRedirectsEnabled(DEFAULT_FOLLOW_REDIRECTS)
             .build();
 
         builder.setConnectionManager(connectionManager)
@@ -247,18 +254,24 @@ public class HttpClientUtils {
     public static HttpUriRequest buildHttpRequest(String url, RequestMethodEnum method) {
         CheckUtils.stringNotBlank(url, "请求 url 不可为空");
         URI uri = HttpRequestUtils.buildUri(url);
+        HttpUriRequest request;
         switch (method) {
             case GET:
-                return new HttpGet(uri);
+                request = new HttpGet(uri);
+                break;
             case POST:
-                return new HttpPost(uri);
+                request = new HttpPost(uri);
+                break;
             case PUT:
-                return new HttpPut(uri);
+                request = new HttpPut(uri);
+                break;
             case DELETE:
-                return new HttpDelete(uri);
+                request = new HttpDelete(uri);
+                break;
             default:
-                return new HttpGet(url);
+                request = new HttpGet(url);
         }
+        return request;
     }
 
     public static HttpUriRequest buildJsonHttpRequest(String url, RequestMethodEnum method, Map<String, String> bodyParams) {
@@ -399,6 +412,32 @@ public class HttpClientUtils {
         @Override
         public X509Certificate[] getAcceptedIssuers() {
             return new X509Certificate[0];
+        }
+
+    }
+
+    static class HttpRequestTraceInterceptor implements HttpRequestInterceptor {
+
+        @Override
+        public void process(HttpRequest request, HttpContext context) {
+            String traceId = MDC.get(Constant.TRACE_ID);
+            if (StringUtils.isBlank(traceId)) {
+                traceId = UuidUtils.jdkUUID();
+                MDC.put(Constant.TRACE_ID, traceId);
+                context.setAttribute(Constant.TRACE_ID, traceId);
+            }
+        }
+
+    }
+
+    static class HttpResponseTraceInterceptor implements HttpResponseInterceptor {
+
+        @Override
+        public void process(HttpResponse response, HttpContext context) {
+            String traceId = Objects.toString(context.getAttribute(Constant.TRACE_ID), null);
+            if (null != traceId) {
+                MDC.remove(Constant.TRACE_ID);
+            }
         }
 
     }

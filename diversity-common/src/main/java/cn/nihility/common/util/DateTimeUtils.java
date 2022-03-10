@@ -35,6 +35,14 @@ public class DateTimeUtils {
         return StringUtils.isBlank(source) ? null : LocalDate.parse(source, DATE_FORMATTER);
     }
 
+    public static String localDateTime2String(LocalDateTime dateTime) {
+        return DATE_TIME_FORMATTER.format(dateTime);
+    }
+
+    public static String localDate2String(LocalDate date) {
+        return DATE_FORMATTER.format(date);
+    }
+
     public static Date simpleDateParse(String source) {
         if (StringUtils.isBlank(source)) {
             return null;
@@ -55,6 +63,14 @@ public class DateTimeUtils {
         }
 
         return result;
+    }
+
+    public static String simpleDateTime2String(Date dateTime) {
+        return SIMPLE_DATE_TIME.get().format(dateTime);
+    }
+
+    public static String simpleDate2String(Date date) {
+        return SIMPLE_DATE.get().format(date);
     }
 
 }
