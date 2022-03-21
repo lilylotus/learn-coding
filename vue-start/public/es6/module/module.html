@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ES6 模块化</title>
+</head>
+<body>
+    <script type="module">
+        // 1. 通用导入方式
+        // 引入 m1.js 模块内容
+        import * as m1 from "./js/m1.js";
+        console.log(m1);
+        console.log(m1.school);
+
+        // 引入 m2.js 模块内容
+        import * as m2 from './js/m2.js';
+        console.log(m2);
+
+        // 引入 m3.js 模块内容
+        import * as m3 from './js/m3.js'
+        console.log(m3)
+        m3.default.func();
+
+        // 2. 结构赋值形式，结构不能重名，可以使用别名 as
+        import {school, moduleFunc} from './js/m1.js';
+        import {school as m2School, findSomething} from './js/m2.js';
+        import {default as defaultm3} from './js/m3.js';
+        console.log('m1 = ', school, ', m2 = ', m2School);
+        console.log(defaultm3.school)
+
+        // 3. 简便形式，仅针对默认暴露形式
+        import default3 from './js/m3.js';
+        console.log(default3);
+        console.log(default3.school);
+        default3.func();
+
+    </script>
+</body>
+</html>

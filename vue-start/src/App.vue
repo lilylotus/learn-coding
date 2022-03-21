@@ -10,9 +10,9 @@
     <el-button type="danger">危险按钮</el-button>
   </el-row> -->
 
-  <hr>
+    <hr>
   
-  <Banner/>
+    <Banner/>
 
     <div class="row">
       <div class="col-xs-2 col-xs-offset-2">
@@ -27,6 +27,7 @@
           <router-link class="list-group-item" active-class="active" to="/home">Home</router-link>
           <router-link class="list-group-item" active-class="active" to="/vuex">Vuex</router-link>
           <router-link class="list-group-item" active-class="active" to="/axios">Axios</router-link>
+          <router-link class="list-group-item" active-class="active" to="/event">Event</router-link>
         </div>
       </div>
 
@@ -47,9 +48,7 @@ import Banner from './pages/Banner.vue';
 
 export default {
   name: 'App',
-  components: {
-    Banner
-  }
+  components: {Banner}
 }
 </script>
 

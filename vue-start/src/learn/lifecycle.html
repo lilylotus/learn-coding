@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue lifecycle</title>
+    <script src="../js/vue.js" type="text/javascript"></script>
+</head>
+<body>
+    
+    <div id="root">
+        <h2 :x="n">N 值 {{n}}</h2>
+        <button @click="nPlus">点我 n + 1</button>
+    </div>
+
+    <script type="text/javascript">
+        const vInstance = new Vue({
+            el: '#root',
+            data: {
+                n: 1
+            },
+            methods: {
+                nPlus() {
+                    this.n = this.n + 1;
+                }
+            },
+            beforeCreate() {
+                console.log("before create.")
+            },
+            created() {
+                console.log("created done")
+            },
+            beforeMount() {
+                console.log("before mount")
+            },
+            // 生命周期钩子，生命周期函数
+            // this -> VM
+            mounted() {
+                console.log("Vue 初始时完成模版的解析，并把真实的 DOM 元素放到页面后调用，仅调用一次")
+            }
+        });
+    </script>
+</body>
+</html>

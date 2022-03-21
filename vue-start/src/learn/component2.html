@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue component learn</title>
+    <script src="../js/vue.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div id="root">
+        <h1>Hello Vue component</h1>
+        <school></school>
+    </div>
+    
+    <script type="text/javascript">
+        Vue.config.productionTip = false;
+
+        // VueComponnet -> 在 应用时 VUE 帮我们调用的 初始化函数，生成了一个全新的 VueComponent 实例
+        const school = Vue.extend({
+            data() {
+                return {
+                    name: 'schoolName',
+                    address: 'schoolAddress'
+                }
+            },
+            methods: {
+                tipName() {
+                    window.alert(this.name);
+                }
+            },
+            template: `
+                <div>
+                    <h2>学校名称： {{name}}</h2>
+                    <h2>学校地址： {{address}}</h2>
+                    <button @click="tipName">点我提示学校名称</button>
+                </div>
+            `
+        })
+
+        const vueInstance = new Vue({
+            el: '#root',
+            // 注册组件，（局部注册）
+            components: {
+                school
+            }
+        });
+    </script>
+</body>
+</html>

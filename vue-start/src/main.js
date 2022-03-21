@@ -29,12 +29,34 @@ VueRouter.prototype.replace = function replace(location) {
   return originalReplace.call(this, location).catch(err => err)
 }
 
+// 注意：原型，VueComponent.prototype.__proto__ === Vue.prototype
+// const component = Vue.extend({}) // -> 创建一个 VueComponente - vc， Vue - vm
+// const vc = new component();
+// Vue.prototype.x = vc;
+// 于是乎在所有的 VueComponent 实例上就能访问到这个 x 变量, this.x
+
+// 绑定事件到全局的 x vc 实例上
+// mounted() {
+//   this.x.$on('globalEvent', (data) => {
+//     console.log('全局事件回调函数被调用', data)
+//   })
+// };
+
+// 触发全局事件
+// triget() {
+//   this.x.$emit('globalEvent', 88);
+// }
+
 new Vue({
   render: h => h(App),
   store,
-  router: router
+  router: router,
   // render(createElement) {
   //   return createElement('h1', '你好 Render')
   // }
   // =  render: h => h('h1', '你好');
+  // 正确的创建全局事件总线
+  beforeCreate() {
+    Vue.prototype.$bus = this;
+  }
 }).$mount('#app')

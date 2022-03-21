@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue component learn</title>
+    <script src="../js/vue.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div id="root">
+        <h1>Hello Vue component</h1>
+
+        <!-- 编写组件标签 -->
+        <school></school>
+        <hr>
+        <student></student>
+        <hr>
+        <global></global>
+    </div>
+    
+    <script type="text/javascript">
+        Vue.config.productionTip = false;
+
+        const school = Vue.extend({
+            data() {
+                return {
+                    name: 'schoolName',
+                    address: 'schoolAddress'
+                }
+            },
+            methods: {
+                tipName() {
+                    window.alert(this.name);
+                }
+            },
+            template: `
+                <div>
+                    <h2>学校名称： {{name}}</h2>
+                    <h2>学校地址： {{address}}</h2>
+                    <button @click="tipName">点我提示学校名称</button>
+                </div>
+            `
+        })
+        const student = Vue.extend({
+            data() {
+                return {
+                    name: 'studentName',
+                    address: 'studentAddress'
+                }
+            },
+            template: `
+                <div>
+                    <h2>学生名称： {{name}}</h2>
+                    <h2>学生地址： {{address}}</h2>
+                    <info></info>
+                </div>
+            `
+        })
+        const global = Vue.extend({
+            data() {
+                return {
+                    data: 'Hello Global Component'
+                }
+            },
+            template: `
+                <div>
+                    <h3>全局组件数据= {{data}}</h3>
+                </div>
+            `
+        })
+        
+        Vue.component('global', global)
+
+        const info = Vue.extend({
+            template: `
+                <div>
+                    <h4>学生信息</h4>
+                </div>
+            `
+        })
+        student.component('info', info);
+
+        const vueInstance = new Vue({
+            el: '#root',
+            // 注册组件，（局部注册）
+            components: {
+                school: school,
+                student
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue render show</title>
+    <script src="../js/vue.js" type="text/javascript"></script>
+</head>
+<body>
+    
+    <div id="root">
+        <h2>Welcome {{name}} - showData = {{vShowData}}</h2>
+        <button @click="changeShow">changeShow</button><br/>
+        <h3 v-show="vShowData">v-show, 通过 display=none 控制，控制显示频繁推荐使用</h3>
+        <h3 v-if="vShowData">v-if, 直接把这个标签删除了，不频繁控制</h3>
+        <h3 v-else-if="!vShowData">v-else-if</h3>
+        <h3 v-else>v-else</h3>
+
+        <h1>渲染</h1>
+        <button @click="addPerson">新增人员</button><span>search {{searchKey}}</span><br/>
+        <input type="text" v-model="searchKey" placeholder="输入姓名搜索"><br>
+        <button @click="sortType=1">升序</button><button @click="sortType=2">降序</button><button @click="sortType=0">原顺序</button>
+        <ul>
+            <li v-for="(p, index) in fliterPerson" :key="p.id">iterator array 人员 {{index + 1}} = {{p.name}} - {{p.age}}, <input type="text"></li>
+        </ul>
+        <!-- 遍历信息 -->
+        <ul>
+            <li v-for="(value, key) in liObj" :key="key">iterator obj {{key}} = {{value}}</li>
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+        new Vue({
+            el: '#root',
+            data: {
+                name: 'Vue Name',
+                vShowData: true,
+                searchKey: "",
+                sortType: 0,
+                person: [
+                    {name: 'p1', age: 18, id: 1},
+                    {name: 'p2', age: 19, id: 2},
+                    {name: 'p3', age: 20, id: 3}
+                ],
+                liObj: {
+                    name: 'liObjName',
+                    age: 20,
+                    sex: 'male'
+                }
+            },
+            methods: {
+                changeShow() {
+                    console.log('change show data')
+                    this.vShowData = !this.vShowData;
+                },
+                addPerson() {
+                    console.log("add a new person")
+                    this.person.push({name: Date.now() + ' p3', age: Date.now() % 100, id: Date.now()})
+                }
+            },
+            computed: {
+                fliterPerson() {
+                    console.log("search @", this.searchKey)
+                    const result = this.person.filter((p) => { 
+                       return p.name.indexOf(this.searchKey) !== -1
+                    })
+                    if (this.sortType) {
+                        result.sort((p1, p2) => {
+                            return this.sortType === 1 ? p1.age - p2.age : p2.age -p1.age;
+                        })
+                    }
+                    return result;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

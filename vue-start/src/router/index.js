@@ -9,6 +9,7 @@ import News from '../pages/News'
 import Detail from '../pages/Detail'
 import AxiosUsage from '../pages/Axios'
 import VuexUsage from '../pages/VuexUsage'
+import EventUsage from '../pages/EventUsage'
 
 // 创建并暴露一个路由器
 // 添加路由守卫
@@ -41,6 +42,15 @@ const router = new VueRouter({
             meta: {
                 check: false,
                 title: 'Vuex 示例'
+            }
+        },
+        {
+            name: 'event',
+            path: '/event',
+            component: EventUsage,
+            meta: {
+                check: false,
+                title: 'Event 事件绑定'
             }
         },
         {

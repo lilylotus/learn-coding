@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import {mapGetters, mapState} from 'vuex'
 export default {
     name: 'Student',
     data() {
