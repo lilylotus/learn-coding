@@ -8,7 +8,7 @@ api:
 
 auth:
   authLoginPrefix: /auth/login
-  ssoHost: http://10.0.41.80:30010
+  ssoHost: http://127.0.0.1:30010
 
 spring:
 #  jackson:

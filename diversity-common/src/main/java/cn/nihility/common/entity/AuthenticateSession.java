@@ -23,7 +23,7 @@ public class AuthenticateSession implements Serializable {
 
     private String userId;
 
-    private transient Map<String, Object> userAttributes;
+    private Map<String, Object> userAttributes;
 
     private Long createTime;
 

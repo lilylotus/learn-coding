@@ -101,7 +101,9 @@ public class AuthenticationController {
         return authenticationService.userInfo(request, response);
     }
 
-    /* ========== CAS https://apereo.github.io/cas/6.0.x/protocol/CAS-Protocol.html */
+    /* ========== CAS https://apereo.github.io/cas/6.0.x/protocol/CAS-Protocol.html
+    * http://127.0.0.1:30010/auth/cas/login?service=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Fcas%2Frec%2Fdemo
+    * */
 
     @GetMapping("/auth/cas/login")
     public String casLoginForm(HttpServletRequest request, HttpServletResponse response) {

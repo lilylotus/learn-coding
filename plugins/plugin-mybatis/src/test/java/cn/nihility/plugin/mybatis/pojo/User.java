@@ -1,8 +1,8 @@
 package cn.nihility.plugin.mybatis.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 @TableName("table_user")
 public class User {
@@ -12,6 +12,11 @@ public class User {
     private String name;
     private Integer age;
     private String email;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime addTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 
     public Long getId() {
         return id;
@@ -45,6 +50,22 @@ public class User {
         this.email = email;
     }
 
+    public LocalDateTime getAddTime() {
+        return addTime;
+    }
+
+    public void setAddTime(LocalDateTime addTime) {
+        this.addTime = addTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -52,6 +73,8 @@ public class User {
             ", name='" + name + '\'' +
             ", age=" + age +
             ", email='" + email + '\'' +
+            ", addTime=" + addTime +
+            ", updateTime=" + updateTime +
             '}';
     }
 }

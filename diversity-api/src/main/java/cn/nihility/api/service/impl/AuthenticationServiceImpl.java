@@ -51,11 +51,11 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         UserInfo info = new UserInfo();
         String uid = UuidUtils.jdkUUID();
         info.setUserId(uid);
-        info.setUserName("Test User Name");
+        info.setUserName(params.get("username"));
 
         Map<String, Object> attr = new HashMap<>(8);
         attr.put("userId", uid);
-        attr.put("userName", "Test User Name");
+        attr.put("userName", params.get("username"));
         info.setExt(attr);
 
         String sessionId;

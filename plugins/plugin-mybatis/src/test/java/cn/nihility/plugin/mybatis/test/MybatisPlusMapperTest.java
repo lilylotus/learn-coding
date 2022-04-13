@@ -35,6 +35,16 @@ class MybatisPlusMapperTest {
     }
 
     @Test
+    void testUpdate() {
+        User user = new User();
+        user.setEmail("update_email@test.com");
+        user.setName("updateName");
+        user.setId(1L);
+        int count = userMapper.updateById(user);
+        Assertions.assertEquals(1, count);
+    }
+
+    @Test
     void testQueryWrapper() {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         User user = new User();
