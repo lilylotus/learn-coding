@@ -13,6 +13,15 @@ public class User {
     private Integer age;
     private String email;
 
+    public User() {
+    }
+
+    public User(String name, Integer age, String email) {
+        this.name = name;
+        this.age = age;
+        this.email = email;
+    }
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime addTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

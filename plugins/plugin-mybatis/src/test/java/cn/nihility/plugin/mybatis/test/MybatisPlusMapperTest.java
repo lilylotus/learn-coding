@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class MybatisPlusMapperTest {
@@ -22,6 +23,9 @@ class MybatisPlusMapperTest {
         List<User> userList = userMapper.selectList(null);
         Assertions.assertNotNull(userList);
         userList.forEach(System.out::println);
+
+        String collect = userList.stream().map(Object::toString).collect(Collectors.joining("#"));
+        System.out.println(collect);
     }
 
     @Test

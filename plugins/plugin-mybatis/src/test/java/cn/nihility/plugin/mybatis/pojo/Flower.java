@@ -11,6 +11,18 @@ public class Flower {
     private LocalDateTime addTime;
     private LocalDateTime updateTime;
 
+    public Flower() {
+    }
+
+    public Flower(String id, String nameEnglish, String nameChinese, Integer age) {
+        this.id = id;
+        this.nameEnglish = nameEnglish;
+        this.nameChinese = nameChinese;
+        this.age = age;
+        this.addTime = addTime;
+        this.updateTime = updateTime;
+    }
+
     public String getId() {
         return id;
     }

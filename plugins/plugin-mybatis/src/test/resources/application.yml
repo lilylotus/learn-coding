@@ -14,3 +14,9 @@ mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
   mapper-locations: classpath:mybatis/mapper/*.xml
   type-aliases-package: cn.nihility.plugin.mybatis.pojo
+
+# 应用 mybatis-plus 后对应使用的是这个配置
+mybatis-plus:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: cn.nihility.plugin.mybatis.pojo
