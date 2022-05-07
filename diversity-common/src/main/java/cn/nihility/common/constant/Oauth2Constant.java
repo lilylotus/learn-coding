@@ -15,7 +15,7 @@ public class Oauth2Constant {
     /**
      * 协议类型
      */
-    public static final String PROTOCOL = "OAUTH";
+    public static final String PROTOCOL = "OAUTH2";
     /**
      * 响应类型，必填
      */
@@ -32,6 +32,10 @@ public class Oauth2Constant {
      * 应用 ID
      */
     public static final String CLIENT_ID = "client_id";
+    /**
+     * 客户端应用密钥
+     */
+    public static final String CLIENT_SECRET = "client_secret";
     /**
      * 重定向地址，可选
      */

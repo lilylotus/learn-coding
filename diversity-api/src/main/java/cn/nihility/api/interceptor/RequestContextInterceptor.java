@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RequestContextInterceptor implements HandlerInterceptor {
 
-    private ISessionService sessionService;
+    private final ISessionService sessionService;
 
     public RequestContextInterceptor(ISessionService sessionService) {
         this.sessionService = sessionService;

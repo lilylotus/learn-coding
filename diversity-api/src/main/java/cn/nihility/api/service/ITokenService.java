@@ -8,12 +8,34 @@ import cn.nihility.common.entity.AuthenticationToken;
  */
 public interface ITokenService {
 
-    String TOKEN_PREFIX = "auth-token";
+    String AUTH_PREFIX = "auth-token";
 
-    void createToken(AuthenticationToken accessToken);
+    String OAUTH_PREFIX = "oauth-token";
 
-    AuthenticationToken getTokenById(String id);
+    String CAS_PREFIX = "cas-token";
 
-    boolean deleteToken(String code);
+    default String casKey(String id) {
+        return CAS_PREFIX + ":" + id;
+    }
+
+    default String oauthKey(String id) {
+        return OAUTH_PREFIX + ":" + id;
+    }
+
+    default String authKey(String id) {
+        return AUTH_PREFIX + ":" + id;
+    }
+
+    void createOauthToken(AuthenticationToken accessToken);
+
+    AuthenticationToken getOauthToken(String id);
+
+    boolean deleteOauthToken(String code);
+
+    void createCasToken(AuthenticationToken accessToken);
+
+    AuthenticationToken getCasToken(String id);
+
+    boolean deleteCasToken(String code);
 
 }

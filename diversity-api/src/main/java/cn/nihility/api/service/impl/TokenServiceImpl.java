@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TokenServiceImpl implements ITokenService {
 
-    private RedissonOperateService redissonOperate;
-    private AuthenticationProperties authenticationProperties;
+    private final RedissonOperateService redissonOperate;
+    private final AuthenticationProperties authenticationProperties;
 
     public TokenServiceImpl(RedissonOperateService redissonOperate,
                             AuthenticationProperties authenticationProperties) {
@@ -26,31 +26,49 @@ public class TokenServiceImpl implements ITokenService {
         this.authenticationProperties = authenticationProperties;
     }
 
-    private String buildKey(String key) {
-        return TOKEN_PREFIX + ":" + key;
-    }
-
-    @Override
-    public void createToken(AuthenticationToken token) {
-        String tokenKey = buildKey(token.getTokenId());
+    private void createToken(AuthenticationToken token, String tokenKey) {
         token.setTtl(authenticationProperties.getInactiveInterval());
         RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(tokenKey);
         bucket.set(token, token.getTtl(), TimeUnit.SECONDS);
     }
 
-    @Override
-    public AuthenticationToken getTokenById(String id) {
-        if (StringUtils.isBlank(id)) {
-            return null;
-        }
-        RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(buildKey(id));
+    public AuthenticationToken getToken(String key) {
+        RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(key);
         return bucket.get();
     }
 
+    /* ========== CAS ========== */
+
     @Override
-    public boolean deleteToken(String id) {
-        RBucket<Object> bucket = redissonOperate.getBucket(buildKey(id));
-        return bucket.delete();
+    public void createCasToken(AuthenticationToken accessToken) {
+        createToken(accessToken, casKey(accessToken.getTokenId()));
+    }
+
+    @Override
+    public AuthenticationToken getCasToken(String id) {
+        return StringUtils.isBlank(id) ? null : getToken(casKey(id));
+    }
+
+    @Override
+    public boolean deleteCasToken(String code) {
+        return redissonOperate.getBucket(casKey(code)).delete();
+    }
+
+    /* ========== oauth2 ========== */
+
+    @Override
+    public void createOauthToken(AuthenticationToken accessToken) {
+        createToken(accessToken, oauthKey(accessToken.getTokenId()));
+    }
+
+    @Override
+    public AuthenticationToken getOauthToken(String id) {
+        return StringUtils.isBlank(id) ? null : getToken(oauthKey(id));
+    }
+
+    @Override
+    public boolean deleteOauthToken(String code) {
+        return redissonOperate.getBucket(oauthKey(code)).delete();
     }
 
 }

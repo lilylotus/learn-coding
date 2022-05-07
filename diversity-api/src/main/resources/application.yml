@@ -1,5 +1,13 @@
 server:
   port: 30010
+  ssl:
+    enabled: false
+    # classpath:nihility.cn.jks
+    key-store: classpath:nihility.cn.pfx
+    # R0DVddBJ
+    key-store-password: DuH340Rn
+    # JKS
+    key-store-type: PKCS12
 
 api:
   unify:

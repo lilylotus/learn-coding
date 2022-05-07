@@ -26,22 +26,26 @@ public class SessionServiceImpl implements ISessionService {
 
     private static final Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 
-    public static final String AUTH_SESSION_COOKIE_KEY = "request_session";
+    public static final String AUTH_SESSION_COOKIE_KEY = "authentication_session";
 
-    private RedissonOperateService redissonOp;
+    private final RedissonOperateService redissonOp;
 
     public SessionServiceImpl(RedissonOperateService redissonOp) {
         this.redissonOp = redissonOp;
+    }
+
+    private String authenticationSessionKey(String sessionId) {
+        return AUTH_SESSION_COOKIE_KEY + ":" + sessionId;
     }
 
     @Override
     public AuthenticateSession getSessionFromCookie(HttpServletRequest request, HttpServletResponse response) {
         String sessionId = HttpRequestUtils.obtainCookieValue(AUTH_SESSION_COOKIE_KEY, request);
         if (StringUtils.isNotBlank(sessionId)) {
-            RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + sessionId);
+            RBucket<AuthenticateSession> bucket = redissonOp.getBucket(authenticationSessionKey(sessionId));
             AuthenticateSession session = bucket.get();
             if (session == null) {
-                log.info("请求话实例不存在，删除对应 cookies");
+                log.warn("请求话实例不存在，删除对应 cookies");
                 CookieUtils.delCookie(AUTH_SESSION_COOKIE_KEY, response);
             } else {
                 RequestContext context = RequestContextHolder.getContext();
@@ -54,12 +58,12 @@ public class SessionServiceImpl implements ISessionService {
     }
 
     @Override
-    public AuthenticateSession getSessionById(String id, HttpServletResponse response) {
-        if (StringUtils.isNotBlank(id)) {
-            RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + id);
+    public AuthenticateSession getSessionById(String sessionId, HttpServletResponse response) {
+        if (StringUtils.isNotBlank(sessionId)) {
+            RBucket<AuthenticateSession> bucket = redissonOp.getBucket(authenticationSessionKey(sessionId));
             AuthenticateSession session = bucket.get();
             if (session == null) {
-                log.info("认证会话实例不存在，删除对应 cookies");
+                log.warn("认证会话实例不存在，删除对应 cookies");
                 CookieUtils.delCookie(AUTH_SESSION_COOKIE_KEY, response);
             } else {
                 RequestContextHolder.getContext().setLoginBefore(true);
@@ -71,13 +75,13 @@ public class SessionServiceImpl implements ISessionService {
 
     @Override
     public void createSession(AuthenticateSession session) {
-        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + session.getSessionId());
+        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(authenticationSessionKey(session.getSessionId()));
         bucket.set(session, session.getTtl(), TimeUnit.SECONDS);
     }
 
     @Override
     public void updateSession(AuthenticateSession session) {
-        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(AUTH_SESSION_COOKIE_KEY + ":" + session.getSessionId());
+        RBucket<AuthenticateSession> bucket = redissonOp.getBucket(authenticationSessionKey(session.getSessionId()));
         bucket.setIfExists(session, session.getTtl(), TimeUnit.SECONDS);
     }
 

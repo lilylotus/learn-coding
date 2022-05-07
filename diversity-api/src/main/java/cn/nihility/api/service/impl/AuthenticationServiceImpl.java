@@ -33,8 +33,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
-    private ISessionService sessionService;
-    private ITokenService tokenService;
+    private final ISessionService sessionService;
+    private final ITokenService tokenService;
 
     public AuthenticationServiceImpl(ISessionService sessionService, ITokenService tokenService) {
         this.sessionService = sessionService;
@@ -88,7 +88,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     public Map<String, Object> userInfo(HttpServletRequest request, HttpServletResponse response) {
         String token = HttpRequestUtils.bearerTokenValue(request.getHeader(AuthConstant.AUTHORIZATION_KEY));
         log.info("token [{}]", token);
-        AuthenticationToken aToken = tokenService.getTokenById(token);
+        AuthenticationToken aToken = tokenService.getOauthToken(token);
         if (StringUtils.isBlank(token) || null == aToken) {
             log.error("请求 token 为空");
             throw new AuthenticationException("请求 token 不可为空");

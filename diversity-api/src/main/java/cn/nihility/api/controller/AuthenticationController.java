@@ -29,9 +29,9 @@ public class AuthenticationController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
-    private IOauth2Service oauth2Service;
-    private IAuthenticationService authenticationService;
-    private ICasService casService;
+    private final IOauth2Service oauth2Service;
+    private final IAuthenticationService authenticationService;
+    private final ICasService casService;
 
     public AuthenticationController(IOauth2Service oauth2Service,
                                     IAuthenticationService authenticationService,
@@ -74,10 +74,18 @@ public class AuthenticationController {
         return "redirect:" + redirect;
     }
 
-    /* ============================== OAuth2.0 ============================== */
+    /* ============================== OAuth2.0 https://datatracker.ietf.org/doc/html/rfc6749#section-4.1 */
 
     /**
      * GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+     *
+     * scope - OPTIONAL
+     *
+     * HTTP/1.1 302 Found
+     * Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
+     *
+     * example:
+     * http://127.0.0.1:30010/auth/oauth/authorize?response_type=code&client_id=s6BhdRkqt3&scope=all&state=xyz&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foauth%2Frec%2Fdemo%3Fparam1%3D%E4%B8%AD%E6%96%87%26param2%3DEnglish
      */
     @GetMapping("/auth/oauth/authorize")
     public void oauthAuthorize(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -87,7 +95,29 @@ public class AuthenticationController {
     }
 
     /**
-     * POST /token?grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb
+     * POST /token HTTP/1.1
+     * Host: server.example.com
+     * Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
+     * Content-Type: application/x-www-form-urlencoded
+     *
+     * scope - OPTIONAL
+     *
+     * grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb
+     *
+     * response:
+     *  {
+     *    "access_token":"2YotnFZFEjr1zCsicMWpAA",
+     *    "token_type":"example",
+     *    "expires_in":3600,
+     *    "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA",
+     *    "example_parameter":"example_value"
+     *  }
+     *
+     *  refresh token:
+     *  grant_type=refresh_token&refresh_token=tGzv3JOkF0XG5Qx2TlKWIA
+     *
+     *  http://127.0.0.1:30010/auth/oauth/token?grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foauth%2Frec%2Fdemo%3Fparam1%3D%E4%B8%AD%E6%96%87%26param2%3DEnglish
+     *  http://127.0.0.1:30010/auth/oauth/token?grant_type=refresh_token&refresh_token=RT-4cf13ce4eec843169e113f10f3c2c3d9
      */
     @RequestMapping(value = "/auth/oauth/token", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
@@ -95,16 +125,23 @@ public class AuthenticationController {
         return oauth2Service.createCodeGrantToken(request, response);
     }
 
-    @RequestMapping(value = "/auth/user-info", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/auth/oauth/user-info", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Map<String, Object> userInfo(HttpServletRequest request, HttpServletResponse response) {
-        return authenticationService.userInfo(request, response);
+        return oauth2Service.userInfo(request, response);
     }
 
-    /* ========== CAS https://apereo.github.io/cas/6.0.x/protocol/CAS-Protocol.html
+    @RequestMapping(value = "/auth/oauth/rec/demo", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public Map<String, Object> oauthRecDemo(HttpServletRequest request, HttpServletResponse response) {
+        return oauth2Service.rec(request, response);
+    }
+
+    /* ========== CAS https://apereo.github.io/cas/6.0.x/protocol/CAS-Protocol.html */
+
+    /**
     * http://127.0.0.1:30010/auth/cas/login?service=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Fcas%2Frec%2Fdemo
     * */
-
     @GetMapping("/auth/cas/login")
     public String casLoginForm(HttpServletRequest request, HttpServletResponse response) {
         String redirectUri = casService.casLogin(request, response);

@@ -17,9 +17,12 @@ import cn.nihility.common.pojo.ResponseHolder;
 import cn.nihility.common.util.AuthenticationUtils;
 import cn.nihility.common.util.HttpClientUtils;
 import cn.nihility.common.util.HttpRequestUtils;
+import cn.nihility.common.util.JacksonUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,7 +72,7 @@ public class CasServiceImpl implements ICasService {
             // 删除原有的 token
             Optional.ofNullable(session.getTokenSet())
                 .orElse(Collections.emptySet())
-                .forEach(t -> tokenService.deleteToken(t.getTokenId()));
+                .forEach(t -> tokenService.deleteCasToken(t.getTokenId()));
             // 生成服务票据 ST
             AuthenticationToken token = AuthenticationUtils.createToken(session.getSessionId(), CasConstant.PROTOCOL,
                 CasConstant.SERVICE_TICKET, CasConstant.SERVICE_TICKET);
@@ -77,8 +80,8 @@ public class CasServiceImpl implements ICasService {
                 CasConstant.SERVICE_TICKET, CasConstant.TGT_TICKET);
             token.setRefTokenId(tgtToken.getTokenId());
 
-            tokenService.createToken(tgtToken);
-            tokenService.createToken(token);
+            tokenService.createCasToken(tgtToken);
+            tokenService.createCasToken(token);
 
             session.addToken(tgtToken);
             session.addToken(token);
@@ -110,9 +113,11 @@ public class CasServiceImpl implements ICasService {
             throw new AuthenticationException("参数 service 不可为空");
         }
 
-        AuthenticationToken token = tokenService.getTokenById(ticket);
+        AuthenticationToken token = tokenService.getCasToken(ticket);
         if (null == token) {
             throw new AuthenticationException("票据不存在或失效");
+        } else {
+            tokenService.deleteCasToken(ticket);
         }
         String sessionId = token.getSessionId();
         AuthenticateSession session = sessionService.getSessionById(sessionId, response);
@@ -147,7 +152,17 @@ public class CasServiceImpl implements ICasService {
 
         log.info("CAS service validate response [{}]", holder);
 
-        return holder.getContent();
+        if (HttpStatus.OK.value() == holder.getStatusCode()) {
+            return holder.getContent();
+        } else {
+            try {
+                return JacksonUtils.toMap(holder.getErrorContent());
+            } catch (JsonProcessingException e) {
+                log.error("解析响应出错 {}", holder.getErrorContent(), e);
+                return Collections.singletonMap("message", "内部异常");
+            }
+        }
+
     }
 
 }
