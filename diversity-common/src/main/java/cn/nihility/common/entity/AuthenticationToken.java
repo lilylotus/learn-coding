@@ -29,22 +29,17 @@ public class AuthenticationToken implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        AuthenticationToken that = (AuthenticationToken) o;
-        return sessionId.equals(that.sessionId) &&
-            tokenId.equals(that.tokenId) &&
-            protocol.equals(that.protocol) &&
-            type.equals(that.type);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AuthenticationToken token = (AuthenticationToken) o;
+        return Objects.equals(sessionId, token.sessionId) && Objects.equals(tokenId, token.tokenId)
+            && Objects.equals(refTokenId, token.refTokenId) && Objects.equals(protocol, token.protocol)
+            && Objects.equals(type, token.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sessionId, tokenId, protocol, type);
+        return Objects.hash(sessionId, tokenId, refTokenId, protocol, type);
     }
 
     /* ============================== getter/setter ============================== */
@@ -112,4 +107,5 @@ public class AuthenticationToken implements Serializable {
     public void setTtl(long ttl) {
         this.ttl = ttl;
     }
+
 }

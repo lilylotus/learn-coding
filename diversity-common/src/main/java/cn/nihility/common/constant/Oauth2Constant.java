@@ -76,5 +76,8 @@ public class Oauth2Constant {
 
     public static final String GRANT_REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
 
+    public static final long ACCESS_TOKEN_TTL = 3600L;
+
+    public static final long REFRESH_TOKEN_TTL = 7200L;
 
 }

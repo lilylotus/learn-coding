@@ -3,9 +3,11 @@ package cn.nihility.api.controller;
 import cn.nihility.api.annotation.ApiAuthenticationCheck;
 import cn.nihility.api.dto.CasResponse;
 import cn.nihility.api.dto.Oauth2Response;
+import cn.nihility.api.dto.OidcTokenDto;
 import cn.nihility.api.service.IAuthenticationService;
 import cn.nihility.api.service.ICasService;
 import cn.nihility.api.service.IOauth2Service;
+import cn.nihility.api.service.IOpenidService;
 import cn.nihility.common.constant.AuthConstant;
 import cn.nihility.common.pojo.UnifyResult;
 import cn.nihility.common.util.JwtUtils;
@@ -30,13 +32,16 @@ public class AuthenticationController {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     private final IOauth2Service oauth2Service;
+    private final IOpenidService openidService;
     private final IAuthenticationService authenticationService;
     private final ICasService casService;
 
     public AuthenticationController(IOauth2Service oauth2Service,
+                                    IOpenidService openidService,
                                     IAuthenticationService authenticationService,
                                     ICasService casService) {
         this.oauth2Service = oauth2Service;
+        this.openidService = openidService;
         this.authenticationService = authenticationService;
         this.casService = casService;
     }
@@ -73,6 +78,64 @@ public class AuthenticationController {
         logger.info("POST /auth/login redirect [{}]", redirect);
         return "redirect:" + redirect;
     }
+
+    /* ============================== openid https://openid.net/specs/openid-connect-core-1_0.html */
+
+    /*
+        The Authorization Code Flow goes through the following steps.
+            Client prepares an Authentication Request containing the desired request parameters.
+            Client sends the request to the Authorization Server.
+            Authorization Server Authenticates the End-User.
+            Authorization Server obtains End-User Consent/Authorization.
+            Authorization Server sends the End-User back to the Client with an Authorization Code.
+            Client requests a response using the Authorization Code at the Token Endpoint.
+            Client receives a response that contains an ID Token and Access Token in the response body.
+            Client validates the ID token and retrieves the End-User's Subject Identifier.
+    * */
+
+    /**
+    * GET /authorize?
+        response_type=code
+        &scope=openid%20profile%20email
+        &client_id=s6BhdRkqt3
+        &state=af0ifjsldkj
+        &redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb HTTP/1.1
+
+    * http://127.0.0.1:30010/auth/oidc/authorize?response_type=code&client_id=s6BhdRkqt3&scope=openid&state=xyz&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foidc%2Fcallback%3Fchinese%3D%E4%B8%AD%E6%96%87%26english%3DEnglish
+    * http://127.0.0.1:30010/auth/oidc/authorize?response_type=token&client_id=s6BhdRkqt3&scope=openid&state=xyz&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fwelcome%3Fchinese%3D%E4%B8%AD%E6%96%87%26english%3Denglish
+    */
+    @GetMapping("/auth/oidc/authorize")
+    public void oidcAuthorize(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String redirectUrl = openidService.authorize(request, response);
+        logger.info("OIDC /authorize redirect url [{}]", redirectUrl);
+        response.sendRedirect(redirectUrl);
+    }
+
+    /**
+     * POST /token HTTP/1.1
+     * Content-Type: application/x-www-form-urlencoded
+     *
+     * /token?client_id=yzx&grant_type=authorization_code&code=SplxlOBeZQQYbYS6WxSbIA&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foidc%2Fcallback%3Fchinese%3D%E4%B8%AD%E6%96%87%26english%3DEnglish
+     *
+     */
+    @PostMapping("/auth/oidc/token")
+    @ResponseBody
+    public OidcTokenDto oidcToken(HttpServletRequest request, HttpServletResponse response) {
+        return openidService.codeConvertToken(request, response);
+    }
+
+    @RequestMapping(value = "/auth/oidc/user-info", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public Map<String, Object> oidcUserInfo(HttpServletRequest request, HttpServletResponse response) {
+        return openidService.userInfo(request, response);
+    }
+
+    @RequestMapping(value = "/auth/oidc/callback", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public Map<String, Object> oidcRecDemo(HttpServletRequest request, HttpServletResponse response) {
+        return openidService.callback(request, response);
+    }
+
 
     /* ============================== OAuth2.0 https://datatracker.ietf.org/doc/html/rfc6749#section-4.1 */
 
@@ -131,10 +194,10 @@ public class AuthenticationController {
         return oauth2Service.userInfo(request, response);
     }
 
-    @RequestMapping(value = "/auth/oauth/rec/demo", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/auth/oauth/callback", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Map<String, Object> oauthRecDemo(HttpServletRequest request, HttpServletResponse response) {
-        return oauth2Service.rec(request, response);
+        return oauth2Service.callback(request, response);
     }
 
     /* ========== CAS https://apereo.github.io/cas/6.0.x/protocol/CAS-Protocol.html */

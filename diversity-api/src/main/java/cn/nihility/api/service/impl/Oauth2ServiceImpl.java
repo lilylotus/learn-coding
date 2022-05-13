@@ -142,9 +142,9 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         }
 
         AuthenticationToken accessToken = AuthenticationUtils.createToken(authSession.getSessionId(), Oauth2Constant.PROTOCOL,
-            Oauth2Constant.ACCESS_TOKEN, Oauth2Constant.ACCESS_TOKEN_PREFIX);
+            Oauth2Constant.ACCESS_TOKEN, Oauth2Constant.ACCESS_TOKEN_PREFIX, Oauth2Constant.ACCESS_TOKEN_TTL);
         AuthenticationToken refreshToken = AuthenticationUtils.createToken(authSession.getSessionId(), Oauth2Constant.PROTOCOL,
-            Oauth2Constant.REFRESH_TOKEN, Oauth2Constant.REFRESH_TOKEN_PREFIX);
+            Oauth2Constant.REFRESH_TOKEN, Oauth2Constant.REFRESH_TOKEN_PREFIX, Oauth2Constant.REFRESH_TOKEN_TTL);
         refreshToken.setRefTokenId(accessToken.getTokenId());
 
         authSession.addToken(accessToken);
@@ -214,7 +214,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
     }
 
     @Override
-    public Map<String, Object> rec(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, Object> callback(HttpServletRequest request, HttpServletResponse response) {
 
         String code = request.getParameter(Oauth2Constant.RESPONSE_TYPE_CODE_VALUE);
         if (StringUtils.isBlank(code)) {

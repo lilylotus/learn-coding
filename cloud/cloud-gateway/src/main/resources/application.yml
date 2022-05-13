@@ -15,6 +15,15 @@ spring:
           - Path=/eureka-client/**
           filters:
           - RewritePath=/eureka-client(?<segment>/?.*), $\{segment}
+        - id: gateway_custome
+          # http://127.0.0.1:51000/gateway-custome/hello?Authorization=Bearer%20xxxxxx
+          uri: http://127.0.0.1:51000
+          predicates:
+          - Path=/gateway-custome/**
+          - 'Authorization=Bearer '
+          filters:
+          - 'Authorization=Bearer '
+          - RedirectTo=302, http://127.0.0.1:51000/sso/success.html
 
 eureka:
   instance:
@@ -25,7 +34,7 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://127.0.0.1:8761/eureka/
+      defaultZone: http://127.0.0.1:8761/eureka
     # 需要 actuator 依赖支持，EurekaDiscoveryClientConfiguration
     healthcheck:
       enabled: false

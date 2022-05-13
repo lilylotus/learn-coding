@@ -26,7 +26,7 @@ public final class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private static final long DEFAULT_JWT_EXPIRE_DURATION = 120 * 60000L;
+    private static final long DEFAULT_JWT_EXPIRE_DURATION = 7200L;
     private static final Algorithm HMAC256;
 
     static {
@@ -53,9 +53,9 @@ public final class JwtUtils {
         //builder.withNotBefore(new Date());
         // 生成签名的时间
         builder.withIssuedAt(new Date());
-        final long expireSeconds = (duration <= 0L ? DEFAULT_JWT_EXPIRE_DURATION : Math.min(duration, DEFAULT_JWT_EXPIRE_DURATION));
+        final long expireSeconds = (duration <= 0L ? DEFAULT_JWT_EXPIRE_DURATION : duration);
         // token 有效时间
-        builder.withExpiresAt(new Date(System.currentTimeMillis() + expireSeconds));
+        builder.withExpiresAt(new Date(System.currentTimeMillis() + (expireSeconds * 1000L)));
 
         // payload
         if (null != claims && !claims.isEmpty()) {

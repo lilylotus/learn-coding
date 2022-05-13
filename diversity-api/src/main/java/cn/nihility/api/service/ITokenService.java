@@ -1,6 +1,8 @@
 package cn.nihility.api.service;
 
+import cn.nihility.common.constant.OidcConstant;
 import cn.nihility.common.entity.AuthenticationToken;
+import cn.nihility.common.util.JwtUtils;
 
 /**
  * @author nihility
@@ -14,6 +16,12 @@ public interface ITokenService {
 
     String CAS_PREFIX = "cas-token";
 
+    String JWT_PREFIX = "auth-jwt";
+
+    default String tokenKey(String prefix, String id) {
+        return prefix + ":" + id;
+    }
+
     default String casKey(String id) {
         return CAS_PREFIX + ":" + id;
     }
@@ -22,8 +30,12 @@ public interface ITokenService {
         return OAUTH_PREFIX + ":" + id;
     }
 
-    default String authKey(String id) {
-        return AUTH_PREFIX + ":" + id;
+    default String oidcKey(String id) {
+        return OidcConstant.OIDC_TOKEN_PREFIX + ":" + id;
+    }
+
+    default String jwtKey(String id) {
+        return JWT_PREFIX + ":" + id;
     }
 
     void createOauthToken(AuthenticationToken accessToken);
@@ -37,5 +49,13 @@ public interface ITokenService {
     AuthenticationToken getCasToken(String id);
 
     boolean deleteCasToken(String code);
+
+    void createOidcToken(AuthenticationToken token);
+
+    AuthenticationToken getOidcToken(String key);
+
+    boolean deleteOidcToken(String key);
+
+    void createJwt(String id, JwtUtils.JwtHolder jwt);
 
 }

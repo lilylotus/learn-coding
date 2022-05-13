@@ -1,8 +1,8 @@
 package cn.nihility.api.service.impl;
 
-import cn.nihility.api.properties.AuthenticationProperties;
 import cn.nihility.api.service.ITokenService;
 import cn.nihility.common.entity.AuthenticationToken;
+import cn.nihility.common.util.JwtUtils;
 import cn.nihility.plugin.redis.service.RedissonOperateService;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
@@ -18,17 +18,13 @@ import java.util.concurrent.TimeUnit;
 public class TokenServiceImpl implements ITokenService {
 
     private final RedissonOperateService redissonOperate;
-    private final AuthenticationProperties authenticationProperties;
 
-    public TokenServiceImpl(RedissonOperateService redissonOperate,
-                            AuthenticationProperties authenticationProperties) {
+    public TokenServiceImpl(RedissonOperateService redissonOperate) {
         this.redissonOperate = redissonOperate;
-        this.authenticationProperties = authenticationProperties;
     }
 
-    private void createToken(AuthenticationToken token, String tokenKey) {
-        token.setTtl(authenticationProperties.getInactiveInterval());
-        RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(tokenKey);
+    private void createToken(AuthenticationToken token, String key) {
+        RBucket<AuthenticationToken> bucket = redissonOperate.getBucket(key);
         bucket.set(token, token.getTtl(), TimeUnit.SECONDS);
     }
 
@@ -69,6 +65,29 @@ public class TokenServiceImpl implements ITokenService {
     @Override
     public boolean deleteOauthToken(String code) {
         return redissonOperate.getBucket(oauthKey(code)).delete();
+    }
+
+    /* ========== OIDC ========== */
+
+    @Override
+    public void createOidcToken(AuthenticationToken token) {
+        createToken(token, oidcKey(token.getTokenId()));
+    }
+
+    @Override
+    public AuthenticationToken getOidcToken(String key) {
+        return StringUtils.isBlank(key) ? null : getToken(oidcKey(key));
+    }
+
+    @Override
+    public boolean deleteOidcToken(String key) {
+        return redissonOperate.getBucket(oidcKey(key)).delete();
+    }
+
+    @Override
+    public void createJwt(String id, JwtUtils.JwtHolder jwt) {
+        RBucket<String> bucket = redissonOperate.getBucket(jwtKey(id));
+        bucket.set(jwt.getAccessToken(), jwt.getExpiresIn(), TimeUnit.SECONDS);
     }
 
 }

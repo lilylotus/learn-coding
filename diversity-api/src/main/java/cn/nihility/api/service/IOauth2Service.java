@@ -26,6 +26,6 @@ public interface IOauth2Service {
 
     Map<String, Object> userInfo(HttpServletRequest request, HttpServletResponse response);
 
-    Map<String, Object> rec(HttpServletRequest request, HttpServletResponse response);
+    Map<String, Object> callback(HttpServletRequest request, HttpServletResponse response);
 
 }
