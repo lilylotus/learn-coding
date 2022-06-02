@@ -7,6 +7,12 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 广播类型交换机， 不需要 route_key
+ *                       -- route --> queue1
+ * P --> fanout_exchange -- route --> queue2
+ *                       -- route --> queue3
+ */
 @Configuration(proxyBeanMethods = false)
 public class FanoutConfiguration {
 

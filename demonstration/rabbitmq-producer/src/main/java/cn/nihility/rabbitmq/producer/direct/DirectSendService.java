@@ -15,13 +15,16 @@ public class DirectSendService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private RabbitTemplate rabbitTemplate;
-    private RabbitTemplate rabbitTemplateJson;
+    private final RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplateJson;
+    private final RabbitTemplate rabbitTemplateJdbc;
 
     public DirectSendService(RabbitTemplate rabbitTemplate,
-                             RabbitTemplate rabbitTemplateJson) {
+                             RabbitTemplate rabbitTemplateJson,
+                             RabbitTemplate rabbitTemplateJdbc) {
         this.rabbitTemplate = rabbitTemplate;
         this.rabbitTemplateJson = rabbitTemplateJson;
+        this.rabbitTemplateJdbc = rabbitTemplateJdbc;
     }
 
     String randomUUID() {
@@ -82,6 +85,37 @@ public class DirectSendService {
             DirectConfiguration.DIRECT_EXCHANGE_BIND_DIRECT_BUSINESS_QUEUE_KEY,
             createData("sendLonelyExchangeWithQueue Send Data"),
             new CorrelationData(randomUUID()));
+    }
+
+    /* ---------- rabbitmq 保证消息不丢失 ---------- */
+
+    private Map<String, Object> createJdbcData(String id, String msg) {
+        Map<String, Object> data = new HashMap<>(8);
+        data.put("id", id);
+        data.put("message", msg);
+        data.put("createTime", DATE_TIME_FORMATTER.format(LocalDateTime.now()));
+        return data;
+    }
+
+    public void sendJdbcMessage(String exchange, String routeKey) {
+        String id = randomUUID();
+        Map<String, Object> data = createJdbcData(id, "发送 JdbcMessage 到 Rabbitmq [" + id + "]");
+
+        /*MessageProperties properties = MessagePropertiesBuilder.newInstance()
+            .setContentEncoding("UTF-8")
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("hello", "helloValue")
+            .setCorrelationId(id)
+            .build();
+
+        Message message = MessageBuilder.withBody(dataString.getBytes(StandardCharsets.UTF_8))
+            .andProperties(properties)
+            .build();
+
+        CorrelationData correlationData = new CorrelationData(id);
+        correlationData.setReturnedMessage(message);*/
+
+        rabbitTemplateJdbc.convertAndSend(exchange, routeKey, data, new CorrelationData(id));
     }
 
 }

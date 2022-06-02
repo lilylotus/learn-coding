@@ -2,10 +2,18 @@ server:
   port: 30020
 spring:
   rabbitmq:
-    host: 10.0.41.80
+    host: 127.0.0.1
     port: 5672
     username: rabbitmq
     password: rabbitmq
+    # 发送者开启 confirm 确认机制
     publisherConfirmType: CORRELATED
-    # 确认消息已发送到队列(Queue)
+    # 确认消息已发送到队列 (Queue)
     publisherReturns: true
+#    listener:
+#      simple:
+#        # 设置消费端手动 ack
+#        acknowledge-mode: manual
+#        retry:
+#          # 是否支持重试
+#          enabled: true

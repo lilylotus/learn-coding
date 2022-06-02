@@ -1,5 +1,6 @@
 
 dependencies {
     implementation(project(":plugins:plugin-rabbitmq"))
+    implementation(project(":plugins:plugin-log4j2"))
     implementation("org.springframework.boot:spring-boot-starter-web")
 }

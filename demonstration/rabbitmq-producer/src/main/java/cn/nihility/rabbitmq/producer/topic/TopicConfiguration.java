@@ -7,6 +7,13 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 订阅主题类型交换机
+ *
+ *                       -- route(*.key.*) --> queue1
+ * P --> topic_exchange  -- route(*.*.key) --> queue2
+ *                       -- route(key.#) --> queue3
+ */
 @Configuration(proxyBeanMethods = false)
 public class TopicConfiguration {
 

@@ -2,16 +2,16 @@ server:
   port: 30030
 spring:
   rabbitmq:
-    host: 10.0.41.80
+    host: 127.0.0.1
     port: 5672
     username: rabbitmq
     password: rabbitmq
     publisherConfirmType: CORRELATED
     # 确认消息已发送到队列(Queue)
     publisherReturns: true
-#    listener:
-#      type: SIMPLE
-#      simple:
-#        # 消费的确认模式为手工确认
-#        acknowledgeMode: MANUAL
-#        defaultRequeueRejected: false
+    listener:
+      type: SIMPLE
+      simple:
+        # 消费的确认模式为手工确认
+        acknowledgeMode: MANUAL
+        defaultRequeueRejected: false

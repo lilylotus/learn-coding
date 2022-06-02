@@ -1,8 +1,10 @@
 package cn.nihility.common.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -14,6 +16,7 @@ public final class NetworkUtils {
 
     public static final String LOOPBACK_ADDRESS = "127.0.0.1";
     public static final String LOCAL_HOST_NAME = "localhost";
+    public static final String UNKNOWN_IP = "unknown";
 
     private NetworkUtils() {
     }
@@ -73,6 +76,44 @@ public final class NetworkUtils {
             }
         }
         return hostName;
+    }
+
+    public static String obtainRequestIp(HttpServletRequest request) {
+
+        // X-Forwarded-For：Squid 服务代理
+        String ip = request.getHeader("X-Forwarded-For");
+        // X-Real-IP：nginx 服务代理
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        // HTTP_CLIENT_IP：有些代理服务器
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // Proxy-Client-IP：apache 服务代理
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        // WL-Proxy-Client-IP：weblogic 服务代理
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        // 如果是多级代理，那么取第一个 ip 为客户 ip
+        if (StringUtils.isNoneBlank(ip) && ip.contains(",")) {
+            ip = ip.substring(ip.lastIndexOf(",") + 1).trim();
+        }
+        // 还是不能获取到，最后再通过 request.getRemoteAddr(); 获取
+        if (StringUtils.isEmpty(ip) || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+
+        return ip;
     }
 
 }

@@ -117,4 +117,53 @@ public class DirectConfiguration {
         return new DirectExchange(DIRECT_LONELY_EXCHANGE);
     }
 
+    /* ------ business rabbitmq -------- */
+
+    public static final String JDBC_DIRECT_EXCHANGE = "JdbcDirectExchange";
+    public static final String JDBC_DIRECT_QUEUE = "JdbcDirectQueue";
+    public static final String JDBC_DIRECT_ROUTE_KEY = "JdbcDirectRouteKey";
+
+    public static final String JDBC_DEAD_LETTER_DIRECT_EXCHANGE = "JdbcDeadLetterDirectExchange";
+    public static final String JDBC_DEAD_LETTER_DIRECT_QUEUE = "JdbcDeadLetterDirectQueue";
+    public static final String JDBC_DEAD_LETTER_DIRECT_ROUTE_KEY = "JdbcDeadLetterDirectRouteKey";
+
+    @Bean
+    public DirectExchange jdbcDirectExchange() {
+        return new DirectExchange(JDBC_DIRECT_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue jdbcDirectQueue() {
+        Map<String, Object> args = new HashMap<>(4);
+        // x-dead-letter-exchange 这里声明当前队列绑定的死信交换机
+        args.put("x-dead-letter-exchange", JDBC_DEAD_LETTER_DIRECT_EXCHANGE);
+        // x-dead-letter-routing-key 这里声明当前队列的死信路由 key
+        args.put("x-dead-letter-routing-key", JDBC_DEAD_LETTER_DIRECT_ROUTE_KEY);
+        return new Queue(JDBC_DIRECT_QUEUE, true, false, false, args);
+    }
+
+    @Bean
+    public Binding jdbcQueueBingExchange(Queue jdbcDirectQueue, DirectExchange jdbcDirectExchange) {
+        return BindingBuilder.bind(jdbcDirectQueue)
+            .to(jdbcDirectExchange)
+            .with(JDBC_DIRECT_ROUTE_KEY);
+    }
+
+    @Bean
+    public DirectExchange jdbcDeadLetterDirectExchange() {
+        return new DirectExchange(JDBC_DEAD_LETTER_DIRECT_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue jdbcDeadLetterDirectQueue() {
+        return new Queue(JDBC_DEAD_LETTER_DIRECT_QUEUE, true, false, false);
+    }
+
+    @Bean
+    public Binding jdbcDeadLetterQueueBingExchange(Queue jdbcDeadLetterDirectQueue, DirectExchange jdbcDeadLetterDirectExchange) {
+        return BindingBuilder.bind(jdbcDeadLetterDirectQueue)
+            .to(jdbcDeadLetterDirectExchange)
+            .with(JDBC_DEAD_LETTER_DIRECT_ROUTE_KEY);
+    }
+
 }
