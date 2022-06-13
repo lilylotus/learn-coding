@@ -17,7 +17,7 @@ public final class IdleConnectionReaper extends Thread {
 
     private static final int REAP_INTERVAL_MILLISECONDS = 5000;
     private static final ArrayList<HttpClientConnectionManager> CONNECTION_MANAGERS = new ArrayList<>();
-    private static long idleConnectionTime = 60000L;
+    private static volatile long idleConnectionTime = HttpClientUtils.DEFAULT_IDLE_CONNECTION_TIME;
 
     private static IdleConnectionReaper instance;
 
@@ -31,6 +31,8 @@ public final class IdleConnectionReaper extends Thread {
     public static synchronized void registerConnectionManager(HttpClientConnectionManager connectionManager) {
         if (instance == null) {
             instance = new IdleConnectionReaper();
+            // 以守护进程方式运行
+            instance.setDaemon(true);
             instance.start();
         }
         if (null != connectionManager) {
@@ -83,7 +85,6 @@ public final class IdleConnectionReaper extends Thread {
     public static synchronized void shutdown() {
         if (instance != null) {
             instance.markShuttingDown();
-            instance.interrupt();
             CONNECTION_MANAGERS.clear();
             instance = null;
         }

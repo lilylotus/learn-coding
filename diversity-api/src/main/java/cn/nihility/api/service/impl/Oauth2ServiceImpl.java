@@ -236,7 +236,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         params.put(Oauth2Constant.GRANT_TYPE, Oauth2Constant.GRANT_AUTHORIZATION_CODE_TYPE);
         params.put("code", code);
 
-        Oauth2Response oauth2Response = HttpClientUtils.executeFormRequest(url, RequestMethodEnum.POST, params, Oauth2Response.class);
+        Oauth2Response oauth2Response = HttpClientUtils.executeForm(url, RequestMethodEnum.POST, params, Oauth2Response.class);
         log.info("oauth2 获取 access_token 响应数据 [{}]", JacksonUtils.toJsonString(oauth2Response));
         String accessToken = null;
         if (oauth2Response == null) {

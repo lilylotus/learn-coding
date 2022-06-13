@@ -3,6 +3,7 @@ package cn.nihility.common.util;
 import cn.nihility.common.constant.RequestMethodEnum;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -193,6 +194,42 @@ class HttpClientTest {
         }
         Assertions.assertNotNull(result);
         System.out.println(result);
+    }
+
+    @Test
+    void testHttpGetRequest() {
+        String value = "kv";
+        String url = HttpRequestUtils.addUrlParam("http://127.0.0.1:30040/welcome/get", "key", value);
+        HttpGet get = new HttpGet(url);
+        HttpGet get2 = new HttpGet(url);
+
+        HashMap result = (HashMap) HttpClientUtils.executeHttpRequest(get, Map.class);
+        Assertions.assertEquals(value, ((Map) result.get("data")).get("key"));
+
+        HashMap result2 = (HashMap) HttpClientUtils.executeHttpRequest(get2, Map.class);
+        Assertions.assertEquals(value, ((Map) result2.get("data")).get("key"));
+    }
+
+    @Test
+    void testHttpGetRequestWithCookie() {
+
+        HttpClientContext httpContext = HttpClientUtils.createHttpClientContext();
+        CookieStore cookieStore = httpContext.getCookieStore();
+
+        String value = "kv";
+        String url = HttpRequestUtils.addUrlParam("http://127.0.0.1:30040/welcome/get", "key", value);
+        HttpGet get = new HttpGet(url);
+        HttpGet get2 = new HttpGet(url);
+
+        HashMap result = (HashMap) HttpClientUtils.executeHttpRequest(get, Map.class, httpContext);
+        Assertions.assertEquals(value, ((Map) result.get("data")).get("key"));
+        System.out.println("cookies1:");
+        cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
+
+        HashMap result2 = (HashMap) HttpClientUtils.executeHttpRequest(get2, Map.class, httpContext);
+        Assertions.assertEquals(value, ((Map) result2.get("data")).get("key"));
+        System.out.println("cookies2:");
+        cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
     }
 
 }

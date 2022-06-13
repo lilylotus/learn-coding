@@ -209,7 +209,7 @@ public class OAuth2Controller {
         params.put("code", code);
 
         @SuppressWarnings("unchecked")
-        Map<String, String> accessTokenMap = HttpClientUtils.executeFormRequest(url, RequestMethodEnum.POST, params, Map.class);
+        Map<String, String> accessTokenMap = HttpClientUtils.executeForm(url, RequestMethodEnum.POST, params, Map.class);
         log.info("获取 access_token 响应数据 [{}]", accessTokenMap);
         String accessToken = null;
         if (accessTokenMap == null || accessTokenMap.isEmpty()) {

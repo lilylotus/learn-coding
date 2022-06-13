@@ -147,7 +147,7 @@ public class CasServiceImpl implements ICasService {
             HttpRequestUtils.urlEncode(domain) + "&ticket=" + ticket;
         log.info("CAS receive domain [{}] redirectUrl [{}]", domain, redirectUrl);
 
-        ResponseHolder<Map> holder = HttpClientUtils.executeFormRequestWithResponse(redirectUrl,
+        ResponseHolder<Map> holder = HttpClientUtils.executeFormWithResponse(redirectUrl,
             RequestMethodEnum.GET, null, Map.class);
 
         log.info("CAS service validate response [{}]", holder);

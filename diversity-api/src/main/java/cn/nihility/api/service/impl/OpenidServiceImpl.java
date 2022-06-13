@@ -258,7 +258,7 @@ public class OpenidServiceImpl implements IOpenidService {
         params.put(OidcConstant.TOKEN_REQUEST_GRANT_TYPE_FIELD, OidcConstant.TOKEN_REQUEST_GRANT_CODE_TYPE_VALUE);
         params.put(OidcConstant.TOKEN_REQUEST_CODE_FIELD, code);
 
-        OidcTokenDto oidcToken = HttpClientUtils.executeFormRequest(url, RequestMethodEnum.POST, params, OidcTokenDto.class);
+        OidcTokenDto oidcToken = HttpClientUtils.executeForm(url, RequestMethodEnum.POST, params, OidcTokenDto.class);
         logger.info("oidc 获取 access_token 响应数据 [{}]", JacksonUtils.toJsonString(oidcToken));
         String accessToken = null;
         if (oidcToken == null) {
