@@ -57,6 +57,9 @@ public class HttpClientUtils {
      */
     public static final String HTTPS_SCHEME = "https";
 
+    /**
+     * 连接建立时间，三次握手完成时间
+     */
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
     /**
      * 等待数据的时间或者两个包之间的间隔时间
@@ -134,7 +137,7 @@ public class HttpClientUtils {
     }
 
     public static HttpClientConnectionManager createHttpClientConnectionManager() {
-        return createHttpClientConnectionManager(true);
+        return createHttpClientConnectionManager(false);
     }
 
     /* ============================== private, inner invoke ============================== */
@@ -194,6 +197,9 @@ public class HttpClientUtils {
         final CustomHttpClientBuilder builder = new CustomHttpClientBuilder();
         builder.closeRemoveConnectionManager(connectionManager);
 
+        // ConnectTimeout：连接建立时间，三次握手完成时间
+        // SocketTimeout：指的是等待数据的时间，或者两次数据包之间的时间间隔。
+        // 值表示的是 “a”、”b”、”c” 这三个报文，每两个相邻的报文的间隔时间不能超过 SocketTimeout
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setSocketTimeout(DEFAULT_SOCKET_TIMEOUT)
             .setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT)

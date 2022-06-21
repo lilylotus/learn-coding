@@ -5,97 +5,101 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A daemon thread used to periodically check connection pools for idle connections.
  */
-public final class IdleConnectionReaper extends Thread {
+public final class IdleConnectionReaper {
 
     private static final Logger log = LoggerFactory.getLogger(IdleConnectionReaper.class);
 
     private static final int REAP_INTERVAL_MILLISECONDS = 5000;
-    private static final ArrayList<HttpClientConnectionManager> CONNECTION_MANAGERS = new ArrayList<>();
-    private static volatile long idleConnectionTime = HttpClientUtils.DEFAULT_IDLE_CONNECTION_TIME;
+    private static final Map<String, HttpClientConnectionManager> CONNECTION_MANAGER = new HashMap<>(8);
 
-    private static IdleConnectionReaper instance;
+    private static ScheduledExecutorService idleReaperService =
+        new ScheduledThreadPoolExecutor(1, new IdleReaperThreadFactory());
 
-    private volatile boolean shuttingDown;
+    /**
+     * true - not running, false - running
+     */
+    private static AtomicBoolean scheduledTaskStatus = new AtomicBoolean(true);
 
     private IdleConnectionReaper() {
-        super("idle_connection_reaper");
-        setDaemon(true);
     }
 
-    public static synchronized void registerConnectionManager(HttpClientConnectionManager connectionManager) {
-        if (instance == null) {
-            instance = new IdleConnectionReaper();
-            // 以守护进程方式运行
-            instance.setDaemon(true);
-            instance.start();
-        }
-        if (null != connectionManager) {
-            CONNECTION_MANAGERS.add(connectionManager);
+    public static synchronized void registerConnectionManager(HttpClientConnectionManager cm) {
+        if (null != cm) {
+            CONNECTION_MANAGER.put(Integer.toString(cm.hashCode()), cm);
+            if (scheduledTaskStatus.get()) {
+                if (idleReaperService.isShutdown()) {
+                    idleReaperService = new ScheduledThreadPoolExecutor(1, new IdleReaperThreadFactory());
+                }
+                idleReaperService.scheduleWithFixedDelay(() -> {
+
+                    final List<HttpClientConnectionManager> copy = new ArrayList<>(CONNECTION_MANAGER.values());
+                    for (HttpClientConnectionManager ccm : copy) {
+                        try {
+                            ccm.closeExpiredConnections();
+                            ccm.closeIdleConnections(HttpClientUtils.DEFAULT_IDLE_CONNECTION_TIME, TimeUnit.MILLISECONDS);
+                        } catch (Exception ex) {
+                            log.error("Unable to close idle connections", ex);
+                        }
+                    }
+
+                }, REAP_INTERVAL_MILLISECONDS, REAP_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+                scheduledTaskStatus.compareAndSet(true, false);
+            }
         }
     }
 
-    public static synchronized void removeConnectionManager(HttpClientConnectionManager connectionManager) {
-        if (null != connectionManager) {
-            CONNECTION_MANAGERS.remove(connectionManager);
+    public static synchronized void removeConnectionManager(HttpClientConnectionManager cm) {
+        if (null != cm) {
+            CONNECTION_MANAGER.remove(Integer.toString(cm.hashCode()));
         }
-        if (CONNECTION_MANAGERS.isEmpty()) {
+        if (CONNECTION_MANAGER.isEmpty()) {
             shutdown();
         }
     }
 
-    private void markShuttingDown() {
-        shuttingDown = true;
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            if (shuttingDown) {
-                log.info("Shutting down reaper thread.");
-                break;
-            }
-
-            try {
-                Thread.sleep(REAP_INTERVAL_MILLISECONDS);
-            } catch (InterruptedException ex) {
-                log.warn("中断异常", ex);
-                Thread.currentThread().interrupt();
-            }
-
-            synchronized (IdleConnectionReaper.class) {
-                final List<HttpClientConnectionManager> copy = new ArrayList<>(CONNECTION_MANAGERS);
-                for (HttpClientConnectionManager cm : copy) {
-                    try {
-                        cm.closeExpiredConnections();
-                        cm.closeIdleConnections(idleConnectionTime, TimeUnit.MILLISECONDS);
-                    } catch (Exception ex) {
-                        log.warn("Unable to close idle connections", ex);
-                    }
-                }
-            }
-        }
-    }
-
     public static synchronized void shutdown() {
-        if (instance != null) {
-            instance.markShuttingDown();
-            CONNECTION_MANAGERS.clear();
-            instance = null;
-        }
+        CONNECTION_MANAGER.clear();
+        idleReaperService.shutdown();
+        scheduledTaskStatus.compareAndSet(false, true);
+        log.info("IdleConnectionReaper Shutdown");
     }
 
     public static synchronized int size() {
-        return CONNECTION_MANAGERS.size();
+        return CONNECTION_MANAGER.size();
     }
 
-    public static synchronized void setIdleConnectionTime(long idleTime) {
-        idleConnectionTime = idleTime;
+    static class IdleReaperThreadFactory implements ThreadFactory {
+
+        private static final AtomicInteger IDX = new AtomicInteger(1);
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        public IdleReaperThreadFactory() {
+            namePrefix = "IdleReaper-" + IDX.getAndIncrement() + "-";
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+            t.setDaemon(true);
+            if (t.getPriority() != Thread.NORM_PRIORITY) {
+                t.setPriority(Thread.NORM_PRIORITY);
+            }
+            return t;
+        }
     }
 
 }
