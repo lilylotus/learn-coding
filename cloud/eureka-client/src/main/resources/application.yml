@@ -9,8 +9,13 @@ eureka:
   instance:
     hostname: localhost
     preferIpAddress: false
+    # 心跳间隔
+    leaseRenewalIntervalInSeconds: 5
+    # 多长时间没收到心跳后可以移除服务实例的时间
+    leaseExpirationDurationInSeconds: 10
   client:
-    enabled: true
+    # 从 eureka server 拉取注册信息的时间间隔（30秒）
+    registry-fetch-interval-seconds: 5
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
@@ -18,6 +23,9 @@ eureka:
     # 需要 actuator 依赖支持，EurekaDiscoveryClientConfiguration
     healthcheck:
       enabled: true
+# ribbon缓存时间
+ribbon:
+  ServerListRefreshInterval: 2000
 
 management:
   endpoints:
