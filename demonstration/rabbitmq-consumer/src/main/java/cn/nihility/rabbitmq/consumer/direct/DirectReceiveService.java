@@ -146,4 +146,26 @@ public class DirectReceiveService {
         }
     }
 
+    @RabbitListener(queues = {DelayedConfiguration.DELAYED_QUEUE})
+    public void delayedDirectQueueReceiver(Map<String, Object> dataMap, Message message, Channel channel) {
+
+        final long deliveryTag = message.getMessageProperties().getDeliveryTag();
+        final Boolean redelivered = message.getMessageProperties().getRedelivered();
+        logger.info("收到 [{}] 消息 deliveryTag [{}], redelivered [{}] : [{}]",
+            DelayedConfiguration.DELAYED_QUEUE, deliveryTag, redelivered, dataMap);
+
+        try {
+            // 确认处理了该消息
+            channel.basicAck(deliveryTag, false);
+        } catch (IOException e) {
+            logger.error("确认收到 [{}] 队列消息异常", DelayedConfiguration.DELAYED_QUEUE, e);
+        }
+
+        // 1. 当消费失败后将此消息存到 Redis，记录消费次数，如果消费了三次还是失败，就丢弃掉消息，记录日志落库保存
+        // 2. 直接填 false ，不重回队列，记录日志、发送邮件等待开发手动处理
+        // 3. 不启用手动 ack ，使用 SpringBoot 提供的消息重试
+        // 注意：一定要手动 throw 一个异常 （RuntimeException），因为 SpringBoot 触发重试是根据方法中发生未捕捉的异常来决定的。
+        // 这个重试是 SpringBoot 提供的，重新执行消费者方法，而不是让 RabbitMQ 重新推送消息。
+
+    }
 }

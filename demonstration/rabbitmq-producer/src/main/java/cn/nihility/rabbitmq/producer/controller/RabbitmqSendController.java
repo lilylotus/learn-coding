@@ -5,7 +5,9 @@ import cn.nihility.rabbitmq.producer.direct.DirectSendService;
 import cn.nihility.rabbitmq.producer.fanout.FanoutSendService;
 import cn.nihility.rabbitmq.producer.topic.TopicSendService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -91,6 +93,12 @@ public class RabbitmqSendController {
         directSendService.sendJdbcMessage(DirectConfiguration.JDBC_DIRECT_EXCHANGE,
             "WrongRouteKey");
         return ResponseEntity.ok("directJdbcRoute");
+    }
+
+    @GetMapping("/direct/delay")
+    public ResponseEntity<Object> delay(@RequestParam("delay") Integer delay) {
+        directSendService.sendDelayedMessage(delay);
+        return ResponseEntity.ok("sendDelayedMessage");
     }
 
 }

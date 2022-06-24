@@ -142,7 +142,10 @@ public class PluginRabbitmqConfiguration {
 
         @Override
         public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
-            logger.info("Rabbitmq 的 broker 交换机向 Queue 投递消息失败，响应 message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
+            // 请注意!如果使用了延迟队列插件，那么一定会调用该 callback 方法
+            // 因为数据并没有提交上去，而是提交在交换器中，过期时间到了才提交上去
+            // 并非是 bug！可以用 if 进行判断交换机名称来捕捉该报错
+            logger.error("Rabbitmq 的 broker 交换机向 Queue 投递消息失败，响应 message [{}], replyCode [{}], replyText [{}], exchange [{}], routingKey [{}]",
                 message, replyCode, replyText, exchange, routingKey);
         }
     }

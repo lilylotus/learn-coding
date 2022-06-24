@@ -1,5 +1,12 @@
 package cn.nihility.rabbitmq.producer.direct;
 
+import cn.nihility.rabbitmq.producer.delay.DelayedConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +21,7 @@ import java.util.UUID;
 public class DirectSendService {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final Logger logger = LoggerFactory.getLogger(DirectSendService.class);
 
     private final RabbitTemplate rabbitTemplate;
     private final RabbitTemplate rabbitTemplateJson;
@@ -116,6 +124,33 @@ public class DirectSendService {
         correlationData.setReturnedMessage(message);*/
 
         rabbitTemplateJdbc.convertAndSend(exchange, routeKey, data, new CorrelationData(id));
+    }
+
+    /* ------ delayed ------*/
+
+    public void sendDelayedMessage(final int delaySeconds) {
+        String id = UUID.randomUUID().toString().replace("-", "");
+        String message = "test message, hello! delayed [" + delaySeconds + "] [" + id + "]";
+        String createTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        Map<String, Object> data = new HashMap<>(4);
+        data.put("messageId", id);
+        data.put("messageData", message);
+        data.put("createTime", createTime);
+        data.put("delaySeconds", delaySeconds);
+
+        rabbitTemplate.convertAndSend(DelayedConfiguration.DELAYED_EXCHANGE,
+            DelayedConfiguration.DELAYED_ROUTE_KEY, data, new MessagePostProcessor() {
+                @Override
+                public Message postProcessMessage(Message message) throws AmqpException {
+                    MessageProperties properties = message.getMessageProperties();
+                    //设置消息持久化
+                    //properties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+                    // 设置延时
+                    properties.setDelay(delaySeconds * 1000);
+                    //properties.setHeader("x-delay", delaySeconds);
+                    return message;
+                }
+            }, new CorrelationData(id));
     }
 
 }
