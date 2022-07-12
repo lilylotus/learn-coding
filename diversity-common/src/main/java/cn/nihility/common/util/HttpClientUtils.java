@@ -6,7 +6,6 @@ import cn.nihility.common.http.CustomHttpClientBuilder;
 import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
@@ -23,7 +22,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +35,16 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class HttpClientUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
+
+    private static final ThreadLocal<HttpClientContext> CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
 
     private HttpClientUtils() {
     }
@@ -240,18 +242,10 @@ public class HttpClientUtils {
             .build();
     }
 
-    public static HttpClientContext createHttpClientContext(CookieStore cookieStore) {
-        if (cookieStore == null) {
-            cookieStore = new BasicCookieStore();
-        }
-        HttpClientContext httpContext = HttpClientContext.create();
-        httpContext.setRequestConfig(createRequestConfig());
-        httpContext.setCookieStore(cookieStore);
-        return httpContext;
-    }
-
     public static HttpClientContext createHttpClientContext() {
-        return createHttpClientContext(null);
+        HttpClientContext httpContext = HttpClientContext.create();
+        httpContext.setCookieStore(new BasicCookieStore());
+        return httpContext;
     }
 
     public static HttpUriRequest buildHttpRequest(String url, RequestMethodEnum method) {
@@ -299,14 +293,22 @@ public class HttpClientUtils {
 
     /* ------------------------------ 发送 http 请求 ------------------------------ */
 
+    public static void setContextThreadLocal(HttpClientContext ctx) {
+        CONTEXT_THREAD_LOCAL.set(ctx);
+    }
+
+    public static HttpClientContext getHttpClientContextLocal() {
+        return CONTEXT_THREAD_LOCAL.get();
+    }
+
     @SuppressWarnings("unchecked")
     public static <R> ResponseHolder<R> executeRequestWithResponse(final CloseableHttpClient httpClient,
                                                                    final HttpUriRequest request,
-                                                                   final HttpContext httpContext,
                                                                    final Class<R> rt) {
-        ResponseHolder<R> result = new ResponseHolder<>();
+        final ResponseHolder<R> result = new ResponseHolder<>();
+        HttpClientContext ctx = getHttpClientContextLocal();
         // 注意：HttpClient 池化管理，不需要关闭
-        try (CloseableHttpResponse httpResponse = httpClient.execute(request, httpContext)) {
+        try (CloseableHttpResponse httpResponse = httpClient.execute(request, ctx)) {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             String respStringEntity = EntityUtils.toString(httpResponse.getEntity());
             if (logger.isDebugEnabled()) {
@@ -325,30 +327,24 @@ public class HttpClientUtils {
             } else {
                 result.setErrorContent(respStringEntity);
             }
+            if (null != ctx) {
+                Optional.ofNullable(ctx.getCookieStore().getCookies())
+                    .orElse(Collections.emptyList())
+                    .forEach(ck -> result.addCookie(ck.getName(), ck.getValue()));
+            }
         } catch (IOException e) {
             logger.error("请求 [{}] 异常", request.getURI());
             throw new HttpClientException("请求 [" + request.getURI() + "] 异常", e);
+        } finally {
+            CONTEXT_THREAD_LOCAL.remove();
         }
         return result;
     }
 
     public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
                                            final HttpUriRequest request,
-                                           final HttpContext httpContext,
                                            final Class<R> rt) {
-        return executeRequestWithResponse(httpClient, request, httpContext, rt).getContent();
-    }
-
-    public static <R> ResponseHolder<R> executeRequestWithResponse(final CloseableHttpClient httpClient,
-                                                                   final HttpUriRequest request,
-                                                                   final Class<R> rt) {
-        return executeRequestWithResponse(httpClient, request, null, rt);
-    }
-
-    public static <R> R executeHttpRequest(final CloseableHttpClient httpClient,
-                                           final HttpUriRequest request,
-                                           final Class<R> rt) {
-        return executeRequestWithResponse(httpClient, request, null, rt).getContent();
+        return executeRequestWithResponse(httpClient, request, rt).getContent();
     }
 
     public static <R> ResponseHolder<R> executeRequestWithResponse(HttpUriRequest request, Class<R> rt) {
@@ -356,17 +352,8 @@ public class HttpClientUtils {
         return executeRequestWithResponse(defaultHttpClient(), request, rt);
     }
 
-    public static <R> ResponseHolder<R> executeRequestWithResponse(HttpUriRequest request, Class<R> rt, HttpContext httpContext) {
-        // 注意：HttpClient 池化管理，不需要关闭
-        return executeRequestWithResponse(defaultHttpClient(), request, httpContext, rt);
-    }
-
     public static <R> R executeHttpRequest(HttpUriRequest request, Class<R> rt) {
         return executeRequestWithResponse(request, rt).getContent();
-    }
-
-    public static <R> R executeHttpRequest(HttpUriRequest request, Class<R> rt, HttpContext httpContext) {
-        return executeRequestWithResponse(request, rt, httpContext).getContent();
     }
 
     /**

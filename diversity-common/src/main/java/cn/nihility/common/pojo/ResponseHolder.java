@@ -1,8 +1,10 @@
 package cn.nihility.common.pojo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,9 +26,22 @@ public class ResponseHolder<T> {
      */
     private Map<String, String> headers;
     /**
+     * http 请求响应的 cookies 参数
+     */
+    private Map<String, String> cookies;
+    /**
      * 请求异常内容
      */
     private String errorContent;
+
+    public void addCookie(String key, String value) {
+        if (cookies == null) {
+            cookies = new HashMap<>(8);
+        }
+        if (StringUtils.isNotBlank(value)) {
+            cookies.put(key, value);
+        }
+    }
 
     public boolean ok() {
         return HttpStatus.SC_OK == statusCode;
@@ -64,12 +79,21 @@ public class ResponseHolder<T> {
         this.errorContent = errorContent;
     }
 
+    public Map<String, String> getCookies() {
+        return cookies == null ? Collections.emptyMap() : cookies;
+    }
+
+    public void setCookies(Map<String, String> cookies) {
+        this.cookies = cookies;
+    }
+
     @Override
     public String toString() {
         return "ResponseHolder{" +
             "content=" + content +
             ", statusCode=" + statusCode +
             ", headers=" + headers +
+            ", cookies=" + cookies +
             ", errorContent=" + errorContent +
             '}';
     }

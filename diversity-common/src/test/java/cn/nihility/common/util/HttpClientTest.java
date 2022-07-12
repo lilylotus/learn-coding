@@ -1,6 +1,7 @@
 package cn.nihility.common.util;
 
 import cn.nihility.common.constant.RequestMethodEnum;
+import cn.nihility.common.pojo.ResponseHolder;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
@@ -31,6 +32,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HttpClientTest {
+
+    @Test
+    void testHttpsGet() {
+//        MDC.put(Constant.TRACE_ID, UuidUtils.jdkUUID());
+
+        HttpGet request = new HttpGet("https://blog.csdn.net/lxj_1993/article/details/109451567");
+        /*String result = HttpClientUtils.executeHttpRequest(request, String.class);
+        System.out.println(result);*/
+
+        HttpClientContext ctx = HttpClientUtils.createHttpClientContext();
+
+        ResponseHolder<String> result1 = HttpClientUtils.executeRequestWithResponse(request, String.class);
+        System.out.println(result1);
+        result1.getCookies().forEach((k, v) -> System.out.println(k + "==" + v));
+
+        HttpClientUtils.setContextThreadLocal(ctx);
+        String resultString = HttpClientUtils.executeHttpRequest(request, String.class);
+        System.out.println("=============");
+        System.out.println(resultString);
+
+        ctx.getCookieStore().getCookies().forEach(ck -> System.out.println(ck.getName() + "=" + ck.getValue()));
+    }
 
     @Test
     void testNormalHttpClientRequestGet() throws IOException {
@@ -114,7 +137,7 @@ class HttpClientTest {
 
         try (CloseableHttpClient httpClient = HttpClientUtils.createHttpClient(false)) {
             @SuppressWarnings("unchecked")
-            Map<String, String> result = HttpClientUtils.executeHttpRequest(httpClient, request, httpContext, Map.class);
+            Map<String, String> result = HttpClientUtils.executeHttpRequest(httpClient, request, Map.class);
             Assertions.assertNotNull(result);
             System.out.println(result);
         } catch (IOException e) {
@@ -221,12 +244,12 @@ class HttpClientTest {
         HttpGet get = new HttpGet(url);
         HttpGet get2 = new HttpGet(url);
 
-        HashMap result = (HashMap) HttpClientUtils.executeHttpRequest(get, Map.class, httpContext);
+        HashMap result = (HashMap) HttpClientUtils.executeHttpRequest(get, Map.class);
         Assertions.assertEquals(value, ((Map) result.get("data")).get("key"));
         System.out.println("cookies1:");
         cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
 
-        HashMap result2 = (HashMap) HttpClientUtils.executeHttpRequest(get2, Map.class, httpContext);
+        HashMap result2 = (HashMap) HttpClientUtils.executeHttpRequest(get2, Map.class);
         Assertions.assertEquals(value, ((Map) result2.get("data")).get("key"));
         System.out.println("cookies2:");
         cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));

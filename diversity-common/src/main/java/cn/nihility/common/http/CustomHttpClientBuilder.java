@@ -60,7 +60,6 @@ public class CustomHttpClientBuilder extends HttpClientBuilder {
             String traceId = MDC.get(Constant.TRACE_ID);
             if (StringUtils.isBlank(traceId)) {
                 traceId = UuidUtils.jdkUUID();
-                MDC.put(Constant.TRACE_ID, traceId);
                 context.setAttribute(Constant.TRACE_ID, traceId);
             }
         }
@@ -71,9 +70,8 @@ public class CustomHttpClientBuilder extends HttpClientBuilder {
 
         @Override
         public void process(HttpResponse response, HttpContext context) {
-            String traceId = Objects.toString(context.getAttribute(Constant.TRACE_ID), null);
-            if (null != traceId) {
-                MDC.remove(Constant.TRACE_ID);
+            if (!Objects.isNull(context.getAttribute(Constant.TRACE_ID))) {
+                context.removeAttribute(Constant.TRACE_ID);
             }
         }
 
