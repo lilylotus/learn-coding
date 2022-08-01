@@ -9,11 +9,13 @@ import org.redisson.api.RMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class RedissonOperateServiceImplTest {
@@ -59,6 +61,25 @@ class RedissonOperateServiceImplTest {
 
         String result = rMap.get("one");
         Assertions.assertEquals("oneValue", result);
+
+    }
+
+    @Test
+    void testEntity() {
+        RedisTemplateTest.RedisEntity entity = new RedisTemplateTest.RedisEntity();
+        entity.setLocalDateTime(LocalDateTime.now());
+        entity.setLongId(System.currentTimeMillis());
+        entity.setStringId(UUID.randomUUID().toString().replace("-", ""));
+        entity.setInstant(Instant.now());
+        entity.setDate(new Date());
+        entity.setIntegerId(20);
+        entity.setLocalDate(LocalDate.now());
+
+        RBucket<RedisTemplateTest.RedisEntity> bucket = redissonOperateService.getBucket("redisson:entity");
+        bucket.set(entity);
+
+        RedisTemplateTest.RedisEntity et = bucket.get();
+        Assertions.assertEquals(entity, et);
 
     }
 

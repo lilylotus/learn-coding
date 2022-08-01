@@ -12,12 +12,16 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class RedisTemplateTest {
@@ -123,6 +127,112 @@ class RedisTemplateTest {
         System.out.println(l2);
         System.out.println(s2);
 
+    }
+
+    @Test
+    void testRedisEntity() {
+        RedisEntity entity = new RedisEntity();
+        entity.setLocalDateTime(LocalDateTime.now());
+        entity.setLongId(System.currentTimeMillis());
+        entity.setStringId(UUID.randomUUID().toString().replace("-", ""));
+        entity.setInstant(Instant.now());
+        entity.setDate(new Date());
+        entity.setIntegerId(20);
+        entity.setLocalDate(LocalDate.now());
+
+        redisTemplate.opsForValue().set("redis:entity", entity);
+        Object et = redisTemplate.opsForValue().get("redis:entity");
+
+        Assertions.assertEquals(entity, et);
+
+    }
+
+    static class RedisEntity implements Serializable {
+
+        private static final long serialVersionUID = -2078156566219783553L;
+
+        private String stringId;
+        private Long longId;
+        private LocalDateTime localDateTime;
+        private Instant instant;
+        private Date date;
+        private LocalDate localDate;
+        private Integer integerId;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RedisEntity that = (RedisEntity) o;
+            return Objects.equals(stringId, that.stringId) &&
+                Objects.equals(longId, that.longId) &&
+                Objects.equals(localDateTime, that.localDateTime) &&
+                Objects.equals(instant, that.instant) &&
+                Objects.equals(date, that.date) &&
+                Objects.equals(localDate, that.localDate) &&
+                Objects.equals(integerId, that.integerId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(stringId, longId, localDateTime, instant, date, localDate, integerId);
+        }
+
+        public String getStringId() {
+            return stringId;
+        }
+
+        public void setStringId(String stringId) {
+            this.stringId = stringId;
+        }
+
+        public Long getLongId() {
+            return longId;
+        }
+
+        public void setLongId(Long longId) {
+            this.longId = longId;
+        }
+
+        public LocalDateTime getLocalDateTime() {
+            return localDateTime;
+        }
+
+        public void setLocalDateTime(LocalDateTime localDateTime) {
+            this.localDateTime = localDateTime;
+        }
+
+        public Instant getInstant() {
+            return instant;
+        }
+
+        public void setInstant(Instant instant) {
+            this.instant = instant;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        public LocalDate getLocalDate() {
+            return localDate;
+        }
+
+        public void setLocalDate(LocalDate localDate) {
+            this.localDate = localDate;
+        }
+
+        public Integer getIntegerId() {
+            return integerId;
+        }
+
+        public void setIntegerId(Integer integerId) {
+            this.integerId = integerId;
+        }
     }
 
 }

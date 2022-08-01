@@ -6,10 +6,13 @@ import cn.nihility.plugin.redis.service.RedissonOperateService;
 import cn.nihility.plugin.redis.service.impl.RedisOperateServiceImpl;
 import cn.nihility.plugin.redis.service.impl.RedissonOperateServiceImpl;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -59,6 +62,10 @@ public class RedisConfiguration implements ResourceLoaderAware, EnvironmentAware
         // 这一句非常的重要，作用是序列化时将对象全类名一起保存下来
         om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
             ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+
+        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        om.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
+        om.registerModule(new JavaTimeModule());
 
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         jackson2JsonRedisSerializer.setObjectMapper(om);
