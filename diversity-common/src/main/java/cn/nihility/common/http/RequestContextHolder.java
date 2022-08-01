@@ -2,6 +2,7 @@ package cn.nihility.common.http;
 
 import cn.nihility.common.constant.Constant;
 import cn.nihility.common.util.HttpRequestUtils;
+import cn.nihility.common.util.NetworkUtils;
 import cn.nihility.common.util.UuidUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +48,7 @@ public class RequestContextHolder {
         context.setStart(System.currentTimeMillis());
         context.setRequestUri(HttpRequestUtils.getOriginatingRequestUri(request));
         context.setRequestMethod(request.getMethod());
-        context.setIp(request.getRemoteAddr());
+        context.setIp(NetworkUtils.obtainRequestIp(request));
 
     }
 

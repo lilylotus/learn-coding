@@ -29,8 +29,12 @@ public class AuthenticationToken implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AuthenticationToken token = (AuthenticationToken) o;
         return Objects.equals(sessionId, token.sessionId) && Objects.equals(tokenId, token.tokenId)
             && Objects.equals(refTokenId, token.refTokenId) && Objects.equals(protocol, token.protocol)

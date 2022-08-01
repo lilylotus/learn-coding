@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author nihility
@@ -78,9 +75,8 @@ public class Oauth2ServiceImpl implements IOauth2Service {
             HttpRequestUtils.urlEncode(redirectUrl) + "&clientId=" + clientId;
 
         if (log.isDebugEnabled()) {
-            log.debug("oauth authorize domain [{}]", domain);
-            log.debug("oauth authorize redirectUrl [{}]", redirectUrl);
-            log.debug("oauth authorize frontRedirectUrl [{}]", frontRedirectUrl);
+            log.debug("oauth authorize domain [{}], redirectUrl [{}], frontRedirectUrl [{}]",
+                domain, redirectUrl, frontRedirectUrl);
         }
 
         AuthenticateSession authSession = RequestContextHolder.getContext().getAuthSession();
@@ -103,6 +99,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         log.info("code grant code [{}], grant_type [{}], scope [{}], redirect_uri [{}]", code, grantType, scope, redirectUri);
 
         Oauth2Response oResponse = new Oauth2Response();
+        List<String> deleteTokenIdList = new ArrayList<>(2);
         AuthenticateSession authSession = null;
 
         if (Oauth2Constant.GRANT_AUTHORIZATION_CODE_TYPE.equals(grantType)) {
@@ -118,7 +115,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
             // 创建新的，删除 code
             tokenService.deleteOauthToken(code);
             authSession = sessionService.getSessionById(codeToken.getSessionId(), response);
-
+            deleteTokenIdList = authSession.deleteProtocolToken(Oauth2Constant.PROTOCOL);
         } else if (Oauth2Constant.GRANT_REFRESH_TOKEN_GRANT_TYPE.equals(grantType)) {
             // grant_type=refresh_token&refresh_token=tGzv3JOkF0XG5Qx2TlKWIA
             if (StringUtils.isBlank(refreshTokenValue)) {
@@ -132,8 +129,10 @@ public class Oauth2ServiceImpl implements IOauth2Service {
             }
             // 生成新的，删除老的
             authSession = sessionService.getSessionById(oldRefreshToken.getSessionId(), response);
-            tokenService.deleteOauthToken(oldRefreshToken.getRefTokenId());
-            tokenService.deleteOauthToken(oldRefreshToken.getTokenId());
+            deleteTokenIdList.add(oldRefreshToken.getRefTokenId());
+            deleteTokenIdList.add(oldRefreshToken.getTokenId());
+            authSession.deleteToken(oldRefreshToken.getRefTokenId());
+            authSession.deleteToken(oldRefreshToken.getTokenId());
         }
 
         if (null == authSession) {
@@ -149,10 +148,11 @@ public class Oauth2ServiceImpl implements IOauth2Service {
 
         authSession.addToken(accessToken);
         authSession.addToken(refreshToken);
-        sessionService.updateSession(authSession);
 
         tokenService.createOauthToken(accessToken);
         tokenService.createOauthToken(refreshToken);
+        deleteTokenIdList.forEach(tokenService::deleteOauthToken);
+        sessionService.updateSession(authSession);
 
         oResponse.setRefreshToken(refreshToken.getTokenId());
         oResponse.setAccessToken(accessToken.getTokenId());
@@ -237,7 +237,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         params.put("code", code);
 
         Oauth2Response oauth2Response = HttpClientUtils.executeForm(url, RequestMethodEnum.POST, params, Oauth2Response.class);
-        log.info("oauth2 获取 access_token 响应数据 [{}]", JacksonUtils.toJsonString(oauth2Response));
+        log.info("oauth2 获取 access_token 响应数据 [{}]", oauth2Response);
         String accessToken = null;
         if (oauth2Response == null) {
             log.error("oauth2 获取 access_token 响应为空");
@@ -256,6 +256,8 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         Map<String, Object> userInfoResult = HttpClientUtils.executeHttpRequest(get, Map.class);
 
         log.info("用户信息 [{}]", userInfoResult);
+
+        userInfoResult.put("token", oauth2Response);
 
         return userInfoResult;
     }

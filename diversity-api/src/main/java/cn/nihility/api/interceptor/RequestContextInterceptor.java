@@ -29,8 +29,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         RequestContext context = RequestContextHolder.getContext();
         RequestContextHolder.assembleContext(request, context);
         if (sessionService != null) {
-            AuthenticateSession session = sessionService.getSessionFromCookie(request, response);
-            context.setAuthSession(session);
+            context.setAuthSession(sessionService.getSessionFromCookie(request, response));
         }
 
         return true;

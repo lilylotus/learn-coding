@@ -276,7 +276,7 @@ public class HttpClientUtils {
         if (method != RequestMethodEnum.GET) {
             HttpRequestUtils.setApplicationJsonHeader(request);
             StringEntity entity = HttpRequestUtils.buildJsonStringEntity(JacksonUtils.toJsonString(bodyParams));
-            HttpRequestUtils.setEntity((HttpEntityEnclosingRequestBase) request, entity);
+            ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
         }
         return request;
     }
@@ -286,7 +286,7 @@ public class HttpClientUtils {
         if (method != RequestMethodEnum.GET) {
             HttpRequestUtils.setFormHeader(request);
             UrlEncodedFormEntity entity = HttpRequestUtils.buildUrlEncodedFormEntity(bodyParams);
-            HttpRequestUtils.setEntity((HttpEntityEnclosingRequestBase) request, entity);
+            ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
         }
         return request;
     }
@@ -301,12 +301,18 @@ public class HttpClientUtils {
         return CONTEXT_THREAD_LOCAL.get();
     }
 
+    public static void removeHttpClientContextLocal() {
+        CONTEXT_THREAD_LOCAL.remove();
+    }
+
     @SuppressWarnings("unchecked")
     public static <R> ResponseHolder<R> executeRequestWithResponse(final CloseableHttpClient httpClient,
                                                                    final HttpUriRequest request,
                                                                    final Class<R> rt) {
         final ResponseHolder<R> result = new ResponseHolder<>();
         HttpClientContext ctx = getHttpClientContextLocal();
+        long startMillis = System.currentTimeMillis();
+
         // 注意：HttpClient 池化管理，不需要关闭
         try (CloseableHttpResponse httpResponse = httpClient.execute(request, ctx)) {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -333,11 +339,11 @@ public class HttpClientUtils {
                     .forEach(ck -> result.addCookie(ck.getName(), ck.getValue()));
             }
         } catch (IOException e) {
-            logger.error("请求 [{}] 异常", request.getURI());
+            logger.error("HttpClient request [{}] with exception, start [{}], duration [{}]ms",
+                request.getURI(), startMillis, (System.currentTimeMillis() - startMillis));
             throw new HttpClientException("请求 [" + request.getURI() + "] 异常", e);
-        } finally {
-            CONTEXT_THREAD_LOCAL.remove();
         }
+
         return result;
     }
 

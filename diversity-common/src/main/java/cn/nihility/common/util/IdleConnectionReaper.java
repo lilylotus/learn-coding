@@ -22,7 +22,10 @@ public final class IdleConnectionReaper {
 
     private static final Logger log = LoggerFactory.getLogger(IdleConnectionReaper.class);
 
-    private static final int REAP_INTERVAL_MILLISECONDS = 5000;
+    private static final int REAP_INTERVAL_MILLISECONDS = 30000;
+
+    private static final int REAP_INTERVAL_DELAY_MILLISECONDS = 5000;
+
     private static final Map<String, HttpClientConnectionManager> CONNECTION_MANAGER = new HashMap<>(8);
 
     private static ScheduledExecutorService idleReaperService =
@@ -55,7 +58,7 @@ public final class IdleConnectionReaper {
                         }
                     }
 
-                }, REAP_INTERVAL_MILLISECONDS, REAP_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
+                }, REAP_INTERVAL_DELAY_MILLISECONDS, REAP_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS);
                 scheduledTaskStatus.compareAndSet(true, false);
             }
         }

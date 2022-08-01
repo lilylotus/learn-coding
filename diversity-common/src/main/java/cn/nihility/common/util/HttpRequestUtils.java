@@ -321,13 +321,13 @@ public class HttpRequestUtils {
 
     public static void setApplicationJsonHeader(final HttpUriRequest request) {
         if (null != request) {
-            request.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+            request.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         }
     }
 
     public static void setFormHeader(final HttpUriRequest request) {
         if (null != request) {
-            request.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            request.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         }
     }
 

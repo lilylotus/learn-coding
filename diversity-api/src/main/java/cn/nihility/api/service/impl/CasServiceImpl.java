@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author nihility
@@ -70,9 +70,8 @@ public class CasServiceImpl implements ICasService {
 
         if (null != session) {
             // 删除原有的 token
-            Optional.ofNullable(session.getTokenSet())
-                .orElse(Collections.emptySet())
-                .forEach(t -> tokenService.deleteCasToken(t.getTokenId()));
+            List<String> deleteTokenList = session.deleteProtocolToken(CasConstant.PROTOCOL);
+            deleteTokenList.forEach(tokenService::deleteCasToken);
             // 生成服务票据 ST
             AuthenticationToken token = AuthenticationUtils.createToken(session.getSessionId(), CasConstant.PROTOCOL,
                 CasConstant.SERVICE_TICKET, CasConstant.SERVICE_TICKET);
@@ -87,7 +86,7 @@ public class CasServiceImpl implements ICasService {
             session.addToken(token);
             sessionService.updateSession(session);
 
-            CookieUtils.setCookie(CasConstant.COOKIE_CASTIC, token.getTokenId(), AuthConstant.TOKEN_TTL, response);
+            CookieUtils.setCookie(CasConstant.COOKIE_CAS_TIC, token.getTokenId(), AuthConstant.TOKEN_TTL, response);
 
             String stRedirectUrl = HttpRequestUtils.addUrlParam(HttpRequestUtils.urlParamsEncode(service),
                 CasConstant.PARAM_TICKET, token.getTokenId());

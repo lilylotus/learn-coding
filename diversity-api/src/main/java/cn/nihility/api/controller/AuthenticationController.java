@@ -148,7 +148,7 @@ public class AuthenticationController {
      * Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
      *
      * example:
-     * http://127.0.0.1:30010/auth/oauth/authorize?response_type=code&client_id=s6BhdRkqt3&scope=all&state=xyz&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foauth%2Frec%2Fdemo%3Fparam1%3D%E4%B8%AD%E6%96%87%26param2%3DEnglish
+     * http://127.0.0.1:30010/auth/oauth/authorize?response_type=code&client_id=s6BhdRkqt3&scope=all&state=xyz&redirect_uri=http%3A%2F%2F127.0.0.1%3A30010%2Fauth%2Foauth%2Fcallback%3Fparam1%3D%E4%B8%AD%E6%96%87%26param2%3DEnglish
      */
     @GetMapping("/auth/oauth/authorize")
     public void oauthAuthorize(HttpServletRequest request, HttpServletResponse response) throws IOException {

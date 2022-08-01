@@ -67,9 +67,8 @@ public class OpenidServiceImpl implements IOpenidService {
             HttpRequestUtils.urlEncode(redirectUrl) + "&clientId=" + clientId;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("oidc authorize domain [{}]", domain);
-            logger.debug("oidc authorize redirectUrl [{}]", redirectUrl);
-            logger.debug("oidc authorize frontRedirectUrl [{}]", frontRedirectUrl);
+            logger.debug("oidc authorize domain [{}], redirectUrl [{}], frontRedirectUrl [{}]",
+                domain, redirectUrl,  frontRedirectUrl);
         }
 
         AuthenticateSession authSession = RequestContextHolder.getContext().getAuthSession();

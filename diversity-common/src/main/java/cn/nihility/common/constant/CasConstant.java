@@ -21,7 +21,7 @@ public class CasConstant {
 
     public static final String TGT_TICKET = "TGT";
 
-    public static final String COOKIE_CASTIC = "CASTIC";
+    public static final String COOKIE_CAS_TIC = "CAS-TIC";
 
 
 

@@ -3,9 +3,7 @@ package cn.nihility.common.entity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author nihility
@@ -17,7 +15,7 @@ public class AuthenticateSession implements Serializable {
 
     private String sessionId;
 
-    private transient Set<AuthenticationToken> tokenSet;
+    private Set<AuthenticationToken> tokenSet;
 
     private Map<String, Object> authResult;
 
@@ -44,6 +42,33 @@ public class AuthenticateSession implements Serializable {
         }
         return tokenSet.stream().filter(t -> t.getTokenId().equals(tokenId))
             .findFirst().orElse(null);
+    }
+
+    public void deleteToken(String tokenId) {
+        if (null == tokenSet || tokenSet.isEmpty()) {
+            return;
+        }
+        tokenSet.stream()
+            .filter(k -> k.getTokenId().equals(tokenId))
+            .findFirst()
+            .ifPresent(token -> tokenSet.remove(token));
+    }
+
+    public List<String> deleteProtocolToken(String protocol) {
+        List<String> deleteList = new ArrayList<>(2);
+        if (null == tokenSet || tokenSet.isEmpty()) {
+            return deleteList;
+        }
+        Set<AuthenticationToken> newTokenSet = new HashSet<>(4);
+        for (AuthenticationToken t : tokenSet) {
+            if (t.getProtocol().equals(protocol)) {
+                deleteList.add(t.getTokenId());
+            } else {
+                newTokenSet.add(t);
+            }
+        }
+        tokenSet = newTokenSet;
+        return deleteList;
     }
 
     /* ============================== getter/setter ============================== */
@@ -111,4 +136,5 @@ public class AuthenticateSession implements Serializable {
     public void setTtl(Long ttl) {
         this.ttl = ttl;
     }
+
 }

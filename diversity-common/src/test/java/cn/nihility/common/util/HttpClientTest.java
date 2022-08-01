@@ -23,10 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -253,6 +250,20 @@ class HttpClientTest {
         Assertions.assertEquals(value, ((Map) result2.get("data")).get("key"));
         System.out.println("cookies2:");
         cookieStore.getCookies().forEach(cookie -> System.out.println(cookie.getName() + " : " + cookie.getValue()));
+    }
+
+    @Test
+    void testHttpClientTimeOut() {
+        Map<String, String> body = new HashMap<>(8);
+        body.put("id", Long.toString(System.currentTimeMillis()));
+        body.put("date", UUID.randomUUID().toString().replace("-", ""));
+        HttpClientContext ctx = HttpClientUtils.createHttpClientContext();
+        HttpClientUtils.setContextThreadLocal(ctx);
+        ResponseHolder<Map> holder = HttpClientUtils.executePostJsonWithResponse("http://local.yzx.cn:30040/http/client/1000", body, Map.class);
+        System.out.println(holder);
+        HttpClientUtils.removeHttpClientContextLocal();
+        holder = HttpClientUtils.executePostJsonWithResponse("http://local.yzx.cn:30040/http/client/1000", body, Map.class);
+        System.out.println(holder);
     }
 
 }
