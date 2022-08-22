@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,14 +28,32 @@ public final class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     private static final long DEFAULT_JWT_EXPIRE_DURATION = 7200L;
-    private static final Algorithm HMAC256;
+    public static final Algorithm HMAC256;
+    public static final Algorithm HMAC512;
+    public static final Algorithm RSA256;
+    public static final Algorithm RSA512;
 
     static {
+        Algorithm rsa256 = null;
+        Algorithm rsa512 = null;
         String randomSecretKey = UUID.randomUUID().toString().replace("-", "");
-        if (logger.isDebugEnabled()) {
-            logger.debug("Jwt Secret Key [{}]", randomSecretKey);
-        }
+        logger.info("Jwt Secret Key [{}]", randomSecretKey);
+
         HMAC256 = Algorithm.HMAC256(randomSecretKey);
+        HMAC512 = Algorithm.HMAC512(randomSecretKey);
+
+        try {
+            RsaUtils.RsaKeyPairHolder keyPairHolder = RsaUtils.generateRsaKeyPair(randomSecretKey);
+            logger.info("jwt rsa private key [{}], public key [{}]",
+                keyPairHolder.getPrivateKey(), keyPairHolder.getPublicKey());
+            rsa256 = Algorithm.RSA256(keyPairHolder.getRsaPublicKey(), keyPairHolder.getRsaPrivateKey());
+            rsa512 = Algorithm.RSA512(keyPairHolder.getRsaPublicKey(), keyPairHolder.getRsaPrivateKey());
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("generate ras key pair error", e);
+        }
+
+        RSA256 = rsa256;
+        RSA512 = rsa512;
     }
 
     private JwtUtils() {
