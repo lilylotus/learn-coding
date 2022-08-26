@@ -22,7 +22,7 @@ public class JdbcService {
     }
 
     public void addServiceLog() {
-        Integer result = serviceLogMapper.insertByEntity(buildServiceLog("测试内容 [" + UuidUtils.jdkUUID() + "]"));
+        Integer result = serviceLogMapper.insertByEntity(buildServiceLog("测试内容 [" + UuidUtils.jdkUuid() + "]"));
         logger.info("随机添加一条操作日志，结果 [{}]", result);
     }
 
@@ -33,7 +33,7 @@ public class JdbcService {
 
     private ServiceLog buildServiceLog(String content) {
         ServiceLog log = new ServiceLog();
-        String user = UuidUtils.jdkUUID(10);
+        String user = UuidUtils.jdkUuid(10);
         log.setId(SnowflakeIdWorker.nextSnowId());
         log.setOperation("测试业务");
         log.setContent(content);

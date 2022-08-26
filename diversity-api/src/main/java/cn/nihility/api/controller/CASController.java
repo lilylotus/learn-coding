@@ -111,7 +111,7 @@ public class CASController {
         }
 
         if (StringUtils.isNotBlank(tgt) || TGT_SET.contains(tgt)) {
-            String uuid = ST_PREFIX + UuidUtils.jdkUUID();
+            String uuid = ST_PREFIX + UuidUtils.jdkUuid();
             String url = HttpRequestUtils.urlParamsEncode(HttpRequestUtils.addUrlParam(service, TICKET, uuid));
             logger.info("TGT [{}] 存在，直接返回业务地址 [{}] ST [{}]", tgt, url, uuid);
             return "redirect:" + url;
@@ -138,8 +138,8 @@ public class CASController {
             service = "http://localhost:30030/cas/business/callback?chinese=中文&english=English";
         }
 
-        String tgt = TGT_PREFIX + UuidUtils.jdkUUID();
-        String st = ST_PREFIX + UuidUtils.jdkUUID();
+        String tgt = TGT_PREFIX + UuidUtils.jdkUuid();
+        String st = ST_PREFIX + UuidUtils.jdkUuid();
         TGT_SET.add(tgt);
         logger.info("CAS TGC = [{}]", tgt);
         HttpRequestUtils.addCookie(CAS_TGC, tgt, null, CAS_COOKIE_PATH, 3600, response);

@@ -277,7 +277,7 @@ public class HttpRequestUtils {
     }
 
     public static void addCookieJsessionid(HttpServletResponse response) {
-        addCookie(COOKIE_JSESSIONID, UuidUtils.jdkUUID(), response);
+        addCookie(COOKIE_JSESSIONID, UuidUtils.jdkUuid(), response);
     }
 
     public static void addCookieJsessionidIfAbsent(HttpServletRequest request, HttpServletResponse response) {

@@ -42,7 +42,7 @@ public class RequestContextHolder {
      */
     public static void assembleContext(HttpServletRequest request, RequestContext context) {
 
-        String traceId = Optional.ofNullable(request.getHeader(Constant.TRACE_ID)).orElse(UuidUtils.jdkUUID());
+        String traceId = Optional.ofNullable(request.getHeader(Constant.TRACE_ID)).orElse(UuidUtils.jdkUuid());
         context.setTraceId(traceId);
         context.setRequest(request);
         context.setStart(System.currentTimeMillis());

@@ -21,7 +21,17 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * JSON Web Token (JWT) - https://www.rfc-editor.org/rfc/rfc7519
+ * <p>
  * jwt token 工具类
+ * <p>
+ * jwt 目前支持的签名算法
+ * <p>
+ * 对称加密 HMAC【哈希消息验证码】：HS256/HS384/HS512
+ * <p>
+ * 非对称加密 RSASSA【RSA 签名算法】（RS256/RS384/RS512）
+ * <p>
+ * ECDSA【椭圆曲线数据签名算法】（ES256/ES384/ES512）
  */
 public final class JwtUtils {
 
@@ -36,22 +46,19 @@ public final class JwtUtils {
     static {
         Algorithm rsa256 = null;
         Algorithm rsa512 = null;
-        String randomSecretKey = UUID.randomUUID().toString().replace("-", "");
-        logger.info("Jwt Secret Key [{}]", randomSecretKey);
+        String secret = UUID.randomUUID().toString().replace("-", "");
+        logger.info("Jwt Secret Key [{}]", secret);
 
-        HMAC256 = Algorithm.HMAC256(randomSecretKey);
-        HMAC512 = Algorithm.HMAC512(randomSecretKey);
+        HMAC256 = Algorithm.HMAC256(secret);
+        HMAC512 = Algorithm.HMAC512(secret);
 
-        try {
-            RsaUtils.RsaKeyPairHolder keyPairHolder = RsaUtils.generateRsaKeyPair(randomSecretKey);
+        RsaUtils.RsaKeyPairHolder keyPairHolder = RsaUtils.generateRsaKeyPair(secret);
+        if (null != keyPairHolder) {
             logger.info("jwt rsa private key [{}], public key [{}]",
                 keyPairHolder.getPrivateKey(), keyPairHolder.getPublicKey());
             rsa256 = Algorithm.RSA256(keyPairHolder.getRsaPublicKey(), keyPairHolder.getRsaPrivateKey());
             rsa512 = Algorithm.RSA512(keyPairHolder.getRsaPublicKey(), keyPairHolder.getRsaPrivateKey());
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("generate ras key pair error", e);
         }
-
         RSA256 = rsa256;
         RSA512 = rsa512;
     }
@@ -122,7 +129,7 @@ public final class JwtUtils {
         return verifyJwtToken(jwt, HMAC256);
     }
 
-    public static String obtainJwtClaim(String claim, String jwt) throws JwtParseException {
+    public static String obtainJwtClaim(String jwt, String claim) throws JwtParseException {
         return verifyJwtToken(jwt).getClaim(claim).asString();
     }
 
@@ -133,9 +140,9 @@ public final class JwtUtils {
         return result;
     }
 
-    public static String jwtDecodeClaim(String claim, String jwt) throws JwtParseException {
+    public static String jwtDecodeClaim(String jwt, String claimKey) throws JwtParseException {
         try {
-            return JWT.decode(jwt).getClaim(claim).asString();
+            return JWT.decode(jwt).getClaim(claimKey).asString();
         } catch (JWTDecodeException ex) {
             logger.error("Jwt [{}] 格式有误，解码异常", jwt);
             throw new JwtParseException("Jwt 格式有误，解码失败", ex);

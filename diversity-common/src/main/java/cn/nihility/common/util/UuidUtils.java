@@ -23,12 +23,16 @@ public class UuidUtils {
         return idWorker;
     }
 
-    public static String jdkUUID() {
+    public static String jdkUuid() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static String jdkUUID(int len) {
-        return (len <= 0 || len >= 32) ? jdkUUID() : jdkUUID().substring(0, len);
+    public static String originJdkUuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static String jdkUuid(int len) {
+        return (len <= 0 || len >= 32) ? jdkUuid() : jdkUuid().substring(0, len);
     }
 
     public static String snowflakeId() {

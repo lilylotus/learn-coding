@@ -1,5 +1,8 @@
 package cn.nihility.common.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -10,6 +13,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 public class RsaUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(RsaUtils.class);
 
     /**
      * 密钥长度，长度越长速度越慢
@@ -23,12 +28,22 @@ public class RsaUtils {
      */
     private static final String STRING_CIPHER_INSTANCE = "RSA/ECB/OAEPWITHSHA-256ANDMGF1PADDING";
 
-    public static RsaKeyPairHolder generateRsaKeyPair(String seed) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(STRING_RSA);
+    public static RsaKeyPairHolder generateRsaKeyPair(String seed) {
+        return generateRsaKeyPair(seed, KEY_SIZE);
+    }
+
+    public static RsaKeyPairHolder generateRsaKeyPair(String seed, int keySize) {
+        KeyPairGenerator keyPairGenerator;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance(STRING_RSA);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("RSA 不支持此算法 [{}]", STRING_RSA, e);
+            return null;
+        }
         if (null == seed) {
-            keyPairGenerator.initialize(KEY_SIZE);
+            keyPairGenerator.initialize(keySize);
         } else {
-            keyPairGenerator.initialize(KEY_SIZE, new SecureRandom(seed.getBytes(StandardCharsets.UTF_8)));
+            keyPairGenerator.initialize(keySize, new SecureRandom(seed.getBytes(StandardCharsets.UTF_8)));
         }
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
@@ -104,7 +119,7 @@ public class RsaUtils {
 
         private String privateKey;
 
-        private  RSAPrivateKey rsaPrivateKey;
+        private RSAPrivateKey rsaPrivateKey;
 
         public RsaKeyPairHolder(String publicKey, RSAPublicKey rsaPublicKey,
                                 String privateKey, RSAPrivateKey rsaPrivateKey) {
@@ -132,8 +147,7 @@ public class RsaUtils {
 
         @Override
         public String toString() {
-            return "publicKey=" + publicKey + "\n" +
-                    "privateKey=" + privateKey;
+            return "publicKey=" + publicKey + System.lineSeparator() + "privateKey=" + privateKey;
         }
     }
 

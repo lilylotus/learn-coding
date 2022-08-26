@@ -101,12 +101,12 @@ public class OAuth2Controller {
         // 隐式授权方式
         // 相比授权码授权，隐式授权少了第一步获取 Authorization Code 的过程，因此变得更为简单。但正因为如此也降低了安全性。
         if (OAUTH2_IMPLICIT_GRANT.equals(responseType)) {
-            redirectAttributes.addAttribute(OAUTH2_RESPONSE_ACCESS_TOKEN_TAG, UuidUtils.jdkUUID());
+            redirectAttributes.addAttribute(OAUTH2_RESPONSE_ACCESS_TOKEN_TAG, UuidUtils.jdkUuid());
             redirectAttributes.addAttribute("token_type", OAUTH2_RESPONSE_TOKEN_TYPE);
             redirectAttributes.addAttribute("expires_in", 3600);
         } else if (OAUTH2_CODE_GRANT.equals(responseType)) {
             // 返回授权码
-            redirectAttributes.addAttribute("code", UuidUtils.jdkUUID());
+            redirectAttributes.addAttribute("code", UuidUtils.jdkUuid());
         } else {
             throw new HttpRequestException(HttpStatus.OK,
                 UnifyResultUtils.failure("OAUTH2 授权类型不支持 [" + responseType + "]"));
@@ -156,10 +156,10 @@ public class OAuth2Controller {
             clientId, grantType, redirectUri, code);
 
         Map<String, Object> result = new HashMap<>(8);
-        result.put(OAUTH2_RESPONSE_ACCESS_TOKEN_TAG, UuidUtils.jdkUUID());
+        result.put(OAUTH2_RESPONSE_ACCESS_TOKEN_TAG, UuidUtils.jdkUuid());
 
         if (CODE_GRANT_AUTHORIZATION_CODE.equals(grantType)) {
-            result.put(CODE_GRANT_REFRESH_TOKEN, UuidUtils.jdkUUID());
+            result.put(CODE_GRANT_REFRESH_TOKEN, UuidUtils.jdkUuid());
         }
 
         // Bearer

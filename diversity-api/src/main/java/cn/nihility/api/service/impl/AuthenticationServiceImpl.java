@@ -49,7 +49,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         log.info("redirect url [{}]", redirect);
 
         UserInfo info = new UserInfo();
-        String uid = UuidUtils.jdkUUID();
+        String uid = UuidUtils.jdkUuid();
         info.setUserId(uid);
         info.setUserName(params.get("username"));
 
@@ -63,7 +63,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
         if (null == authSession) {
             AuthenticateSession session = new AuthenticateSession();
-            sessionId = UuidUtils.jdkUUID();
+            sessionId = UuidUtils.jdkUuid();
             session.setSessionId(sessionId);
             session.setCreateTime(System.currentTimeMillis());
             session.setUserId(uid);

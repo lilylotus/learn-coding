@@ -13,7 +13,7 @@ class JwtUtilsTest {
     @Test
     void testCreateJwtToken() {
 
-        Map<String, String> cliams = new HashMap<>();
+        Map<String, String> cliams = new HashMap<>(8);
         cliams.put("userId", "uid");
         cliams.put("userName", "name");
 
@@ -32,13 +32,13 @@ class JwtUtilsTest {
 
         //JwtUtil.verifyJwtToken(jwt2);
 
-        String userId = JwtUtils.obtainJwtClaim("userId", jwt);
+        String userId = JwtUtils.obtainJwtClaim(jwt, "userId");
         Assertions.assertEquals("uid", userId);
 
         Map<String, String> claims = JwtUtils.obtainJwtClaims(jwt);
         System.out.println(claims);
 
-        String is = JwtUtils.jwtDecodeClaim("userId1", jwt);
+        String is = JwtUtils.jwtDecodeClaim(jwt, "userId");
         Assertions.assertEquals("uid", is);
 
     }

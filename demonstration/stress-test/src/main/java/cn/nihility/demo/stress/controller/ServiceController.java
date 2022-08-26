@@ -87,7 +87,7 @@ public class ServiceController {
     public ResponseEntity<UnifyResult<String>> redisSeckill() {
 
         long start = System.currentTimeMillis();
-        String uuid = UuidUtils.jdkUUID(10);
+        String uuid = UuidUtils.jdkUuid(10);
         String val = uuid + "=" + start;
         boolean success = false;
         boolean loopFailure = true;

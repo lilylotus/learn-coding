@@ -30,7 +30,7 @@ public class AuthenticationUtils {
     }
 
     public static String tokenId(String prefix) {
-        return prefix + "-" + UuidUtils.jdkUUID();
+        return prefix + "-" + UuidUtils.jdkUuid();
     }
 
 }

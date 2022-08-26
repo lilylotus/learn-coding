@@ -59,7 +59,7 @@ public class CustomHttpClientBuilder extends HttpClientBuilder {
         public void process(HttpRequest request, HttpContext context) {
             String traceId = MDC.get(Constant.TRACE_ID);
             if (StringUtils.isBlank(traceId)) {
-                traceId = UuidUtils.jdkUUID();
+                traceId = UuidUtils.jdkUuid();
                 context.setAttribute(Constant.TRACE_ID, traceId);
             }
         }

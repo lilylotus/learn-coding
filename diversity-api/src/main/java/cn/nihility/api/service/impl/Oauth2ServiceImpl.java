@@ -230,7 +230,7 @@ public class Oauth2ServiceImpl implements IOauth2Service {
         String userInfoUrl = "http://127.0.0.1:30010/auth/oauth/user-info";
         Map<String, String> params = new HashMap<>(8);
         params.put(Oauth2Constant.CLIENT_ID, "OAuth2.0 Client Id");
-        params.put(Oauth2Constant.CLIENT_SECRET, UuidUtils.jdkUUID());
+        params.put(Oauth2Constant.CLIENT_SECRET, UuidUtils.jdkUuid());
         params.put(Oauth2Constant.SCOPE, "all");
         params.put(Oauth2Constant.REDIRECT_URI, "http://127.0.0.1:30010/auth/oauth/user-info?param1=中文&param2=English");
         params.put(Oauth2Constant.GRANT_TYPE, Oauth2Constant.GRANT_AUTHORIZATION_CODE_TYPE);

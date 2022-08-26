@@ -20,7 +20,7 @@ public class RequestTraceIdFilter implements Filter {
 
         String traceId = ((HttpServletRequest) request).getHeader(Constant.TRACE_ID);
 
-        MDC.put(Constant.TRACE_ID, (traceId == null ? UuidUtils.jdkUUID() : traceId));
+        MDC.put(Constant.TRACE_ID, (traceId == null ? UuidUtils.jdkUuid() : traceId));
 
         chain.doFilter(request, response);
 
