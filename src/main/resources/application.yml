@@ -1,0 +1,83 @@
+server:
+  port: 54000
+
+spring:
+  application:
+    name: CloudGateway
+  cloud:
+    inetutils:
+      preferredNetworks:
+        - 10.0
+    nacos:
+      config:
+        enabled: true
+        server-addr: 127.0.0.1:8848
+        file-extension: yml
+      discovery:
+        enabled: true
+        server-addr: 127.0.0.1:8848
+    gateway:
+      # 自定义指定全局过滤器是否启用 (前缀 + GlobalFilter）
+      global-filter:
+        customer:
+          enabled: true
+      # 自定义指定路由断言是否启用 (前缀 + RoutePredicateFactory）
+      predicate:
+        customer:
+          enabled: true
+      # 自定义指定过滤器是否启用 (前缀 + GatewayFilterFactory）
+      filter:
+        customer:
+          enabled: true
+      loadbalancer:
+        use404: false
+      # global http timeouts configuration
+      httpclient:
+        pool:
+          max-idle-time: 10000
+        # milliseconds
+        connect-timeout: 3000
+        # java.time.Duration
+        response-timeout: 5s
+      # GatewayProperties
+      routes:
+      - id: bootLearn
+        uri: http://127.0.0.1:30040
+        predicates:
+          - Path=/welcome
+        filters:
+          - PreserveHostHeader
+      - id: boot
+        uri: lb://boot
+        predicates:
+        - Path=/boot/**
+        - Customer=customer, \d+
+        filters:
+        - StripPrefix=1
+        - Customer=customer, customerValue
+        metadata:
+          # milliseconds
+          response-timeout: 5000
+          # milliseconds
+          connect-timeout: 3000
+      - id: segment
+        uri: lb://boot
+        predicates:
+          - Path=/segment/{segment}
+          - Customer=customer, \d+
+        filters:
+          - Customer=customer, customer-{segment}
+          - StripPrefix=1
+logging:
+  pattern:
+    console: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(-%5p) %clr(${PID:- }){magenta} %clr([%X{traceId}]){faint} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx'
+  level:
+    root: info
+    reactor.netty.http.server.AccessLog: debug
+    cn.nihilty.gateway: debug
+
+reactor:
+  netty:
+    http:
+      server:
+        accessLogEnabled: true
