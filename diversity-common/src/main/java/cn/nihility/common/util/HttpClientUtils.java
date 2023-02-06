@@ -26,14 +26,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Map;
@@ -84,6 +82,7 @@ public class HttpClientUtils {
      * Default value for time to live.
      */
     public static final long DEFAULT_TIME_TO_LIVE = 900L;
+    public static final long EVICT_IDLE_CONNECT_TIME_OUT = 300L;
     /**
      * Default time to live unit.
      */
@@ -91,16 +90,73 @@ public class HttpClientUtils {
 
     public static final long DEFAULT_IDLE_CONNECTION_TIME = 30000L;
 
+    /**
+     * 客户端证书路径，用了本地绝对路径，需要修改
+     */
+    private static final String CLIENT_CERT_FILE = "C:\\Users\\intel\\Desktop\\ssl2\\client\\client.p12";
+    /**
+     * 客户端证书密码
+     */
+    private static final String CLIENT_PWD = "123456";
+    /**
+     * 信任库路径，即 keytool 生成的那个自定义名称的库文件
+     */
+    private static final String TRUST_STORE_FILE = "C:\\Users\\intel\\Desktop\\ssl2\\ca\\test.truststore";
+    /**
+     * 信任库密码，即 keytool 时的密码
+     */
+    private static final String TRUST_STORE_PWD = "123456";
+
     private static HttpClientConnectionManager httpClientConnectionManager;
     private static CloseableHttpClient defaultHttpClient;
 
-    public static HttpClientConnectionManager createHttpClientConnectionManager(boolean disableSslValidation) {
+    private static KeyStore loadKeyStore(String keyStorePath, String password, String type)
+        throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        KeyStore ks = KeyStore.getInstance(type);
+        try (FileInputStream is = new FileInputStream(keyStorePath)) {
+            ks.load(is, password.toCharArray());
+        }
+        return ks;
+    }
+
+    /**
+     * ssl 双向认证
+     *
+     * @return ssl context
+     */
+    public static SSLContext createSslContext() {
+        SSLContext ctx = null;
+        try {
+            // 初始化密钥库
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            KeyStore keyStore = loadKeyStore(CLIENT_CERT_FILE, CLIENT_PWD, "PKCS12");
+            keyManagerFactory.init(keyStore, CLIENT_PWD.toCharArray());
+
+            // 初始化信任库
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+            KeyStore trustKeyStore = loadKeyStore(TRUST_STORE_FILE, TRUST_STORE_PWD, "JKS");
+            trustManagerFactory.init(trustKeyStore);
+
+            // 初始化SSL上下文
+            ctx = SSLContext.getInstance("TLSv1.2");
+            // keyManagerFactory.getKeyManagers() 双向认证客户端证书，服务端 ca 证书校验客户端 client.cer/client.key
+            // trustManagerFactory.getTrustManagers()  ca 证书，校验服务端 server.cer/server.key
+            ctx.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+
+        } catch (Exception ex) {
+            logger.error("create https ssl context error", ex);
+        }
+        return ctx;
+    }
+
+    public static HttpClientConnectionManager createHttpClientConnectionManager(boolean sslValidation) {
         RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create()
             .register(HTTP_SCHEME, PlainConnectionSocketFactory.INSTANCE);
-        if (disableSslValidation) {
+        if (sslValidation) {
             try {
                 // SSL
-                final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+                // SSLContext sslContext = createSslContext();
+                SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
                 sslContext.init(null,
                     new TrustManager[]{new DisabledValidationTrustManager()},
                     new SecureRandom());
@@ -139,7 +195,7 @@ public class HttpClientUtils {
     }
 
     public static HttpClientConnectionManager createHttpClientConnectionManager() {
-        return createHttpClientConnectionManager(false);
+        return createHttpClientConnectionManager(true);
     }
 
     /* ============================== private, inner invoke ============================== */
@@ -209,6 +265,8 @@ public class HttpClientUtils {
             .build();
 
         builder.setConnectionManager(connectionManager)
+            .evictIdleConnections(EVICT_IDLE_CONNECT_TIME_OUT, TimeUnit.SECONDS)
+            .evictExpiredConnections()
             .setUserAgent(getDefaultUserAgent())
             .setDefaultRequestConfig(defaultRequestConfig)
             .setRetryHandler(new StandardHttpRequestRetryHandler(3, true));

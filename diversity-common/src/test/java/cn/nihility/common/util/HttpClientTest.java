@@ -266,4 +266,11 @@ class HttpClientTest {
         System.out.println(holder);
     }
 
+    @Test
+    void testHttpsClientGet() {
+        String url = "https://ssl.luck.com";
+        HttpGet get = new HttpGet(url);
+        System.out.println(HttpClientUtils.executeHttpRequest(get, String.class));
+    }
+
 }
